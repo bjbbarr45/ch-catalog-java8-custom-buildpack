@@ -72,15 +72,15 @@ module JavaBuildpack::Container
     # Creates the command to run the Tomcat application.
     #
     # @return [String] the command to run the application.
-#    def release
-#      @java_opts << "-D#{KEY_HTTP_PORT}=$PORT"
-#
-#      java_home_string = "JAVA_HOME=#{@java_home}"
-#      java_opts_string = ContainerUtils.space("JAVA_OPTS=\"#{ContainerUtils.to_java_opts_s(@java_opts)}\"")
-#      start_script_string = ContainerUtils.space(File.join TOMCAT_HOME, 'bin', 'catalina.sh')
-#
-#      "#{java_home_string}#{java_opts_string}#{start_script_string} run"
-#    end
+    def release
+      @java_opts << "-D#{KEY_HTTP_PORT}=$PORT"
+
+      java_home_string = "JAVA_HOME=#{@java_home}"
+      java_opts_string = ContainerUtils.space("JAVA_OPTS=\"#{ContainerUtils.to_java_opts_s(@java_opts)}\"")
+      start_script_string = ContainerUtils.space(File.join TOMCAT_HOME, 'bin', 'catalina.sh')
+
+      "#{java_home_string}#{java_opts_string}#{start_script_string} run"
+    end
 
     private
     
