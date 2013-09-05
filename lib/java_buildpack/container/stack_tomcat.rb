@@ -124,6 +124,7 @@ module JavaBuildpack::Container
           puts "Copying applib jars from deployable."
           FileUtils.mkdir_p(File.join(tomcat_home, "applib"))
           Dir.entries(File.join(@app_dir, "applib")).each do |file|
+            next unless File.file?(File.join(@app_dir, "applib", file))
             FileUtils.ln_sf(File.join("..", "..", "applib", file), File.join(tomcat_home, "applib", file))
           end
         end
@@ -132,12 +133,10 @@ module JavaBuildpack::Container
       def copy_endorsed_dir
         if File.exists?(File.join(@app_dir, "endorsed"))
           puts "Copying endorsed jars from deployable."
-          if File.exists?(File.join(@app_dir, "applib"))
-            puts "Copying applib jars from deployable."
-            FileUtils.mkdir_p(File.join(tomcat_home, "endorsed"))
-            Dir.entries(File.join(@app_dir, "endorsed")).each do |file|
-              FileUtils.ln_sf(File.join("..", "..", "endorsed", file), File.join(tomcat_home, "endorsed", file))
-            end
+          FileUtils.mkdir_p(File.join(tomcat_home, "endorsed"))
+          Dir.entries(File.join(@app_dir, "endorsed")).each do |file|
+            next unless File.file?(File.join(@app_dir, "endorsed", file))
+            FileUtils.ln_sf(File.join("..", "..", "endorsed", file), File.join(tomcat_home, "endorsed", file))
           end
         end
       end
