@@ -126,7 +126,7 @@ module JavaBuildpack::Container
       def copy_applib_dir
         if File.exists?(File.join(@app_dir, "applib"))
           puts "Copying applib jars from deployable."
-          FileUtils.cf_r(File.join(@app_dir, "applib"), @tomcat_home)
+          FileUtils.cp_r(File.join(@app_dir, "applib"), @tomcat_home)
           FileUtils.rm_rf(File.join(@app_dir, "applib"))
         end
       end
@@ -134,7 +134,7 @@ module JavaBuildpack::Container
       def copy_endorsed_dir
         if File.exists?(File.join(@app_dir, "endorsed"))
           puts "Copying endorsed jars from deployable."
-          FileUtils.cf_r(File.join(@app_dir, "endorsed"), @tomcat_home)
+          FileUtils.cp_r(File.join(@app_dir, "endorsed"), @tomcat_home)
           FileUtils.rm_rf(File.join(@app_dir, "endorsed"))
         end
       end
