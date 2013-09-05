@@ -13,20 +13,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Configuration for components to use in the buildpack
+# Configuration for the Tomcat container
 ---
-containers:
-  - "JavaBuildpack::Container::StackTomcat"
-  - "JavaBuildpack::Container::Groovy"
-  - "JavaBuildpack::Container::Main"
-  - "JavaBuildpack::Container::SpringBootCli"
-  - "JavaBuildpack::Container::Tomcat"
-  - "JavaBuildpack::Container::Play"
-jres:
-  - "JavaBuildpack::Jre::OpenJdk"
-frameworks:
-  - "JavaBuildpack::Framework::JavaOpts"
-  - "JavaBuildpack::Framework::NewRelic"
-  - "JavaBuildpack::Framework::PlayAutoReconfiguration"
-  - "JavaBuildpack::Framework::PlayJpaPlugin"
-#  - "JavaBuildpack::Framework::SpringAutoReconfiguration"
+version: 7.0.+
+repository_root: "http://download.pivotal.io.s3.amazonaws.com/tomcat"
+support:
+  version: 1.1.+
+  repository_root: "http://download.pivotal.io.s3.amazonaws.com/tomcat-buildpack-support"
+env: cf
