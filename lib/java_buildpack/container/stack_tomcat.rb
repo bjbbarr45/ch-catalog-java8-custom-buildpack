@@ -74,7 +74,7 @@ module JavaBuildpack::Container
 
       java_home_string = "JAVA_HOME=#{@java_home}"
       java_opts_string = ContainerUtils.space("JAVA_OPTS=\"#{ContainerUtils.to_java_opts_s(@java_opts)}\"")
-      start_script_string = ContainerUtils.space(File.join TOMCAT_HOME, 'bin', 'catalina.sh')
+      start_script_string = ContainerUtils.space(File.join(TOMCAT_HOME, 'bin', 'catalina.sh'))
 
       "#{java_home_string}#{java_opts_string}#{start_script_string} run"
     end
@@ -103,7 +103,7 @@ module JavaBuildpack::Container
           deployable_file = find_deployable_file(file, env)
           unless deployable_file.nil? 
             puts "For #{file} using '#{File.basename(deployable_file)}' from deployable"
-            system "ln -sfn #{File.join('..', '..', File.basename(deployable_file))} #{File.join(tomcat_home, "conf", file)}"
+            system "ln -sfn #{File.join('..', '..', File.basename(deployable_file))} #{File.join(tomcat_home, 'conf', file)}"
           end
         end
       end
@@ -125,7 +125,7 @@ module JavaBuildpack::Container
           FileUtils.mkdir_p(File.join(tomcat_home, "applib"))
           Dir.entries(File.join(@app_dir, "applib")).each do |file|
             next unless File.file?(File.join(@app_dir, "applib", file))
-            system "ln -sfn #{File.join("..", "..", "applib", file)} #{File.join(tomcat_home, "applib", file)}"
+            system "ln -sfn #{File.join('..', '..', 'applib', file)} #{File.join(tomcat_home, 'applib', file)}"
           end
         end
       end
@@ -136,7 +136,7 @@ module JavaBuildpack::Container
           FileUtils.mkdir_p(File.join(tomcat_home, "endorsed"))
           Dir.entries(File.join(@app_dir, "endorsed")).each do |file|
             next unless File.file?(File.join(@app_dir, "endorsed", file))
-            system "ln -sfn #{File.join("..", "..", "endorsed", file)} #{File.join(tomcat_home, "endorsed", file)}"
+            system "ln -sfn #{File.join('..', '..', 'endorsed', file)} #{File.join(tomcat_home, 'endorsed', file)}"
           end
         end
       end
@@ -151,7 +151,7 @@ module JavaBuildpack::Container
           context_root_war_name = "#{context_root.gsub(/\//, '#')}.war"
           FileUtils.mkdir_p(File.join(tomcat_home, "webapps"))
           puts "Deploying #{war_file} to webapps with context root #{context_root}"
-            system "ln -sfn #{File.join("..", "..", File.basename(war_file))} #{File.join(tomcat_home, "webapps", context_root_war_name)}"
+          system "ln -sfn #{File.join('..', '..', File.basename(war_file))} #{File.join(tomcat_home, 'webapps', context_root_war_name)}"
         end
       end
       
@@ -187,7 +187,7 @@ module JavaBuildpack::Container
           version = nil
           uri = nil
         end
-end
+
         return version, uri # rubocop:disable RedundantReturn
       end
 
@@ -225,5 +225,5 @@ end
         end
         war_exists && catalina_properties_exists
       end
-  end
+    end
 end
