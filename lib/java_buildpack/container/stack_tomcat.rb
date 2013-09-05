@@ -63,10 +63,7 @@ module JavaBuildpack::Container
       copy_applib_dir
       copy_endorsed_dir
       copy_env_files_to_conf(env)
-      FileUtils.rm_f(File.join(@app_dir, "*"))
       link_stack_tomcat_libs
-#      link_application
-#      link_libs
     end
 
     # Creates the command to run the Tomcat application.
@@ -96,7 +93,6 @@ module JavaBuildpack::Container
           FileUtils.mkdir_p(applib) unless File.exists?(applib)
            
           libs.each { |lib|
-            puts "ln -sfn #{File.join '..', '..', lib} #{applib}"
             system "ln -sfn #{File.join '..', '..', lib} #{applib}"
           }
         end
@@ -126,16 +122,23 @@ module JavaBuildpack::Container
       def copy_applib_dir
         if File.exists?(File.join(@app_dir, "applib"))
           puts "Copying applib jars from deployable."
-          FileUtils.cp_r(File.join(@app_dir, "applib"), tomcat_home)
-          FileUtils.rm_rf(File.join(@app_dir, "applib"))
+          FileUtils.mkdir_p(File.join(tomcat_home, "applib"))
+          Dir.entries(File.join(@app_dir, "applib")).each do |file|
+            FileUtils.ln_sf(File.join("..", "..", "applib", file), File.join(tomcat_home, "applib", file))
+          end
         end
       end
       
       def copy_endorsed_dir
         if File.exists?(File.join(@app_dir, "endorsed"))
           puts "Copying endorsed jars from deployable."
-          FileUtils.cp_r(File.join(@app_dir, "endorsed"), tomcat_home)
-          FileUtils.rm_rf(File.join(@app_dir, "endorsed"))
+          if File.exists?(File.join(@app_dir, "applib"))
+            puts "Copying applib jars from deployable."
+            FileUtils.mkdir_p(File.join(tomcat_home, "endorsed"))
+            Dir.entries(File.join(@app_dir, "endorsed")).each do |file|
+              FileUtils.ln_sf(File.join("..", "..", "endorsed", file), File.join(tomcat_home, "endorsed", file))
+            end
+          end
         end
       end
 
