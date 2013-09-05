@@ -107,7 +107,7 @@ module JavaBuildpack::Container
           deployable_file = find_deployable_file(file, env)
           unless deployable_file.nil? 
             puts "For #{file} using '#{File.basename(deployable_file)}' from deployable"
-            FileUtils.mv(deployable_file, File.join(tomcat_home, "conf", file))
+            FileUtils.ln_sf(File.join('..', '..', File.basename(deployable_file)), File.join(tomcat_home, "conf", file))
           end
         end
       end
@@ -149,7 +149,7 @@ module JavaBuildpack::Container
           context_root_war_name = "#{context_root.gsub(/\//, '#')}.war"
           FileUtils.mkdir_p(File.join(tomcat_home, "webapps"))
           puts "Deploying #{war_file} to webapps with context root #{context_root}"
-          FileUtils.mv(war_file, File.join(tomcat_home, "webapps", context_root_war_name))
+          FileUtils.ln_sf(File.join("..", "..", File.basename(war_file)), File.join(tomcat_home, "webapps", context_root_war_name))
         end
       end
       
