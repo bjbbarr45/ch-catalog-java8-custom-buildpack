@@ -58,7 +58,7 @@ module JavaBuildpack::Framework
 
       CONTAINER_NAME = 'debug'.freeze
 
-      def self.add_debug_script
+      def add_debug_script
         FileUtils.mkdir_p(File.join(@app_dir, ".profile.d"))
         File.open(File.join(@app_dir, ".profile.d", "debug.sh"), "a") do |file|
           file.puts(
@@ -75,11 +75,11 @@ module JavaBuildpack::Framework
         end
       end
       
-      def self.debug_run_opts
+      def debug_run_opts
         "-Xdebug -Xrunjdwp:transport=dt_socket,address=$VCAP_DEBUG_PORT,server=y,suspend=n"
       end
     
-      def self.debug_suspend_opts
+      def debug_suspend_opts
         "-Xdebug -Xrunjdwp:transport=dt_socket,address=$VCAP_DEBUG_PORT,server=y,suspend=y"
       end
   end
