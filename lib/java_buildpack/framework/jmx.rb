@@ -21,7 +21,7 @@ module JavaBuildpack::Framework
 
   # Encapsulates the detect, compile, and release functionality for contributing custom Java options to an application
   # at runtime.
-  class Debug
+  class JMX
 
     # Creates an instance, passing in an arbitrary collection of options.
     #
@@ -30,57 +30,64 @@ module JavaBuildpack::Framework
     # @option context [Hash] :configuration the properties provided by the user
     def initialize(context = {})
       @app_dir = context[:app_dir]
+      @agent_dir = File.join(@app_dir, ".agent")
       @java_opts = context[:java_opts]
     end
 
-    # Always contributes debug info if the app is running in debug mode
+    # Always add JMX config if it is a java app
     #
     # @return [String] returns +java-opts+ if Java options have been set by the user
     def detect
       CONTAINER_NAME
     end
 
-    # Add the debug_opts script to the droplet
+    # Ensures that none of the Java options specify memory configurations
     #
     # @return [void]
     def compile
-      add_debug_script
+      install_jmxmp_agent
+      add_jmx_script
     end
 
-    # Append the $DEBUG_OPTS environment variable to the command if it gets set.
+    # Add $JMX_OPTS to the start command if it gets set
     #
     # @return [void]
     def release
-      @java_opts.concat ["$DEBUG_OPTS"]
+      @java_opts.concat ["$JMX_OPTS"]
     end
 
     private
 
-      CONTAINER_NAME = 'debug'.freeze
+      CONTAINER_NAME = 'jmx'.freeze
+      
+      JMXMP_PACKAGE =  "jmxmp-agent-1.0.jar".freeze
 
-      def add_debug_script
+      #TODO add support for proper remote download
+      def buildpack_cache_dir
+        "/var/vcap/packages/buildpack_cache"
+      end
+      
+      def install_jmxmp_agent
+        FileUtils.mkdir_p(@agent_dir)
+        file_path = File.join(buildpack_cache_dir, JMXMP_PACKAGE)
+        FileUtils.cp(file_path, File.join(@agent_dir, JMXMP_PACKAGE))
+      end
+      
+      def add_jmx_script
         FileUtils.mkdir_p(File.join(@app_dir, ".profile.d"))
-        File.open(File.join(@app_dir, ".profile.d", "debug_opts.sh"), "a") do |file|
+        File.open(File.join(@app_dir, ".profile.d", "jmx_opts.sh"), "a") do |file|
           file.puts(
-            <<-DEBUG_BASH
-if [ -n "$VCAP_DEBUG_MODE" ]; then
-  if [ "$VCAP_DEBUG_MODE" = "run" ]; then
-    export DEBUG_OPTS="#{debug_run_opts}"
-  elif [ "$VCAP_DEBUG_MODE" = "suspend" ]; then
-    export DEBUG_OPTS="#{debug_suspend_opts}"
-  fi
+            <<-JMX_BASH
+if [ -n "$VCAP_CONSOLE_PORT" ]; then
+  export JMX_OPTS="#{jmx_opts}"
 fi
-               DEBUG_BASH
+               JMX_BASH
           )
         end
       end
       
-      def debug_run_opts
-        "-Xdebug -Xrunjdwp:transport=dt_socket,address=$VCAP_DEBUG_PORT,server=y,suspend=n"
-      end
-    
-      def debug_suspend_opts
-        "-Xdebug -Xrunjdwp:transport=dt_socket,address=$VCAP_DEBUG_PORT,server=y,suspend=y"
+      def jmx_opts
+        "-javaagent:#{File.join(@agent_dir, JMXMP_PACKAGE)} -Dorg.lds.cloudfoundry.jmxmp.host=$VCAP_CONSOLE_IP -Dorg.lds.cloudfoundry.jmxmp.port=$VCAP_CONSOLE_PORT"
       end
   end
 end
