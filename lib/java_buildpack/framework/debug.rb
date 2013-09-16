@@ -29,6 +29,7 @@ module JavaBuildpack::Framework
     # @option context [Array<String>] :java_opts an array that Java options can be added to
     # @option context [Hash] :configuration the properties provided by the user
     def initialize(context = {})
+      @app_dir = context[:app_dir]
       @java_opts = context[:java_opts]
       @configuration = context[:configuration]
     end
