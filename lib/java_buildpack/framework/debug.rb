@@ -52,7 +52,7 @@ module JavaBuildpack::Framework
     #
     # @return [void]
     def release
-      @java_opts.concat "$DEBUG_OPTS"
+      @java_opts.concat ["$DEBUG_OPTS"]
     end
 
     private
