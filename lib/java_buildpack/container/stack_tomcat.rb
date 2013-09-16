@@ -63,17 +63,9 @@ module JavaBuildpack::Container
       copy_applib_dir
       copy_endorsed_dir
       copy_env_files_to_conf(env)
-      add_debug
       link_stack_tomcat_libs
     end
     
-    def add_debug
-      FileUtils.mkdir_p "#{@app_dir}/.profile.d"
-      File.open("#{@app_dir}/.profile.d/debug.sh", "a") do |file|
-        file.puts "export DEBUG_OPTS=DudeDebug"
-      end
-    end
-
     # Creates the command to run the Tomcat application.
     #
     # @return [String] the command to run the application.
