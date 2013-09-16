@@ -23,7 +23,13 @@ module JavaBuildpack::Util
   describe DownloadCache do
 
     before do
+      JavaBuildpack::Diagnostics::LoggerFactory.send :close
       $stderr = StringIO.new
+      tmpdir = Dir.tmpdir
+      diagnostics_directory = File.join(tmpdir, JavaBuildpack::Diagnostics::DIAGNOSTICS_DIRECTORY)
+      FileUtils.rm_rf diagnostics_directory
+      JavaBuildpack::Diagnostics::LoggerFactory.create_logger tmpdir
+      $stdout = StringIO.new
     end
 
     it 'should download from a uri if the cached file does not exist' do
@@ -275,6 +281,7 @@ module JavaBuildpack::Util
           FileUtils.mkdir_p java_buildpack_cache
           touch java_buildpack_cache, 'cached', 'foo-stashed'
           with_buildpack_cache(buildpack_cache) do
+            DownloadCache.stub(:internet_up).and_return(false)
             DownloadCache.new(root).get('http://foo-uri/') do |file|
               expect(file.read).to eq('foo-stashed')
             end
