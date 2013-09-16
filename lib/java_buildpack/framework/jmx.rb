@@ -87,7 +87,7 @@ fi
       end
       
       def jmx_opts
-        "-javaagent:#{File.join(@agent_dir, JMXMP_PACKAGE)} -Dorg.lds.cloudfoundry.jmxmp.host=$VCAP_CONSOLE_IP -Dorg.lds.cloudfoundry.jmxmp.port=$VCAP_CONSOLE_PORT"
+        "-javaagent:#{File.join(".agent", JMXMP_PACKAGE)} -Dorg.lds.cloudfoundry.jmxmp.host=$VCAP_CONSOLE_IP -Dorg.lds.cloudfoundry.jmxmp.port=$VCAP_CONSOLE_PORT"
       end
   end
 end
