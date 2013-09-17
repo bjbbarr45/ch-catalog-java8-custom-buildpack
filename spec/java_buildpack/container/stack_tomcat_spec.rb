@@ -32,10 +32,10 @@ module JavaBuildpack::Container
 
     let(:application_cache) { double('ApplicationCache') }
 
-#    before do
-#      $stdout = StringIO.new
-#      $stderr = StringIO.new
-#    end
+    before do
+      $stdout = StringIO.new
+      $stderr = StringIO.new
+    end
 
     it 'should detect Tomcat Deployable' do
       JavaBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(TOMCAT_VERSION) if block }
@@ -164,22 +164,5 @@ module JavaBuildpack::Container
         expect(File.exists?(test_text)).to be_false
       end
     end
-    
-#
-#    it 'should return command' do
-#      JavaBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(TOMCAT_VERSION) if block }
-#      .and_return(TOMCAT_DETAILS, SUPPORT_DETAILS)
-#
-#      command = Tomcat.new(
-#        app_dir: 'spec/fixtures/container_tomcat',
-#        java_home: 'test-java-home',
-#        java_opts: %w(test-opt-2 test-opt-1),
-#        configuration: {}
-#      ).release
-#
-#      expect(command).to eq('JAVA_HOME=test-java-home JAVA_OPTS="-Dhttp.port=$PORT test-opt-1 test-opt-2" .tomcat/bin/catalina.sh run')
-#    end
-
   end
-
 end
