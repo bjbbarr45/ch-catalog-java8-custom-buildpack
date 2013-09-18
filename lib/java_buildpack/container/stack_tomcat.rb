@@ -60,7 +60,7 @@ module JavaBuildpack::Container
       download_support
       catalina_props = properties(catalina)
       jvm_args = java_opts(env)
-      jvm-args.each do |arg|
+      jvm_args.each do |arg|
         ["-Xms", "-Xmx", "-XX:MaxMetaspaceSize", "-XX:MaxPermSize", "-Xss"].each do |param|
           raise "jvmargs.properties value '#{option}' uses the memory argument '#{param}'.  Memory customization should be done using the java-buildpack instead. (https://github.com/cloudfoundry/java-buildpack/blob/master/docs/jre-openjdk.md)" if arg.include? param
         end
