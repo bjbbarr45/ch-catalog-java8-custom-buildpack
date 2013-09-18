@@ -86,7 +86,7 @@ module JavaBuildpack::Container
       "#{java_home_string}#{java_opts_string}#{start_script_string} run"
     end
 
-    privatel
+    private
     
       DEPLOYABLE_ENV = 'env'.freeze
       
