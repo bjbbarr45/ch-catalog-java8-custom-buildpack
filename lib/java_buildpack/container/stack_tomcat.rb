@@ -172,7 +172,7 @@ module JavaBuildpack::Container
         props = {}
         props = properties(File.join(@app_dir, "jvmargs.properties")) if File.exists?(File.join(@app_dir, "jvmargs.properties"))
         args = {}
-        props.map do |k,v|l
+        props.map do |k,v|
           next if k.rindex("jvmarg").nil?
           command_key = k[k.rindex("jvmarg")..-1]
           args[command_key] = v if k == command_key && !args.include?(command_key)
