@@ -59,6 +59,13 @@ module JavaBuildpack::Container
       remove_tomcat_files
       download_support
       catalina_props = properties(catalina)
+      jvm_args = java_opts(env)
+      jvm-args.each do |arg|
+        ["-Xms", "-Xmx", "-XX:MaxMetaspaceSize", "-XX:MaxPermSize", "-Xss"].each do |param|
+          raise "jvmargs.properties value '#{option}' uses the memory argument '#{param}'.  Memory customization should be done using the java-buildpack instead. (https://github.com/cloudfoundry/java-buildpack/blob/master/docs/jre-openjdk.md)" if arg.include? param
+        end
+      end
+      @java_opts.concat java_opts(env)
       copy_wars_to_tomcat(catalina_props)
       copy_applib_dir
       copy_endorsed_dir
@@ -79,7 +86,7 @@ module JavaBuildpack::Container
       "#{java_home_string}#{java_opts_string}#{start_script_string} run"
     end
 
-    private
+    privatel
     
       DEPLOYABLE_ENV = 'env'.freeze
       
@@ -159,6 +166,19 @@ module JavaBuildpack::Container
         %w[NOTICE RELEASE-NOTES RUNNING.txt LICENSE temp/* webapps/* work/* logs bin/commons-daemon-native* bin/tomcat-native* lib/catalina-ha* lib/catalina-tribes* lib/tomcat-i18n-* lib/tomcat-dbcp*].each do |file|
           FileUtils.rm_rf(File.join(tomcat_home, file))
         end
+      end
+
+      def java_opts(env = "cf")
+        props = {}
+        props = properties(File.join(@app_dir, "jvmargs.properties")) if File.exists?(File.join(@app_dir, "jvmargs.properties"))
+        args = {}
+        props.map do |k,v|l
+          next if k.rindex("jvmarg").nil?
+          command_key = k[k.rindex("jvmarg")..-1]
+          args[command_key] = v if k == command_key && !args.include?(command_key)
+          args[command_key] = v if k == "#{env}.#{command_key}"
+        end
+        args.values
       end
 
       
