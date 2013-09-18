@@ -62,7 +62,7 @@ module JavaBuildpack::Container
       jvm_args = java_opts(env)
       jvm_args.each do |arg|
         ["-Xms", "-Xmx", "-XX:MaxMetaspaceSize", "-XX:MaxPermSize", "-Xss"].each do |param|
-          raise "jvmargs.properties value '#{option}' uses the memory argument '#{param}'.  Memory customization should be done using the java-buildpack instead. (https://github.com/cloudfoundry/java-buildpack/blob/master/docs/jre-openjdk.md)" if arg.include? param
+          raise "jvmargs.properties value '#{arg}' uses the memory argument '#{param}'.  Memory customization should be done using the java-buildpack instead. (https://github.com/cloudfoundry/java-buildpack/blob/master/docs/jre-openjdk.md)" if arg.include? param
         end
       end
       @java_opts.concat java_opts(env)
