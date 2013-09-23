@@ -24,7 +24,7 @@
 		<Connector port='${http.port}' bindOnInit="false"/>
 
 		<Engine defaultHost='localhost' name='Catalina'>
-			<Valve className="org.apache.catalina.valves.RemoteIpValve" protocolHeader="x-forwarded-proto"/>
+			<Valve className="org.apache.catalina.valves.RemoteIpValve" protocolHeader="X-Forwarded-Scheme"/>
 			<Host name='localhost'>
 				<Listener className="com.gopivotal.buildpack.support.tomcat.ApplicationStartupFailureDetectingLifecycleListener"/>
 			</Host>
