@@ -60,7 +60,7 @@ module JavaBuildpack::Container
       download_support
       catalina_props = properties(catalina)
       if(!catalina_props.has_key?("org.apache.tomcat.util.digester.PROPERTY_SOURCE"))
-        puts "Warning: #{catalina} doesn't appear to speciry a 'org.apache.tomcat.util.digester.PROPERTY_SOURCE'.  Resolving environment variables may not work."
+        puts "Warning: #{catalina} doesn't appear to specify a 'org.apache.tomcat.util.digester.PROPERTY_SOURCE'.  Resolving environment variables may not work."
       end
       jvm_args = java_opts(env)
       jvm_args.each do |arg|
