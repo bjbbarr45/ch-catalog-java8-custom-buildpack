@@ -156,7 +156,8 @@ module JavaBuildpack::Container
       def copy_wars_to_tomcat(catalina_props)
         Dir.glob(File.join(@app_dir, "*.war")) do |war_file|
           context_root = "ROOT"
-          context_root = catalina_props["#{context_root}.contextRoot"] unless catalina_props["#{context_root}.contextRoot"].nil?
+          war_file_name = File.basename(war_file).gsub(/.war/, "")
+          context_root = catalina_props["#{war_file_name}.contextRoot"] unless catalina_props["#{war_file_name}.contextRoot"].nil?
           context_root[0] = "" if context_root[0] == "/"
           context_root = "ROOT" if context_root.empty?
           context_root_war_name = "#{context_root.gsub(/\//, '#')}.war"
