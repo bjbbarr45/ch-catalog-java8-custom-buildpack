@@ -60,7 +60,7 @@ module JavaBuildpack::Framework
 
       CONTAINER_NAME = 'proxy_config'.freeze
       
-      HTTPPROXY_PACKAGE =  "httpproxy-agent-1.0.jar".freeze
+      HTTPPROXY_PACKAGE =  "httpproxy-agent-1.1.jar".freeze
 
       #TODO add support for proper remote download
       def buildpack_cache_dir
