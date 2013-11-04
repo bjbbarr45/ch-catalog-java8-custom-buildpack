@@ -36,20 +36,21 @@ module JavaBuildpack::Container
     # @param [String, nil] value the value to evalutate for extra spacing
     # @return [String] an empty string if +value+ is +nil+ or empty, otherwise the value prepended with a space
     def self.space(value)
+      value = value.to_s if value.respond_to?(:to_s)
       value.nil? || value.empty? ? '' : " #{value}"
     end
 
     # Returns an +Array+ containing the relative paths of the JARs located in the additional libraries directory.  The
-    # paths of these JARs are relative to the +app_dir+.
+    # paths of these JARs are relative to the +root_dir+.
     #
-    # @param [String] app_dir the directory that the application exists in
+    # @param [String] root_dir the directory relative to which the resultant are calculated
     # @param [String] lib_directory the directory that additional libraries are placed in
     # @return [Array<String>] the relative paths of the JARs located in the additional libraries directory
-    def self.libs(app_dir, lib_directory)
+    def self.libs(root_dir, lib_directory)
       libs = []
 
       if lib_directory
-        root_directory = Pathname.new(app_dir)
+        root_directory = Pathname.new(root_dir)
 
         libs = Pathname.new(lib_directory).children
         .select { |file| file.extname == '.jar' }

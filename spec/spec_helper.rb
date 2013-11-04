@@ -24,14 +24,10 @@ CodeClimate::TestReporter.start
 
 require 'tmpdir'
 require 'webmock/rspec'
+WebMock.disable_net_connect!(allow: 'codeclimate.com')
 require 'fileutils'
 require 'java_buildpack/diagnostics/common'
 require 'java_buildpack/diagnostics/logger_factory'
-
-# Following required for class variable initialisation in DownloadCache.
-WebMock::API.stub_request(:get, 'http://download.pivotal.io.s3.amazonaws.com/openjdk/lucid/x86_64/index.yml')
-.with(headers: { 'Accept' => '*/*', 'User-Agent' => 'Ruby' })
-.to_return(status: 200, body: '', headers: {})
 
 RSpec.configure do |config|
   config.treat_symbols_as_metadata_keys_with_true_values = true
@@ -49,8 +45,5 @@ RSpec.configure do |config|
   config.after(:all) do
     $stderr = STDERR
     $stdout = STDOUT
-
-    WebMock.allow_net_connect!
   end
 end
-

@@ -24,6 +24,12 @@ module JavaBuildpack::Util
     before do
       @previous_value = ARGV[1]
       ARGV[1] = nil
+
+      stub_request(:get, 'http://foo-uri/')
+      .with(headers: { 'Accept' => '*/*', 'User-Agent' => 'Ruby' })
+      .to_return(status: 200, body: '', headers: {})
+
+      DownloadCache.class_variable_set :@@internet_checked, false
     end
 
     after do
@@ -36,18 +42,18 @@ module JavaBuildpack::Util
 
     it 'should use ARGV[1] directory' do
       stub_request(:get, 'http://foo-uri/').to_return(
-        status: 200,
-        body: 'foo-cached',
-        headers: {
-          Etag: 'foo-etag',
-          'Last-Modified' => 'foo-last-modified'
-        }
+          status: 200,
+          body: 'foo-cached',
+          headers: {
+              Etag: 'foo-etag',
+              'Last-Modified' => 'foo-last-modified'
+          }
       )
 
       Dir.mktmpdir do |root|
         ARGV[1] = root
 
-        ApplicationCache.new.get('http://foo-uri/') {}
+        ApplicationCache.new.get('http://foo-uri/') { }
 
         expect(Dir[File.join(root, '*.cached')].size).to eq(1)
       end

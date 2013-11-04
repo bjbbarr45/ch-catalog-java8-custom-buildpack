@@ -23,10 +23,17 @@ module JavaBuildpack::Util
 
     before do
       @previous_value = ENV.delete 'BUILDPACK_CACHE'
+
+      stub_request(:get, 'http://foo-uri/')
+      .with(headers: { 'Accept' => '*/*', 'User-Agent' => 'Ruby' })
+      .to_return(status: 200, body: '', headers: {})
+
+      DownloadCache.class_variable_set :@@internet_checked, false
     end
 
     after do
       ENV['BUILDPACK_CACHE'] = @previous_value
+      DownloadCache.class_variable_set :@@internet_checked, false
     end
 
     it 'should raise an error if BUILDPACK_CACHE is not defined' do
@@ -35,18 +42,18 @@ module JavaBuildpack::Util
 
     it 'should use BUILDPACK_CACHE directory' do
       stub_request(:get, 'http://foo-uri/').to_return(
-        status: 200,
-        body: 'foo-cached',
-        headers: {
-          Etag: 'foo-etag',
-          'Last-Modified' => 'foo-last-modified'
-        }
+          status: 200,
+          body: 'foo-cached',
+          headers: {
+              Etag: 'foo-etag',
+              'Last-Modified' => 'foo-last-modified'
+          }
       )
 
       Dir.mktmpdir do |root|
         ENV['BUILDPACK_CACHE'] = root
 
-        GlobalCache.new.get('http://foo-uri/') {}
+        GlobalCache.new.get('http://foo-uri/') { }
 
         expect(Dir[File.join(root, '*.cached')].size).to eq(1)
       end

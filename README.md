@@ -31,14 +31,12 @@ The buildpack supports configuration and extension through the use of Git reposi
 	* [Spring Auto Reconfiguration](docs/framework-spring-auto-reconfiguration.md) ([Configuration](docs/framework-spring-auto-reconfiguration.md#configuration))
 * Standard JREs
 	* [OpenJDK](docs/jre-openjdk.md) ([Configuration](docs/jre-openjdk.md#configuration))
-* Extending
-	* [Containers](docs/extending-containers.md)
-	* [JREs](docs/extending-jres.md)
-	* [Frameworks](docs/extending-frameworks.md)
+* [Extending](docs/extending.md)
 * Utilities
-	* [Caches](docs/util-caches.md)
-	* [Logging](docs/logging.md)
+	* [Caches](docs/util-caches.md) ([Configuration](docs/util-caches.md#configuration))
+	* [Logging](docs/logging.md) ([Configuration](docs/logging.md#configuration))
 	* [Repositories](docs/util-repositories.md)
+	* [Other Utiltities](docs/util-other.md)
 	* [Repository Builder](docs/util-repository-builder.md)
 	* [Test Applications](docs/util-test-applications.md)
 
@@ -56,6 +54,8 @@ If you want to use the RubyMine debugger, you may need to [install additional ge
 bundle install --gemfile Gemfile.rubymine-debug
 ```
 
+[Installing Cloud Foundry on Vagrant][] is useful for privately testing new features.
+
 ## Contributing
 [Pull requests][] are welcome; see the [contributor guidelines][] for details.
 
@@ -69,3 +69,4 @@ The Tomcat Builder is released under version 2.0 of the [Apache License][].
 [install additional gems]: http://stackoverflow.com/questions/11732715/how-do-i-install-ruby-debug-base19x-on-mountain-lion-for-intellij
 [pull request]: https://help.github.com/articles/using-pull-requests
 [Pull requests]: http://help.github.com/send-pull-requests
+[Installing Cloud Foundry on Vagrant]: http://blog.cloudfoundry.com/2013/06/27/installing-cloud-foundry-on-vagrant/

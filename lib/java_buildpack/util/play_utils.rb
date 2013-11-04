@@ -34,7 +34,7 @@ module JavaBuildpack::Util
         start_script(file) && (lib_play_jar(file) || staged_play_jar(file))
       end
 
-      raise "Play application detected in multiple directories: #{roots}" if roots.size > 1
+      fail "Play application detected in multiple directories: #{roots}" if roots.size > 1
 
       roots.first
     end
@@ -90,13 +90,13 @@ module JavaBuildpack::Util
 
     private
 
-      START_SCRIPT = 'start'.freeze
+    START_SCRIPT = 'start'.freeze
 
-      PLAY_JAR = '*play_*.jar'.freeze
+    PLAY_JAR = '*play_*.jar'.freeze
 
-      def self.play_jar(root)
-        Dir[File.join(root, PLAY_JAR)].first
-      end
+    def self.play_jar(root)
+      Dir[File.join(root, PLAY_JAR)].first
+    end
 
     private_class_method :new
 
