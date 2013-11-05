@@ -15,52 +15,44 @@
 # limitations under the License.
 
 require 'fileutils'
+require 'java_buildpack/base_component'
 require 'java_buildpack/container'
 require 'java_buildpack/container/container_utils'
 require 'java_buildpack/repository/configured_item'
 require 'java_buildpack/util/application_cache'
 require 'java_buildpack/util/format_duration'
-require 'java_buildpack/container/tomcat'
+require 'java_buildpack/util/java_main_utils'
+require 'java_buildpack/util/resource_utils'
 
 module JavaBuildpack::Container
 
-  # Encapsulates the detect, compile, and release functionality for Stack Tomcat applications.
-  class StackTomcat < Tomcat
+  # Encapsulates the detect, compile, and release functionality for Tomcat applications.
+  class StackTomcat < JavaBuildpack::BaseComponent
 
-    # Creates an instance, passing in an arbitrary collection of options.
-    #
-    # @param [Hash] context the context that is provided to the instance
-    # @option context [String] :app_dir the directory that the application exists in
-    # @option context [String] :java_home the directory that acts as +JAVA_HOME+
-    # @option context [Array<String>] :java_opts an array that Java options can be added to
-    # @option context [String] :lib_directory the directory that additional libraries are placed in
-    # @option context [Hash] :configuration the properties provided by the user
     def initialize(context)
-      super(context)
-      @tomcat_version, @tomcat_uri = StackTomcat.find_stack_tomcat(@app_dir, @configuration)
-      @support_version, @support_uri = StackTomcat.find_stack_tomcat_support(@app_dir, @configuration)
+      super('Stack Tomcat', context)
+
+      if supports?
+        @tomcat_version, @tomcat_uri = JavaBuildpack::Repository::ConfiguredItem.find_item(@component_name, @configuration) { |candidate_version| candidate_version.check_size(3) }
+        @support_version, @support_uri = JavaBuildpack::Repository::ConfiguredItem.find_item(@component_name, @configuration[KEY_SUPPORT])
+      else
+        @tomcat_version, @tomcat_uri = nil, nil
+        @support_version, @support_uri = nil, nil
+      end
     end
 
-    # Detects whether this application is a Tomcat application.
-    #
-    # @return [String] returns +tomcat-<version>+ if and only if the application has a +WEB-INF+ directory, otherwise
-    #                  returns +nil+
     def detect
-      @tomcat_version ? ["Stack Tomcat", tomcat_id(@tomcat_version)] : nil
+      @tomcat_version && @support_version ? [tomcat_id(@tomcat_version), support_id(@support_version)] : nil
     end
 
-    # Downloads and unpacks a Tomcat instance and support JAR
-    #
-    # @return [void]
     def compile
       env = @configuration[DEPLOYABLE_ENV]
       catalina = find_deployable_file("catalina.properties", env)
       download_tomcat
-      remove_tomcat_files
       download_support
       catalina_props = properties(catalina)
       if(!catalina_props.has_key?("org.apache.tomcat.util.digester.PROPERTY_SOURCE"))
-        puts "Warning: #{catalina} doesn't appear to specify a 'org.apache.tomcat.util.digester.PROPERTY_SOURCE'.  Resolving environment variables may not work."
+        puts "Warning: #{catalina.basename.to_s} doesn't appear to specify a 'org.apache.tomcat.util.digester.PROPERTY_SOURCE'.  Resolving environment variables may not work."
       end
       jvm_args = java_opts(env)
       jvm_args.each do |arg|
@@ -76,179 +68,226 @@ module JavaBuildpack::Container
       copy_env_files_to_conf(env)
       link_stack_tomcat_libs
     end
-    
-    # Creates the command to run the Tomcat application.
-    #
-    # @return [String] the command to run the application.
+
     def release
       @java_opts << "-D#{KEY_HTTP_PORT}=$PORT"
 
       java_home_string = "JAVA_HOME=#{@java_home}"
       java_opts_string = ContainerUtils.space("JAVA_OPTS=\"#{ContainerUtils.to_java_opts_s(@java_opts)}\"")
-      start_script_string = ContainerUtils.space(File.join(TOMCAT_HOME, 'bin', 'catalina.sh'))
+      start_script_string = ContainerUtils.space(@application.relative_path_to(tomcat_home + 'bin' + 'catalina.sh'))
 
       "#{java_home_string}#{java_opts_string}#{start_script_string} run"
     end
 
+    protected
+
+    # The unique indentifier of the component, incorporating the version of the dependency (e.g. +tomcat-7.0.42+)
+    #
+    # @param [String] version the version of the dependency
+    # @return [String] the unique identifier of the component
+    def tomcat_id(version)
+      "tomcat-#{version}"
+    end
+
+    # The unique indentifier of the component, incorporating the version of the dependency (e.g. +tomcat-buildpack-support-1.1.0+)
+    #
+    # @param [String] version the version of the dependency
+    # @return [String] the unique identifier of the component
+    def support_id(version)
+      "tomcat-buildpack-support-#{version}"
+    end
+
+    # Whether or not this component supports this application
+    #
+    # @return [Boolean] whether or not this component supports this application
+    def supports?
+      deployable?
+    end
+
     private
+
+    KEY_HTTP_PORT = 'http.port'.freeze
+
+    KEY_SUPPORT = 'support'.freeze
+
+    WEB_INF_DIRECTORY = 'WEB-INF'.freeze
+
+    DEPLOYABLE_ENV = 'env'.freeze
     
-      DEPLOYABLE_ENV = 'env'.freeze
-      
-      CONFIG_FILES = ["catalina.policy", "catalina.properties", "context.xml", "logging.properties", "server.xml", "web.xml"]
-      
-      def link_stack_tomcat_libs
-        libs = ContainerUtils.libs(@app_dir, @lib_directory)
+    CONFIG_FILES = ["catalina.policy", "catalina.properties", "context.xml", "logging.properties", "server.xml", "web.xml"]
+    
+    def download_tomcat
+      download(@tomcat_version, @tomcat_uri) { |file| expand file }
+    end
 
-        if libs
-          applib = File.join(tomcat_home, "lib")
-          FileUtils.mkdir_p(applib) unless File.exists?(applib)
-           
-          libs.each { |lib|
-            system "ln -sfn #{File.join '..', '..', lib} #{applib}"
-          }
-        end
-      end
-        
-      def copy_env_files_to_conf(env)
-        CONFIG_FILES.each do | file |
-          deployable_file = find_deployable_file(file, env)
-          unless deployable_file.nil? 
-            puts "For #{file} using '#{File.basename(deployable_file)}' from deployable"
-            system "ln -sfn #{File.join('..', '..', File.basename(deployable_file))} #{File.join(tomcat_home, 'conf', file)}"
-          end
-        end
+    def download_support
+      download_jar(@support_version, @support_uri, support_jar_name, File.join(tomcat_home, 'lib'), 'Buildpack Tomcat Support')
+    end
+
+    def expand(file)
+      expand_start_time = Time.now
+      print "       Expanding Tomcat to #{@application.relative_path_to(tomcat_home)} "
+
+      shell "rm -rf #{tomcat_home}"
+      shell "mkdir -p #{tomcat_home}"
+      
+      excludes = ""
+
+      ["NOTICE", "RELEASE-NOTES", "RUNNING.txt", "LICENSE", File.join("temp","*"), "webapps", File.join("work", "*"), "logs", File.join("bin", "commons-daemon-native*"), File.join("bin", "tomcat-native*"), File.join("lib", "catalina-ha*"), File.join("lib", "catalina-tribes*"), File.join("lib", "tomcat-i18n-*"), File.join("lib", "tomcat-dbcp*"), File.join('conf', 'server.xml'), File.join('conf', 'context.xml')].each do |file|
+        excludes << " --exclude='#{file}'"
       end
       
-      def find_deployable_file(filename, env)
-        raise "#{filename} is not an environment paramiterizable file." unless CONFIG_FILES.include?(filename)
-        file_found = nil
-        Dir.glob(File.join(@app_dir, "*#{filename}")) do |file|
-          next unless File.file?(file)
-          file_found = file if file_found.nil? && file == File.join(@app_dir, filename)   
-          file_found = file if file == File.join(@app_dir, "#{env}.#{filename}")
-        end
-        file_found
-      end
+      shell "tar xzf #{file.path} -C #{tomcat_home} --strip 1 #{excludes} 2>&1"
       
-      def copy_applib_dir
-        if File.exists?(File.join(@app_dir, "applib"))
-          puts "Copying applib jars from deployable."
-          FileUtils.mkdir_p(File.join(tomcat_home, "applib"))
-          Dir.entries(File.join(@app_dir, "applib")).each do |file|
-            next unless File.file?(File.join(@app_dir, "applib", file))
-            system "ln -sfn #{File.join('..', '..', 'applib', file)} #{File.join(tomcat_home, 'applib', file)}"
-          end
-        end
-      end
-      
-      def copy_endorsed_dir
-        if File.exists?(File.join(@app_dir, "endorsed"))
-          puts "Copying endorsed jars from deployable."
-          FileUtils.mkdir_p(File.join(tomcat_home, "endorsed"))
-          Dir.entries(File.join(@app_dir, "endorsed")).each do |file|
-            next unless File.file?(File.join(@app_dir, "endorsed", file))
-            system "ln -sfn #{File.join('..', '..', 'endorsed', file)} #{File.join(tomcat_home, 'endorsed', file)}"
-          end
-        end
-      end
 
-      
-      def copy_wars_to_tomcat(catalina_props)
-        Dir.glob(File.join(@app_dir, "*.war")) do |war_file|
-          context_root = "ROOT"
-          war_file_name = File.basename(war_file).gsub(/.war/, "")
-          context_root = catalina_props["#{war_file_name}.contextRoot"] unless catalina_props["#{war_file_name}.contextRoot"].nil?
-          context_root[0] = "" if context_root[0] == "/"
-          context_root = "ROOT" if context_root.empty?
-          context_root_war_name = "#{context_root.gsub(/\//, '#')}.war"
-          FileUtils.mkdir_p(File.join(tomcat_home, "webapps"))
-          puts "Deploying #{war_file} to webapps with context root #{context_root}"
-          system "ln -sfn #{File.join('..', '..', File.basename(war_file))} #{File.join(tomcat_home, 'webapps', context_root_war_name)}"
-        end
-      end
-      
-      def remove_tomcat_files
-        %w[NOTICE RELEASE-NOTES RUNNING.txt LICENSE temp/* webapps/* work/* logs bin/commons-daemon-native* bin/tomcat-native* lib/catalina-ha* lib/catalina-tribes* lib/tomcat-i18n-* lib/tomcat-dbcp*].each do |file|
-          FileUtils.rm_rf(File.join(tomcat_home, file))
-        end
-      end
+      JavaBuildpack::Util::ResourceUtils.copy_resources('tomcat', tomcat_home)
+      puts "(#{(Time.now - expand_start_time).duration})"
+    end
 
-      def java_opts(env = "cf")
-        props = {}
-        props = properties(File.join(@app_dir, "jvmargs.properties")) if File.exists?(File.join(@app_dir, "jvmargs.properties"))
-        args = {}
-        props.map do |k,v|
-          next if k.rindex("jvmarg").nil?
-          command_key = k[k.rindex("jvmarg")..-1]
-          args[command_key] = v if k == command_key && !args.include?(command_key)
-          args[command_key] = v if k == "#{env}.#{command_key}"
-        end
-        args.values
-      end
-
-      
-      def properties(props_file)
-        properties = {}
-        IO.foreach(props_file) do |line|
-          next if line.strip[0] == "#"
-          if line =~ /([^=]*)=(.*)\/\/(.*)/ || line =~ /([^=]*)=(.*)/
-            case $2
-            when "true"
-              properties[$1.strip] = true
-            when "false"
-              properties[$1.strip] = false
-            else
-              properties[$1.strip] = $2.nil? ? nil : $2.strip
-            end
-          end
-        end
-        properties
-      end
-      
-      def self.find_stack_tomcat_support(app_dir, configuration)
-        if deployable?(app_dir, configuration)
-          version, uri = JavaBuildpack::Repository::ConfiguredItem.find_item(configuration[KEY_SUPPORT])
-        else
-          version = nil
-          uri = nil
-        end
-
-        return version, uri # rubocop:disable RedundantReturn
-      end
-
-
-      def self.find_stack_tomcat(app_dir, configuration)
-        if deployable?(app_dir, configuration)
-          version, uri = JavaBuildpack::Repository::ConfiguredItem.find_item(configuration) do |candidate_version|
-            fail "Malformed Tomcat version #{candidate_version}: too many version components" if candidate_version[3]
-          end
-        else
-          version = nil
-          uri = nil
-        end
-
-        return version, uri # rubocop:disable RedundantReturn
-      rescue => e
-        raise RuntimeError, "Tomcat container error: #{e.message}", e.backtrace
-      end
-
-      def self.deployable?(app_dir, configuration)
-        env = configuration[DEPLOYABLE_ENV]
-        war_exists = false
-        catalina_properties_exists = false
-        
-        Dir.entries(app_dir).each do |file|
-          next unless File.file?(File.join(app_dir, file))
-
-          if file.end_with?(".war")
-            war_exists = true
-          end
-          
-          if file == "catalina.properties" || file == "#{env}.catalina.properties"
-              catalina_properties_exists = true
-          end
-        end
-        war_exists && catalina_properties_exists
+    def link_stack_tomcat_libs
+      libs = ContainerUtils.libs(@app_dir, @lib_directory)
+    
+      if libs
+        applib = File.join(tomcat_home, "lib")
+        FileUtils.mkdir_p(applib) unless File.exist?(applib)
+         
+        libs.each { |lib|
+          system "ln -sfn #{File.join '..', '..', lib} #{applib}"
+        }
       end
     end
+
+
+    def support_jar_name
+      "#{support_id @support_version}.jar"
+    end
+
+    def tomcat_home
+      @application.component_directory 'tomcat'
+    end
+
+    def webapps
+      tomcat_home + 'webapps'
+    end
+
+    def deployable?
+      env = @configuration[DEPLOYABLE_ENV]
+      war_exists = false
+      catalina_properties_exists = false
+      
+      puts "Application: #{@application.class}"
+      
+      @application.children.each do |file|
+        next unless file.file?
+    
+        if file.basename.to_s.end_with?(".war")
+          war_exists = true
+        end
+        
+        if file.basename.to_s == "catalina.properties" || file.basename.to_s == "#{env}.catalina.properties"
+            catalina_properties_exists = true
+        end
+      end
+      war_exists && catalina_properties_exists
+    end
+    
+    def find_deployable_file(filename, env)
+      raise "#{filename} is not an environment paramiterizable file." unless CONFIG_FILES.include?(filename)
+      file_found = nil
+      @application.children.each do |file|
+        next unless file.file?
+        file_found = file if file_found.nil? && file.basename.to_s == filename   
+        file_found = file if file.basename.to_s == "#{env}.#{filename}"
+      end
+      file_found
+    end
+    
+    def properties(props_file)
+      properties = {}
+      IO.foreach(props_file.to_path) do |line|
+        next if line.strip[0] == "#"
+        if line =~ /([^=]*)=(.*)\/\/(.*)/ || line =~ /([^=]*)=(.*)/
+          case $2
+          when "true"
+            properties[$1.strip] = true
+          when "false"
+            properties[$1.strip] = false
+          else
+            properties[$1.strip] = $2.nil? ? nil : $2.strip
+          end
+        end
+      end
+      properties
+    end
+
+    def java_opts(env = "cf")
+      props = {}
+      props = properties(@application.child("jvmargs.properties")) if @application.child("jvmargs.properties").exist?
+      args = {}
+      props.map do |k,v|
+        next if k.rindex("jvmarg").nil?
+        command_key = k[k.rindex("jvmarg")..-1]
+        args[command_key] = v if k == command_key && !args.include?(command_key)
+        args[command_key] = v if k == "#{env}.#{command_key}"
+      end
+      args.values
+    end
+
+    def copy_wars_to_tomcat(catalina_props)
+      @application.children.each do |war_file|
+        next unless war_file.file?
+        next unless war_file.basename.to_s.end_with?(".war")
+        context_root = "ROOT"
+        war_file_name = war_file.basename.to_s.gsub(/.war/, "")
+        context_root = catalina_props["#{war_file_name}.contextRoot"] unless catalina_props["#{war_file_name}.contextRoot"].nil?
+        context_root[0] = "" if context_root[0] == "/"
+        context_root = "ROOT" if context_root.empty?
+        context_root_war_name = "#{context_root.gsub(/\//, '#')}.war"
+        FileUtils.mkdir_p(webapps)
+        puts "Deploying #{war_file} to webapps with context root #{context_root}"
+
+        FileUtils.rm_rf webapps
+        FileUtils.mkdir_p webapps
+        new_war = webapps + context_root_war_name
+        FileUtils.ln_sf(war_file.relative_path_from(webapps),  new_war)
+      end
+    end
+
+    def copy_applib_dir
+      applib = @application.child("applib")
+      if applib.exist? && applib.directory?
+        puts "Copying applib jars from deployable."
+        tomcat_applib = tomcat_home + "applib"
+        FileUtils.mkdir_p(tomcat_applib)
+        applib.each_entry do |file|
+          next unless file.file?
+          FileUtils.ln_sf(file.relative_path_from(tomcat_applib),  tomcat_applib+file.basename)
+        end
+      end
+    end
+
+    def copy_endorsed_dir
+      endorsed = @application.child("endorsed")
+      if endorsed.exist?
+        puts "Copying endorsed jars from deployable."
+        tomcat_endorsed = tomcat_home + "endorsed"
+        FileUtils.mkdir_p()
+        endorsed.each_entry do |file|
+          next unless file.file?
+          FileUtils.ln_sf(file.relative_path_from(tomcat_endorsed),  tomcat_endorsed+file.basename)
+        end
+      end
+    end
+    
+    def copy_env_files_to_conf(env)
+      tomcat_conf = tomcat_home+"conf"
+      CONFIG_FILES.each do | file |
+        deployable_file = find_deployable_file(file, env)
+        unless deployable_file.nil? 
+          puts "For #{file} using '#{deployable_file.basename.to_s}' from deployable"
+          FileUtils.ln_sf(deployable_file.relative_path_from(tomcat_conf),  tomcat_conf+file)
+        end
+      end
+    end
+  end
 end

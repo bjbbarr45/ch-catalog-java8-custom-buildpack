@@ -42,6 +42,7 @@ module JavaBuildpack::Container
       .and_return(TOMCAT_DETAILS, SUPPORT_DETAILS)
       detected = StackTomcat.new(
         app_dir: 'spec/fixtures/container_stack_tomcat',
+        application: JavaBuildpack::Application.new('spec/fixtures/container_stack_tomcat'),
         configuration: {"env" => "cf"}
       ).detect
 
@@ -51,21 +52,11 @@ module JavaBuildpack::Container
     it 'should not detect Tomcat Deployable' do
       detected = StackTomcat.new(
         app_dir: 'spec/fixtures/container_main',
+        application: JavaBuildpack::Application.new('spec/fixtures/container_main'),
         configuration: {}
       ).detect
 
       expect(detected).to be_nil
-    end
-
-    it 'should fail when a malformed version is detected' do
-      JavaBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(JavaBuildpack::Util::TokenizedVersion.new('7.0.40_0')) if block }
-      .and_return(TOMCAT_DETAILS, SUPPORT_DETAILS)
-      expect do
-        StackTomcat.new(
-          app_dir: 'spec/fixtures/container_tomcat',
-          configuration: {}
-        ).detect
-      end.to raise_error(/Malformed\ Tomcat\ version/)
     end
 
     it 'should extract Tomcat from a GZipped TAR' do
@@ -82,6 +73,7 @@ module JavaBuildpack::Container
 
         StackTomcat.new(
           app_dir: root,
+          application: JavaBuildpack::Application.new(root),
           configuration: {}
         ).compile
 
@@ -116,10 +108,11 @@ module JavaBuildpack::Container
 
         StackTomcat.new(
           app_dir: root,
+          application: JavaBuildpack::Application.new(root),
           configuration: {}
         ).compile
 
-        root_webapp = File.join root, '.tomcat', 'webapps', 'ROOT.war'
+        root_webapp = File.join(root, '.tomcat', 'webapps', 'ROOT.war')
         expect(File.exists?(root_webapp)).to be_true
       end
     end
@@ -144,6 +137,7 @@ module JavaBuildpack::Container
 
         StackTomcat.new(
           app_dir: root,
+          application: JavaBuildpack::Application.new(root),
           lib_directory: lib_directory,
           configuration: {}
         ).compile
