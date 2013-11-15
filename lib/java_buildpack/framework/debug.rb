@@ -15,20 +15,21 @@
 # limitations under the License.
 
 require 'java_buildpack/framework'
+require 'java_buildpack/base_component'
 require 'shellwords'
 
 module JavaBuildpack::Framework
 
   # Encapsulates the detect, compile, and release functionality for contributing custom Java options to an application
   # at runtime.
-  class Debug
+  class Debug < JavaBuildpack::BaseComponent
 
     # Creates an instance, passing in an arbitrary collection of options.
     #
     # @param [Hash] context the context that is provided to the instance
     # @option context [Array<String>] :java_opts an array that Java options can be added to
     # @option context [Hash] :configuration the properties provided by the user
-    def initialize(context = {})
+    def initialize(context)
       super('Debug', context)
     end
 

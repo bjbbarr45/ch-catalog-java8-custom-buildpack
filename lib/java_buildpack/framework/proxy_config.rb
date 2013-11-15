@@ -15,6 +15,7 @@
 # limitations under the License.
 
 require 'java_buildpack/framework'
+require 'java_buildpack/base_component'
 require 'shellwords'
 
 module JavaBuildpack::Framework
