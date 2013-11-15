@@ -42,10 +42,12 @@ module JavaBuildpack::Container
     end
 
     def detect
+      puts "We are now detecting Tomcat!!!!!!!!!!!!!!!!!! #{@java_opts}"
       @tomcat_version && @support_version ? [tomcat_id(@tomcat_version), support_id(@support_version)] : nil
     end
 
     def compile
+      puts "We are now compiling Tomcat!!!!!!!!!!!!!!!!!! #{@java_opts}"
       download_tomcat
       download_support
       link_application
@@ -53,6 +55,7 @@ module JavaBuildpack::Container
     end
 
     def release
+      puts "We are now releasing Tomcat!!!!!!!!!!!!!!!!!! #{@java_opts}"
       @java_opts << "-D#{KEY_HTTP_PORT}=$PORT"
 
       java_home_string = "JAVA_HOME=#{@java_home}"
