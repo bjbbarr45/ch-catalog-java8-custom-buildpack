@@ -21,7 +21,7 @@ module JavaBuildpack::Framework
 
   # Encapsulates the detect, compile, and release functionality for contributing custom Java options to an application
   # at runtime.
-  class JMX
+  class JMX < JavaBuildpack::BaseComponent
 
     # Creates an instance, passing in an arbitrary collection of options.
     #
@@ -29,9 +29,7 @@ module JavaBuildpack::Framework
     # @option context [Array<String>] :java_opts an array that Java options can be added to
     # @option context [Hash] :configuration the properties provided by the user
     def initialize(context = {})
-      @app_dir = context[:app_dir]
-      @agent_dir = File.join(@app_dir, ".agent")
-      @java_opts = context[:java_opts]
+      super('JMX', context)
     end
 
     # Always add JMX config if it is a java app
@@ -67,10 +65,15 @@ module JavaBuildpack::Framework
         "/var/vcap/packages/buildpack_cache"
       end
       
+      def agent_dir
+        @application.component_directory 'agent'        
+      end
+      
       def install_jmxmp_agent
-        FileUtils.mkdir_p(@agent_dir)
+
+        FileUtils.mkdir_p(agent_dir)
         file_path = File.join(buildpack_cache_dir, JMXMP_PACKAGE)
-        FileUtils.cp(file_path, File.join(@agent_dir, JMXMP_PACKAGE))
+        FileUtils.cp(file_path, File.join(agent_dir, JMXMP_PACKAGE))
       end
       
       def add_jmx_script
@@ -87,7 +90,7 @@ fi
       end
       
       def jmx_opts
-        "-javaagent:#{File.join(".agent", JMXMP_PACKAGE)} -Dorg.lds.cloudfoundry.jmxmp.host=$VCAP_CONSOLE_IP -Dorg.lds.cloudfoundry.jmxmp.port=$VCAP_CONSOLE_PORT"
+        "-javaagent:#{agent_dir + JMXMP_PACKAGE} -Dorg.lds.cloudfoundry.jmxmp.host=$VCAP_CONSOLE_IP -Dorg.lds.cloudfoundry.jmxmp.port=$VCAP_CONSOLE_PORT"
       end
   end
 end
