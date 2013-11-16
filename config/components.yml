@@ -30,6 +30,6 @@ frameworks:
   - "JavaBuildpack::Framework::PlayAutoReconfiguration"
   - "JavaBuildpack::Framework::PlayJpaPlugin"
   - "JavaBuildpack::Framework::Debug"
-#  - "JavaBuildpack::Framework::JMX"
+  - "JavaBuildpack::Framework::JMX"
   - "JavaBuildpack::Framework::ProxyConfig"
   - "JavaBuildpack::Framework::SpringAutoReconfiguration"

@@ -71,7 +71,6 @@ module JavaBuildpack::Framework
       end
       
       def install_jmxmp_agent
-
         FileUtils.mkdir_p(agent_dir)
         file_path = File.join(buildpack_cache_dir, JMXMP_PACKAGE)
         FileUtils.cp(file_path, File.join(agent_dir, JMXMP_PACKAGE))
