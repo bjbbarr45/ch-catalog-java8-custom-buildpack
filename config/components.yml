@@ -29,5 +29,5 @@ frameworks:
   - "JavaBuildpack::Framework::NewRelic"
   - "JavaBuildpack::Framework::PlayAutoReconfiguration"
   - "JavaBuildpack::Framework::PlayJpaPlugin"
-#  - "JavaBuildpack::Framework::Debug"
+  - "JavaBuildpack::Framework::Debug"
   - "JavaBuildpack::Framework::SpringAutoReconfiguration"
