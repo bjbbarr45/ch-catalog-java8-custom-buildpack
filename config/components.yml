@@ -16,7 +16,6 @@
 # Configuration for components to use in the buildpack
 ---
 containers:
-#  - "JavaBuildpack::Container::StackTomcat"
   - "JavaBuildpack::Container::Groovy"
   - "JavaBuildpack::Container::Main"
   - "JavaBuildpack::Container::SpringBootCli"
@@ -29,7 +28,4 @@ frameworks:
   - "JavaBuildpack::Framework::NewRelic"
   - "JavaBuildpack::Framework::PlayAutoReconfiguration"
   - "JavaBuildpack::Framework::PlayJpaPlugin"
-#  - "JavaBuildpack::Framework::Debug"
-#  - "JavaBuildpack::Framework::JMX"
-#  - "JavaBuildpack::Framework::ProxyConfig"
-#  - "JavaBuildpack::Framework::SpringAutoReconfiguration"
+  - "JavaBuildpack::Framework::SpringAutoReconfiguration"
