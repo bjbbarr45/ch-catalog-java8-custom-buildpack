@@ -44,6 +44,7 @@ module JavaBuildpack::Framework
     #
     # @return [void]
     def compile
+      puts "jmx compile"
       install_jmxmp_agent
       add_jmx_script
     end

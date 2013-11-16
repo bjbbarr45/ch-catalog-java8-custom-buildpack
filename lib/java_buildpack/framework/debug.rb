@@ -44,6 +44,7 @@ module JavaBuildpack::Framework
     #
     # @return [void]
     def compile
+      puts "debug compile"
       add_debug_script
     end
 

@@ -44,6 +44,7 @@ module JavaBuildpack::Framework
     #
     # @return [void]
     def compile
+      puts "proxy compile"
       install_httpproxy_agent
       add_httpproxy_script
     end
