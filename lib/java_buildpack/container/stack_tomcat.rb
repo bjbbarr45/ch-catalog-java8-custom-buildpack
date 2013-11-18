@@ -31,7 +31,6 @@ module JavaBuildpack::Container
 
     def initialize(context)
       super('Stack Tomcat', context)
-      puts "initialize Stack Tomcat"
 
       if supports?
         @tomcat_version, @tomcat_uri = JavaBuildpack::Repository::ConfiguredItem.find_item(@component_name, @configuration) { |candidate_version| candidate_version.check_size(3) }
@@ -43,12 +42,10 @@ module JavaBuildpack::Container
     end
 
     def detect
-      puts "detect Stack Tomcat"
       @tomcat_version && @support_version ? [tomcat_id(@tomcat_version), support_id(@support_version)] : nil
     end
 
     def compile
-      puts "compile Stack Tomcat"
       env = @configuration[DEPLOYABLE_ENV]
       catalina = find_deployable_file("catalina.properties", env)
       download_tomcat
@@ -73,7 +70,6 @@ module JavaBuildpack::Container
     end
 
     def release
-      puts "release Stack Tomcat"
       @java_opts << "-D#{KEY_HTTP_PORT}=$PORT"
 
       java_home_string = "JAVA_HOME=#{@java_home}"
