@@ -175,8 +175,6 @@ module JavaBuildpack::Container
       war_exists = false
       catalina_properties_exists = false
       
-      puts "Application: #{@application.class}"
-      
       @application.children.each do |file|
         next unless file.file?
     
@@ -244,7 +242,7 @@ module JavaBuildpack::Container
         context_root = "ROOT" if context_root.empty?
         context_root_war_name = "#{context_root.gsub(/\//, '#')}.war"
         FileUtils.mkdir_p(webapps)
-        puts "Deploying #{war_file} to webapps with context root #{context_root}"
+        print "       Deploying #{war_file} to webapps with context root #{context_root}"
 
         FileUtils.rm_rf webapps
         FileUtils.mkdir_p webapps
