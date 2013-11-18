@@ -32,4 +32,4 @@ frameworks:
   - "JavaBuildpack::Framework::Debug"
   - "JavaBuildpack::Framework::JMX"
   - "JavaBuildpack::Framework::ProxyConfig"
-  - "JavaBuildpack::Framework::SpringAutoReconfiguration"
+#  - "JavaBuildpack::Framework::SpringAutoReconfiguration"
