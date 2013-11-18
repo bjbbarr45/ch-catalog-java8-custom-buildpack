@@ -242,7 +242,7 @@ module JavaBuildpack::Container
         context_root = "ROOT" if context_root.empty?
         context_root_war_name = "#{context_root.gsub(/\//, '#')}.war"
         FileUtils.mkdir_p(webapps)
-        print "       Deploying #{war_file} to webapps with context root #{context_root}"
+        puts "Deploying #{war_file} to webapps with context root #{context_root}"
 
         FileUtils.rm_rf webapps
         FileUtils.mkdir_p webapps
