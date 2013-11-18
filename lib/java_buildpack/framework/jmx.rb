@@ -90,7 +90,7 @@ fi
       end
       
       def jmx_opts
-        "-javaagent:#{(agent_dir + JMXMP_PACKAGE).relative_path_from(@app_dir)} -Dorg.lds.cloudfoundry.jmxmp.host=$VCAP_CONSOLE_IP -Dorg.lds.cloudfoundry.jmxmp.port=$VCAP_CONSOLE_PORT"
+        "-javaagent:#{(agent_dir + JMXMP_PACKAGE).relative_path_from(Pathname.new(@app_dir))} -Dorg.lds.cloudfoundry.jmxmp.host=$VCAP_CONSOLE_IP -Dorg.lds.cloudfoundry.jmxmp.port=$VCAP_CONSOLE_PORT"
       end
   end
 end
