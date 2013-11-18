@@ -90,7 +90,7 @@ fi
       end
       
       def httpproxy_opts
-        "-javaagent:#{agent_dir + HTTPPROXY_PACKAGE}"
+        "-javaagent:#{(agent_dir + HTTPPROXY_PACKAGE).relative_path_from(Pathname.new(@app_dir))}"
       end
   end
 end
