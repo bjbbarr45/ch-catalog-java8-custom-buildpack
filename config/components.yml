@@ -16,7 +16,7 @@
 # Configuration for components to use in the buildpack
 ---
 containers:
-  - "JavaBuildpack::Container::StackTomcat"
+#  - "JavaBuildpack::Container::StackTomcat"
   - "JavaBuildpack::Container::Groovy"
   - "JavaBuildpack::Container::Main"
   - "JavaBuildpack::Container::SpringBootCli"
