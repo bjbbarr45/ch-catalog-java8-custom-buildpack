@@ -280,6 +280,7 @@ module JavaBuildpack::Container
     def copy_env_files_to_conf(env)
       tomcat_conf = tomcat_home+"conf"
       CONFIG_FILES.each do | file |
+        puts "Finding environment for #{file} and #{env}"
         deployable_file = find_deployable_file(file, env)
         unless deployable_file.nil? 
           puts "For #{file} using '#{deployable_file.basename.to_s}' from deployable"
