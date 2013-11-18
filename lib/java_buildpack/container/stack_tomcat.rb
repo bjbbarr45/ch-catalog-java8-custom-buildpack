@@ -257,8 +257,9 @@ module JavaBuildpack::Container
         puts "Copying applib jars from deployable."
         tomcat_applib = tomcat_home + "applib"
         FileUtils.mkdir_p(tomcat_applib)
-        applib.each_entry do |file|
+        applib.children.each do |file|
           next unless file.file?
+          next unless file.basename.to_s.end_with?(".jar")
           FileUtils.ln_sf(file.relative_path_from(tomcat_applib),  tomcat_applib+file.basename)
         end
       end
@@ -269,9 +270,10 @@ module JavaBuildpack::Container
       if endorsed.exist?
         puts "Copying endorsed jars from deployable."
         tomcat_endorsed = tomcat_home + "endorsed"
-        FileUtils.mkdir_p()
-        endorsed.each_entry do |file|
+        FileUtils.mkdir_p(tomcat_endorsed)
+        endorsed.children.each do |file|
           next unless file.file?
+          next unless file.basename.to_s.end_with?(".jar")
           FileUtils.ln_sf(file.relative_path_from(tomcat_endorsed),  tomcat_endorsed+file.basename)
         end
       end
