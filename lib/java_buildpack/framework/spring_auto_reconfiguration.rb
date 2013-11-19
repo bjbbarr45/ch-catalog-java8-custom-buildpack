@@ -17,7 +17,6 @@
 require 'java_buildpack/diagnostics/logger_factory'
 require 'java_buildpack/framework'
 require 'java_buildpack/framework/spring_auto_reconfiguration/web_xml_modifier'
-require 'java_buildpack/repository/configured_item'
 require 'java_buildpack/versioned_dependency_component'
 
 module JavaBuildpack::Framework
@@ -41,22 +40,18 @@ module JavaBuildpack::Framework
 
     protected
 
-    def id(version)
-      "spring-auto-reconfiguration-#{version}"
-    end
-
     def supports?
       Dir["#{@app_dir}/**/#{SPRING_JAR_PATTERN}"].any?
     end
 
     private
 
-    SPRING_JAR_PATTERN = 'spring-core*.jar'.freeze
+    SPRING_JAR_PATTERN = '*spring-core*.jar'.freeze
 
     WEB_XML = File.join 'WEB-INF', 'web.xml'.freeze
 
     def jar_name
-      "#{id @version}.jar"
+      "#{@parsable_component_name}-#{@version}.jar"
     end
 
     def modify_web_xml

@@ -47,8 +47,8 @@ module JavaBuildpack::Container
           configuration: {}
       ).detect
 
-      expect(detected).to include('tomcat-7.0.40')
-      expect(detected).to include('tomcat-buildpack-support-1.0.0')
+      expect(detected).to include('tomcat=7.0.40')
+      expect(detected).to include('tomcat-buildpack-support=1.0.0')
     end
 
     it 'should not detect when WEB-INF is absent' do
@@ -156,6 +156,69 @@ module JavaBuildpack::Container
       end
     end
 
+    it 'should link the Tomcat datasource JAR to the ROOT webapp when that JAR is present' do
+      Dir.mktmpdir do |root|
+        Dir.mkdir File.join(root, 'WEB-INF')
+        lib_directory = File.join(root, '.lib')
+        Dir.mkdir lib_directory
+
+        JavaBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(TOMCAT_VERSION) if block }
+        .and_return(TOMCAT_DETAILS, SUPPORT_DETAILS)
+
+        JavaBuildpack::Util::ApplicationCache.stub(:new).and_return(application_cache)
+        application_cache.stub(:get).with('test-tomcat-uri').and_yield(File.open('spec/fixtures/stub-tomcat7.tar.gz'))
+        application_cache.stub(:get).with('test-support-uri').and_yield(File.open('spec/fixtures/stub-support.jar'))
+
+        application = JavaBuildpack::Application.new(root)
+
+        Tomcat.new(
+            app_dir: root,
+            application: application,
+            configuration: {},
+            lib_directory: lib_directory
+        ).compile
+
+        root_webapp = File.join root, '.tomcat', 'webapps', 'ROOT'
+
+        tomcat_datasource_jar = File.join root_webapp, 'WEB-INF', 'lib', 'tomcat-jdbc.jar'
+        expect(File.exists?(tomcat_datasource_jar)).to be_true
+        expect(File.readlink(tomcat_datasource_jar)).to eq('../../.lib/tomcat-jdbc.jar')
+
+        tomcat_datasource_link_in_lib_directory = File.join lib_directory, 'tomcat-jdbc.jar'
+        expect(File.exists?(tomcat_datasource_link_in_lib_directory))
+        expect(File.readlink(tomcat_datasource_link_in_lib_directory)).to eq('../.tomcat/lib/tomcat-jdbc.jar')
+      end
+    end
+
+    it 'should not link the Tomcat datasource JAR to the ROOT webapp when that JAR is absent' do
+      Dir.mktmpdir do |root|
+        Dir.mkdir File.join(root, 'WEB-INF')
+        lib_directory = File.join(root, '.lib')
+        Dir.mkdir lib_directory
+
+        JavaBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(TOMCAT_VERSION) if block }
+        .and_return(TOMCAT_DETAILS, SUPPORT_DETAILS)
+
+        JavaBuildpack::Util::ApplicationCache.stub(:new).and_return(application_cache)
+        application_cache.stub(:get).with('test-tomcat-uri').and_yield(File.open('spec/fixtures/stub-tomcat.tar.gz'))
+        application_cache.stub(:get).with('test-support-uri').and_yield(File.open('spec/fixtures/stub-support.jar'))
+
+        application = JavaBuildpack::Application.new(root)
+
+        Tomcat.new(
+            app_dir: root,
+            application: application,
+            configuration: {},
+            lib_directory: lib_directory
+        ).compile
+
+        root_webapp = File.join root, '.tomcat', 'webapps', 'ROOT'
+
+        tomcat_datasource_jar = File.join root_webapp, 'WEB-INF', 'lib', 'tomcat-jdbc.jar'
+        expect(File.exists?(tomcat_datasource_jar)).to be_false
+      end
+    end
+
     it 'should link additional libraries to the ROOT webapp' do
       Dir.mktmpdir do |root|
         Dir.mkdir File.join root, 'WEB-INF'
@@ -192,6 +255,58 @@ module JavaBuildpack::Container
         expect(File.readlink(test_jar_2)).to eq('../../.lib/test-jar-2.jar')
 
         expect(File.exists?(test_text)).to be_false
+      end
+    end
+
+    it 'should link extra applications to the applications directory' do
+      Dir.mktmpdir do |root|
+        extra_applications_dir = File.join(root, '.extra-applications')
+        Dir.mkdir extra_applications_dir
+        Dir.mkdir File.join root, 'WEB-INF'
+        system "cp -r spec/fixtures/framework_spring_insight #{extra_applications_dir}"
+
+        JavaBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(TOMCAT_VERSION) if block }
+        .and_return(TOMCAT_DETAILS, SUPPORT_DETAILS)
+
+        JavaBuildpack::Util::ApplicationCache.stub(:new).and_return(application_cache)
+        application_cache.stub(:get).with('test-tomcat-uri').and_yield(File.open('spec/fixtures/stub-tomcat.tar.gz'))
+        application_cache.stub(:get).with('test-support-uri').and_yield(File.open('spec/fixtures/stub-support.jar'))
+
+        Tomcat.new(
+            app_dir: root,
+            application: JavaBuildpack::Application.new(root),
+            configuration: {}
+        ).compile
+
+        insight_test_dir = File.join root, '.tomcat', 'webapps', 'framework_spring_insight'
+        expect(File.exists?(insight_test_dir)).to be_true
+        expect(File.symlink?(insight_test_dir)).to be_true
+      end
+    end
+
+    it 'should link container libs to the tomcat lib directory' do
+      Dir.mktmpdir do |root|
+        container_libs_directory = File.join(root, '.container-libs')
+        Dir.mkdir container_libs_directory
+        Dir.mkdir File.join root, 'WEB-INF'
+        system "cp -r spec/fixtures/framework_spring_insight/.insight/weaver/insight-weaver-1.2.4-CI-SNAPSHOT.jar #{container_libs_directory}"
+
+        JavaBuildpack::Repository::ConfiguredItem.stub(:find_item) { |&block| block.call(TOMCAT_VERSION) if block }
+        .and_return(TOMCAT_DETAILS, SUPPORT_DETAILS)
+
+        JavaBuildpack::Util::ApplicationCache.stub(:new).and_return(application_cache)
+        application_cache.stub(:get).with('test-tomcat-uri').and_yield(File.open('spec/fixtures/stub-tomcat.tar.gz'))
+        application_cache.stub(:get).with('test-support-uri').and_yield(File.open('spec/fixtures/stub-support.jar'))
+
+        Tomcat.new(
+            app_dir: root,
+            application: JavaBuildpack::Application.new(root),
+            configuration: {}
+        ).compile
+
+        insight_test_lib = File.join root, '.tomcat', 'lib', 'insight-weaver-1.2.4-CI-SNAPSHOT.jar'
+        expect(File.exists?(insight_test_lib)).to be_true
+        expect(File.symlink?(insight_test_lib)).to be_true
       end
     end
 

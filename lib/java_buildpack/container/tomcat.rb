@@ -19,7 +19,6 @@ require 'java_buildpack/base_component'
 require 'java_buildpack/container'
 require 'java_buildpack/container/container_utils'
 require 'java_buildpack/repository/configured_item'
-require 'java_buildpack/util/application_cache'
 require 'java_buildpack/util/format_duration'
 require 'java_buildpack/util/java_main_utils'
 require 'java_buildpack/util/resource_utils'
@@ -48,7 +47,10 @@ module JavaBuildpack::Container
     def compile
       download_tomcat
       download_support
+      link_tomcat_datasource
       link_application
+      link_container_libs
+      link_extra_applications
       link_libs
     end
 
@@ -64,20 +66,20 @@ module JavaBuildpack::Container
 
     protected
 
-    # The unique indentifier of the component, incorporating the version of the dependency (e.g. +tomcat-7.0.42+)
+    # The unique indentifier of the component, incorporating the version of the dependency (e.g. +tomcat=7.0.42+)
     #
     # @param [String] version the version of the dependency
     # @return [String] the unique identifier of the component
     def tomcat_id(version)
-      "tomcat-#{version}"
+      "#{@parsable_component_name}=#{version}"
     end
 
-    # The unique indentifier of the component, incorporating the version of the dependency (e.g. +tomcat-buildpack-support-1.1.0+)
+    # The unique indentifier of the component, incorporating the version of the dependency (e.g. +tomcat-buildpack-support=1.1.0+)
     #
     # @param [String] version the version of the dependency
     # @return [String] the unique identifier of the component
     def support_id(version)
-      "tomcat-buildpack-support-#{version}"
+      "tomcat-buildpack-support=#{version}"
     end
 
     # Whether or not this component supports this application
@@ -93,7 +95,13 @@ module JavaBuildpack::Container
 
     KEY_SUPPORT = 'support'.freeze
 
+    TOMCAT_DATASOURCE_JAR = 'tomcat-jdbc.jar'.freeze
+
     WEB_INF_DIRECTORY = 'WEB-INF'.freeze
+
+    def container_libs_directory
+      @application.component_directory 'container-libs'
+    end
 
     def download_tomcat
       download(@tomcat_version, @tomcat_uri) { |file| expand file }
@@ -115,10 +123,38 @@ module JavaBuildpack::Container
       puts "(#{(Time.now - expand_start_time).duration})"
     end
 
+    def extra_applications_directory
+      @application.component_directory 'extra-applications'
+    end
+
     def link_application
       FileUtils.rm_rf root
       FileUtils.mkdir_p root
       @application.children.each { |child| FileUtils.ln_sf child.relative_path_from(root), root }
+    end
+
+    # Support for container libs in addition to the user's application is temporary and will go away in the future.
+    def link_container_libs
+      if container_libs_directory.exist?
+        container_libs = ContainerUtils.libs(@app_dir, container_libs_directory)
+
+        if container_libs
+          FileUtils.mkdir_p(tomcat_lib) unless tomcat_lib.exist?
+          container_libs.each { |lib| FileUtils.ln_sf(File.join('..', '..', lib), tomcat_lib) }
+        end
+      end
+    end
+
+    # Support for extra applications in addition to the user's application is temporary and will go away in the future.
+    def link_extra_applications
+      if extra_applications_directory.exist?
+        extra_applications = ContainerUtils.relative_paths(@app_dir, extra_applications_directory.children) { |file| file.directory? }
+
+        if extra_applications
+          FileUtils.mkdir_p webapps
+          extra_applications.each { |extra_application| FileUtils.ln_sf(File.join('..', '..', extra_application), webapps) }
+        end
+      end
     end
 
     def link_libs
@@ -126,7 +162,18 @@ module JavaBuildpack::Container
 
       if libs
         FileUtils.mkdir_p(web_inf_lib) unless web_inf_lib.exist?
-        libs.each { |lib| shell "ln -sfn #{File.join '..', '..', lib} #{web_inf_lib}" }
+        libs.each { |lib| FileUtils.ln_sf(File.join('..', '..', lib), web_inf_lib) }
+      end
+    end
+
+    def link_tomcat_datasource
+      tomcat_datasource_jar = tomcat_lib + TOMCAT_DATASOURCE_JAR
+      if tomcat_datasource_jar.exist?
+        # Link Tomcat datasource JAR into .lib
+        lib_directory_pathname = Pathname.new(@lib_directory)
+        symlink_source = tomcat_datasource_jar.relative_path_from(lib_directory_pathname)
+        symlink_target = lib_directory_pathname + TOMCAT_DATASOURCE_JAR
+        symlink_target.make_symlink symlink_source
       end
     end
 
@@ -135,11 +182,15 @@ module JavaBuildpack::Container
     end
 
     def support_jar_name
-      "#{support_id @support_version}.jar"
+      "tomcat-buildpack-support-#{@support_version}.jar"
     end
 
     def tomcat_home
       @application.component_directory 'tomcat'
+    end
+
+    def tomcat_lib
+      tomcat_home + 'lib'
     end
 
     def webapps

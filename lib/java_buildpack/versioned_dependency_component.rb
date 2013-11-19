@@ -35,20 +35,12 @@ module JavaBuildpack
     #
     # @return [Array<String>, String, nil] If the component should be used when staging the application, a +String+ or
     #                                      an +Array<String>+ that uniquely identifies the component (e.g.
-    #                                      +openjdk-1.7.0_40+).  Otherwise, +nil+.
+    #                                      +openjdk=1.7.0_40+).  Otherwise, +nil+.
     def detect
       @version ? id(@version) : nil
     end
 
     protected
-
-    # The unique indentifier of the component, incorporating the version of the dependency (e.g. +openjdk-1.7.0_40+)
-    #
-    # @param [String] version the version of the dependency
-    # @return [String] the unique identifier of the component
-    def id(version)
-      fail "Method 'id(version)' must be defined"
-    end
 
     # Whether or not this component supports this application
     #
@@ -74,6 +66,38 @@ module JavaBuildpack
     # @param [String] description an optional description for the download.  Defaults to +@component_name+.
     def download_jar(jar_name, target_directory = @lib_directory, description = @component_name)
       download(description) { |file| shell "cp #{file.path} #{File.join(target_directory, jar_name)}" }
+    end
+
+    # Downloads a given ZIP file and expands it to a given destination.
+    #
+    # @param [String] target_directory the path of the directory into which to expand the item
+    # @param [Boolean] strip_top_level_directory Whether to strip the top-level directory when expanding. Defaults to +true+.
+    # @param [String] description an optional description for the download and expansion.  Defaults to +@component_name+.
+    def download_zip(target_directory, strip_top_level_directory = true, description = @component_name)
+      download(description) do |file|
+        expand_start_time = Time.now
+        print "       Expanding #{description} to #{target_directory} "
+
+        FileUtils.rm_rf target_directory
+        FileUtils.mkdir_p File.dirname(target_directory)
+
+        if strip_top_level_directory
+          Dir.mktmpdir do |root|
+            shell "unzip -qq #{file.path} -d #{root} 2>&1"
+            shell "mv #{root}/$(ls #{root}) #{target_directory}"
+          end
+        else
+          shell "unzip -qq #{file.path} -d #{target_directory} 2>&1"
+        end
+
+        puts "(#{(Time.now - expand_start_time).duration})"
+      end
+    end
+
+    private
+
+    def id(version)
+      "#{@parsable_component_name}=#{version}"
     end
 
   end

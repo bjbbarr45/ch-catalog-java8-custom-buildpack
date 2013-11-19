@@ -60,16 +60,19 @@ module JavaBuildpack::Util
     #                    deleted while it is being used, the cached item can only be accessed as part of a block.
     # @return [void]
     def get(uri)
-      internet_up = DownloadCache.internet_available? uri, @logger
-
       filenames = filenames(uri)
+
       File.open(filenames[:lock], File::CREAT) do |lock_file|
         lock_file.flock(File::LOCK_EX)
 
-        if internet_up && should_update(filenames)
-          update(filenames, uri)
-        elsif should_download(filenames)
-          download(filenames, uri, internet_up)
+        internet_up, file_downloaded = DownloadCache.internet_available?(filenames, uri, @logger)
+
+        unless file_downloaded
+          if internet_up && should_update(filenames)
+            update(filenames, uri)
+          elsif should_download(filenames)
+            download(filenames, uri, internet_up)
+          end
         end
 
         lock_file.flock(File::LOCK_SH)
@@ -102,10 +105,17 @@ module JavaBuildpack::Util
 
     HTTP_ERRORS = [
         EOFError,
+        Errno::ECONNABORTED,
         Errno::ECONNREFUSED,
         Errno::ECONNRESET,
+        Errno::EHOSTDOWN,
         Errno::EHOSTUNREACH,
         Errno::EINVAL,
+        Errno::ENETDOWN,
+        Errno::ENETRESET,
+        Errno::ENETUNREACH,
+        Errno::ENONET,
+        Errno::ENOTCONN,
         Errno::EPIPE,
         Errno::ETIMEDOUT,
         Net::HTTPBadResponse,
@@ -128,13 +138,13 @@ module JavaBuildpack::Util
 
     TIMEOUT_SECONDS = 10
 
-    def self.internet_available?(uri, logger)
+    def self.internet_available?(filenames, uri, logger)
       @@monitor.synchronize do
-        return @@internet_up if @@internet_checked
+        return @@internet_up, false if @@internet_checked # rubocop:disable RedundantReturn
       end
       cache_configuration = get_configuration
       if cache_configuration['remote_downloads'] == 'disabled'
-        store_internet_availability false
+        return store_internet_availability(false), false # rubocop:disable RedundantReturn
       elsif cache_configuration['remote_downloads'] == 'enabled'
         begin
           rich_uri = URI(uri)
@@ -144,12 +154,13 @@ module JavaBuildpack::Util
             request = Net::HTTP::Get.new(uri)
             http.request request do |response|
               internet_up = response.code == HTTP_OK
-              store_internet_availability internet_up
+              write_response(filenames, response) if internet_up
+              return store_internet_availability(internet_up), internet_up # rubocop:disable RedundantReturn
             end
           end
         rescue *HTTP_ERRORS => ex
           logger.debug { "Internet detection failed with #{ex}" }
-          store_internet_availability false
+          return store_internet_availability(false), false # rubocop:disable RedundantReturn
         end
       else
         fail "Invalid remote_downloads property in cache configuration: #{cache_configuration}"
@@ -164,6 +175,12 @@ module JavaBuildpack::Util
       internet_up
     end
 
+    def self.clear_internet_availability
+      @@monitor.synchronize do
+        @@internet_checked = false
+      end
+    end
+
     def delete_file(filename)
       File.delete filename if File.exists? filename
     end
@@ -173,10 +190,10 @@ module JavaBuildpack::Util
         begin
           rich_uri = URI(uri)
 
-          Net::HTTP.start(rich_uri.host, rich_uri.port, use_ssl: use_ssl?(rich_uri)) do |http|
+          Net::HTTP.start(rich_uri.host, rich_uri.port, use_ssl: DownloadCache.use_ssl?(rich_uri)) do |http|
             request = Net::HTTP::Get.new(uri)
             http.request request do |response|
-              write_response(filenames, response)
+              DownloadCache.write_response(filenames, response)
             end
           end
 
@@ -218,7 +235,7 @@ module JavaBuildpack::Util
       end
     end
 
-    def persist_header(response, header, filename)
+    def self.persist_header(response, header, filename)
       unless response[header].nil?
         File.open(filename, File::CREAT | File::WRONLY) do |file|
           file.write(response[header])
@@ -246,13 +263,13 @@ module JavaBuildpack::Util
     def update(filenames, uri)
       rich_uri = URI(uri)
 
-      Net::HTTP.start(rich_uri.host, rich_uri.port, use_ssl: use_ssl?(rich_uri)) do |http|
+      Net::HTTP.start(rich_uri.host, rich_uri.port, use_ssl: DownloadCache.use_ssl?(rich_uri)) do |http|
         request = Net::HTTP::Get.new(uri)
         set_header request, 'If-None-Match', filenames[:etag]
         set_header request, 'If-Modified-Since', filenames[:last_modified]
 
         http.request request do |response|
-          write_response(filenames, response) unless response.code == '304'
+          DownloadCache.write_response(filenames, response) unless response.code == '304'
         end
       end
 
@@ -260,11 +277,11 @@ module JavaBuildpack::Util
       @logger.warn "Unable to update from #{uri} due to #{ex}. Using cached version."
     end
 
-    def use_ssl?(uri)
+    def self.use_ssl?(uri)
       uri.scheme == 'https'
     end
 
-    def write_response(filenames, response)
+    def self.write_response(filenames, response)
       persist_header response, 'Etag', filenames[:etag]
       persist_header response, 'Last-Modified', filenames[:last_modified]
 

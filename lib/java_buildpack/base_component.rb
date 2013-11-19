@@ -16,6 +16,7 @@
 
 require 'java_buildpack'
 require 'java_buildpack/util/application_cache'
+require 'java_buildpack/util/library_utils'
 require 'java_buildpack/util/shell'
 
 module JavaBuildpack
@@ -32,12 +33,15 @@ module JavaBuildpack
 
     # Creates an instance.  The contents of +context+ are assigned to instance variables matching their keys.
     # +component_name+ and +context+ are exposed via +@component_name+ and +@context+ respectively for any component
-    # that wishes to use them.
+    # that wishes to use them.  An additional +@parsable_component_name+ is exposed that is a lowercased and space-
+    # removed version of +component_name+.
     #
     # @param [String] component_name The name of the component
     # @param [Hash] context A shared context provided to all components
     def initialize(component_name, context)
       @component_name = component_name
+      @parsable_component_name = component_name.gsub(/ /, '-').downcase
+
       @context = context
       @context.each { |key, value| instance_variable_set("@#{key}", value) }
     end
@@ -46,7 +50,7 @@ module JavaBuildpack
     #
     # @return [Array<String>, String, nil] If the component should be used when staging the application, a +String+ or
     #                                      an +Array<String>+ that uniquely identifies the component (e.g.
-    #                                      +openjdk-1.7.0_40+).  Otherwise, +nil+.
+    #                                      +openjdk=1.7.0_40+).  Otherwise, +nil+.
     def detect
       fail "Method 'detect' must be defined"
     end
@@ -67,7 +71,7 @@ module JavaBuildpack
     # are expected to read the +context+ values and take them into account when creating the command.
     #
     # @return [void, String] components other than containers are not expected to return any value.  Container
-    #                        compoonents are expected to return the command required to run the application.
+    #                        components are expected to return the command required to run the application.
     def release
       fail "Method 'release' must be defined"
     end
@@ -101,6 +105,13 @@ module JavaBuildpack
     # @param [String] description an optional description for the download.  Defaults to +@component_name+.
     def download_jar(version, uri, jar_name, target_directory = @lib_directory, description = @component_name)
       download(version, uri, description) { |file| shell "cp #{file.path} #{File.join(target_directory, jar_name)}" }
+    end
+
+    # Returns the additional libraries.
+    #
+    # @param [Array<String>] the paths of JARs in the additional libraries directory
+    def additional_libraries
+      JavaBuildpack::Util::LibraryUtils.lib_jars @lib_directory
     end
 
   end

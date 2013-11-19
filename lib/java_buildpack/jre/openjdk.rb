@@ -18,8 +18,6 @@ require 'fileutils'
 require 'java_buildpack/diagnostics/common'
 require 'java_buildpack/jre'
 require 'java_buildpack/jre/memory/openjdk_memory_heuristic_factory'
-require 'java_buildpack/repository/configured_item'
-require 'java_buildpack/util/application_cache'
 require 'java_buildpack/util/format_duration'
 require 'java_buildpack/util/resource_utils'
 require 'java_buildpack/versioned_dependency_component'
@@ -33,7 +31,7 @@ module JavaBuildpack::Jre
     KILLJAVA_FILE_NAME = 'killjava'.freeze
 
     def initialize(context)
-      super('OpenJDK JRE', context)
+      super('OpenJDK', context)
       @java_home.concat JAVA_HOME
     end
 
@@ -49,10 +47,6 @@ module JavaBuildpack::Jre
     end
 
     protected
-
-    def id(version)
-      "openjdk-#{version}"
-    end
 
     def supports?
       true

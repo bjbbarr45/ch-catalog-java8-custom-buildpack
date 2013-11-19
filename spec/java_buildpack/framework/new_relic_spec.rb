@@ -43,7 +43,7 @@ module JavaBuildpack::Framework
           vcap_services: vcap_services
       ).detect
 
-      expect(detected).to eq('new-relic-2.21.2')
+      expect(detected).to eq('new-relic-agent=2.21.2')
     end
 
     it 'should not detect without newrelic-n/a service' do
@@ -79,7 +79,7 @@ module JavaBuildpack::Framework
       end.to raise_error
     end
 
-    it 'should copy additional libraries to the lib directory' do
+    it 'should download New Relic agent JAR' do
       Dir.mktmpdir do |root|
         JavaBuildpack::Repository::ConfiguredItem.stub(:find_item).and_return(NEW_RELIC_DETAILS)
         JavaBuildpack::Util::ApplicationCache.stub(:new).and_return(application_cache)
@@ -91,7 +91,7 @@ module JavaBuildpack::Framework
             vcap_services: vcap_services
         ).compile
 
-        expect(File.exists? File.join(root, '.new-relic', 'new-relic-2.21.2.jar')).to be_true
+        expect(File.exists? File.join(root, '.new-relic', 'new-relic-agent-2.21.2.jar')).to be_true
       end
     end
 
@@ -123,7 +123,7 @@ module JavaBuildpack::Framework
           vcap_services: vcap_services
       ).release
 
-      expect(java_opts).to include('-javaagent:.new-relic/new-relic-2.21.2.jar')
+      expect(java_opts).to include('-javaagent:.new-relic/new-relic-agent-2.21.2.jar')
       expect(java_opts).to include('-Dnewrelic.home=.new-relic')
       expect(java_opts).to include('-Dnewrelic.config.license_key=test-license-key')
       expect(java_opts).to include("-Dnewrelic.config.app_name='test-application-name'")

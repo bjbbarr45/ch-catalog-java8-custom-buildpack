@@ -15,7 +15,6 @@
 # limitations under the License.
 
 require 'java_buildpack/framework'
-require 'java_buildpack/util/application_cache'
 require 'java_buildpack/util/resource_utils'
 require 'java_buildpack/util/service_utils'
 require 'java_buildpack/versioned_dependency_component'
@@ -48,10 +47,6 @@ module JavaBuildpack::Framework
 
     protected
 
-    def id(version)
-      "new-relic-#{version}"
-    end
-
     def supports?
       JavaBuildpack::Util::ServiceUtils.find_service(@vcap_services, SERVICE_NAME)
     end
@@ -65,7 +60,7 @@ module JavaBuildpack::Framework
     SERVICE_NAME = /newrelic/.freeze
 
     def jar_name
-      "#{id @version}.jar"
+      "#{@parsable_component_name}-#{@version}.jar"
     end
 
     def license_key

@@ -25,10 +25,12 @@ The buildpack supports configuration and extension through the use of Git reposi
 	* [Tomcat](docs/container-tomcat.md) ([Configuration](docs/container-tomcat.md#configuration))
 * Standard Frameworks
 	* [`JAVA_OPTS`](docs/framework-java_opts.md) ([Configuration](docs/framework-java_opts.md#configuration))
+	* [AppDynamics](docs/framework-app-dynamics.md) ([Configuration](docs/framework-app-dynamics.md#configuration))
 	* [New Relic](docs/framework-new-relic.md) ([Configuration](docs/framework-new-relic.md#configuration))
 	* [Play Auto Reconfiguration](docs/framework-play-auto-reconfiguration.md) ([Configuration](docs/framework-play-auto-reconfiguration.md#configuration))
 	* [Play JPA Plugin](docs/framework-play-jpa-plugin.md) ([Configuration](docs/framework-play-jpa-plugin.md#configuration))
 	* [Spring Auto Reconfiguration](docs/framework-spring-auto-reconfiguration.md) ([Configuration](docs/framework-spring-auto-reconfiguration.md#configuration))
+	* [Spring Insight](docs/framework-spring-insight.md) ([Configuration](docs/framework-spring-insight.md#configuration))
 * Standard JREs
 	* [OpenJDK](docs/jre-openjdk.md) ([Configuration](docs/jre-openjdk.md#configuration))
 * [Extending](docs/extending.md)
@@ -39,6 +41,7 @@ The buildpack supports configuration and extension through the use of Git reposi
 	* [Other Utiltities](docs/util-other.md)
 	* [Repository Builder](docs/util-repository-builder.md)
 	* [Test Applications](docs/util-test-applications.md)
+	* [System Tests](docs/util-system-tests.md)
 
 ## Running Tests
 To run the tests, do the following:

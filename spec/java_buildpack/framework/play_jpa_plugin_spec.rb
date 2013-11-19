@@ -40,7 +40,7 @@ module JavaBuildpack::Framework
           configuration: {}
       ).detect
 
-      expect(detected).to eq('play-jpa-plugin-0.7.1')
+      expect(detected).to eq('play-jpa-plugin=0.7.1')
     end
 
     it 'should detect staged application' do
@@ -51,7 +51,7 @@ module JavaBuildpack::Framework
           configuration: {}
       ).detect
 
-      expect(detected).to eq('play-jpa-plugin-0.7.1')
+      expect(detected).to eq('play-jpa-plugin=0.7.1')
     end
 
     it 'should detect dist application' do
@@ -62,14 +62,14 @@ module JavaBuildpack::Framework
           configuration: {}
       ).detect
 
-      expect(detected).to eq('play-jpa-plugin-0.7.1')
+      expect(detected).to eq('play-jpa-plugin=0.7.1')
     end
 
     it 'should not detect non-JPA application' do
       JavaBuildpack::Repository::ConfiguredItem.stub(:find_item).and_return(DETAILS)
 
       detected = PlayJpaPlugin.new(
-          app_dir: 'spec/fixtures/container_play',
+          app_dir: 'spec/fixtures/container_play_2.1_dist',
           configuration: {}
       ).detect
 
@@ -91,7 +91,7 @@ module JavaBuildpack::Framework
             configuration: {}
         ).compile
 
-        expect(File.exists? File.join(lib_directory, 'play-jpa-plugin-0.7.1.jar')).to be_true
+        expect(File.exists? File.join(lib_directory, 'play-jpa-plugin=0.7.1.jar')).to be_true
       end
     end
 

@@ -18,7 +18,6 @@ require 'java_buildpack/base_component'
 require 'java_buildpack/container'
 require 'java_buildpack/container/container_utils'
 require 'java_buildpack/util/java_main_utils'
-require 'java_buildpack/util/properties'
 
 module JavaBuildpack::Container
 
@@ -32,7 +31,7 @@ module JavaBuildpack::Container
     end
 
     def detect
-      main_class ? id : nil
+      main_class ? @parsable_component_name : nil
     end
 
     def compile
@@ -67,10 +66,6 @@ module JavaBuildpack::Container
       "-cp #{classpath.join(':')}"
     end
 
-    def id
-      'java-main'
-    end
-
     def main_class
       JavaBuildpack::Util::JavaMainUtils.main_class(@app_dir, @configuration)
     end
@@ -81,7 +76,7 @@ module JavaBuildpack::Container
     end
 
     def port
-      main_class =~ /^org\.springframework\.boot\.loader\.[JW]arLauncher$/ ? '--server.port=$PORT' : nil
+      main_class =~ /^org\.springframework\.boot\.loader\.(?:[JW]ar|Properties)Launcher$/ ? '--server.port=$PORT' : nil
     end
 
   end
