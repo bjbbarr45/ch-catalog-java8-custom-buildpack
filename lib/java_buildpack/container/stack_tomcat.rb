@@ -71,6 +71,8 @@ module JavaBuildpack::Container
 
     def release
       @java_opts << "-D#{KEY_HTTP_PORT}=$PORT"
+      #Set timezone for stack-tomcat to Mountain by default
+      @java_opts << "-Duser.timezone=America/Denver"
 
       java_home_string = "JAVA_HOME=#{@java_home}"
       java_opts_string = ContainerUtils.space("JAVA_OPTS=\"#{ContainerUtils.to_java_opts_s(@java_opts)}\"")
