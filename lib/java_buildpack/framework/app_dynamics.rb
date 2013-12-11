@@ -32,12 +32,14 @@ module JavaBuildpack::Framework
       FileUtils.rm_rf app_dynamics_home
       FileUtils.mkdir_p app_dynamics_home
       download_zip app_dynamics_home, false
+      sm_credentials = JavaBuildpack::Util::ServiceUtils.find_service(@vcap_services, SM_SERVICE_NAME)['credentials']
+      puts "sm credentials = #{sm_credentials}"
+      STDOUT.flush
     end
 
     def release
       credentials = JavaBuildpack::Util::ServiceUtils.find_service(@vcap_services, SERVICE_NAME)['credentials']
       sm_credentials = JavaBuildpack::Util::ServiceUtils.find_service(@vcap_services, SM_SERVICE_NAME)['credentials']
-      puts "sm credentials = #{sm_credentials}"
         
       @java_opts << "-javaagent:#{@application.relative_path_to(app_dynamics_home) + 'javaagent.jar'}"
       @java_opts << host_name(credentials)
@@ -49,8 +51,6 @@ module JavaBuildpack::Framework
       @java_opts << "-Dappdynamics.agent.reuse.nodeName.prefix='#{credentials['node_name_prefix']}#{@vcap_application[KEY_NAME]}'"
       @java_opts << account_name(credentials)
       @java_opts << account_access_key(credentials)
-      puts "Finished app dynamics.  #{@java_opts}"
-      STDOUT.flush
     end
 
     protected
