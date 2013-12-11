@@ -25,7 +25,7 @@ module JavaBuildpack::Framework
   class AppDynamics < JavaBuildpack::VersionedDependencyComponent
 
     def initialize(context)
-      super('ICS AppDynamics Agent', context)
+      super('AppDynamics Agent', context)
     end
 
     def compile
@@ -45,7 +45,7 @@ module JavaBuildpack::Framework
       @java_opts << "-Dappdynamics.agent.applicationName='#{sm_credentials['smData']['PortfolioId']}'"
       @java_opts << "-Dappdynamics.agent.tierName='#{sm_credentials['smData']['CIName']}'"
       @java_opts << "-Dappdynamics.agent.reuse.nodeName=true"
-      @java_opts << "-Dappdynamics.agent.reuse.nodeName.prefix='#{credentials['node_name_prefix']}#{@vcap_application[KEY_NAME]}')"
+      @java_opts << "-Dappdynamics.agent.reuse.nodeName.prefix='#{credentials['node_name_prefix']}#{@vcap_application[KEY_NAME]}'"
       @java_opts << account_name(credentials)
       @java_opts << account_access_key(credentials)
     end
