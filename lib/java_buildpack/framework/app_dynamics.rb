@@ -25,7 +25,7 @@ module JavaBuildpack::Framework
   class AppDynamics < JavaBuildpack::VersionedDependencyComponent
 
     def initialize(context)
-      super('AppDynamics Agent', context)
+      super('ICS AppDynamics Agent', context)
     end
 
     def compile
@@ -36,14 +36,16 @@ module JavaBuildpack::Framework
 
     def release
       credentials = JavaBuildpack::Util::ServiceUtils.find_service(@vcap_services, SERVICE_NAME)['credentials']
-
+      sm_credentials = JavaBuildpack::Util::ServiceUtils.find_service(@vcap_services, SM_SERVICE_NAME)['credentials']
+        
       @java_opts << "-javaagent:#{@application.relative_path_to(app_dynamics_home) + 'javaagent.jar'}"
       @java_opts << host_name(credentials)
       @java_opts << port(credentials)
       @java_opts << ssl_enabled(credentials)
-      @java_opts << "-Dappdynamics.agent.applicationName='#{@vcap_application[KEY_NAME]}'"
-      @java_opts << "-Dappdynamics.agent.tierName='#{@configuration['tier_name']}'"
-      @java_opts << "-Dappdynamics.agent.nodeName=$(expr \"$VCAP_APPLICATION\" : '.*instance_id[\": ]*\"\\([a-z0-9]\\+\\)\".*')"
+      @java_opts << "-Dappdynamics.agent.applicationName='#{sm_credentials['smData']['PortfolioId']}'"
+      @java_opts << "-Dappdynamics.agent.tierName='#{sm_credentials['smData']['CIName']}'"
+      @java_opts << "-Dappdynamics.agent.reuse.nodeName=true"
+      @java_opts << "-Dappdynamics.agent.reuse.nodeName.prefix='#{credentials['node_name_prefix']}#{@vcap_application[KEY_NAME]}')"
       @java_opts << account_name(credentials)
       @java_opts << account_access_key(credentials)
     end
@@ -69,6 +71,8 @@ module JavaBuildpack::Framework
     KEY_SSL_ENABLED = 'ssl-enabled'.freeze
 
     SERVICE_NAME = /app-dynamics/.freeze
+
+    SM_SERVICE_NAME = /servicemanager-service/.freeze
 
     def account_access_key(credentials)
       account_access_key = credentials[KEY_ACCOUNT_ACCESS_KEY]
