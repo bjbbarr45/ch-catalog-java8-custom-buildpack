@@ -52,7 +52,8 @@ module JavaBuildpack::Framework
     protected
 
     def supports?
-      JavaBuildpack::Util::ServiceUtils.find_service(@vcap_services, SERVICE_NAME)
+      !JavaBuildpack::Util::ServiceUtils.find_service(@vcap_services, SERVICE_NAME).nil? &&
+        !JavaBuildpack::Util::ServiceUtils.find_service(@vcap_services, SM_SERVICE_NAME).nil? 
     end
 
     private
