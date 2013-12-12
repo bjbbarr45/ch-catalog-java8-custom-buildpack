@@ -44,8 +44,7 @@ module JavaBuildpack::Framework
       @java_opts << ssl_enabled(credentials)
       @java_opts << "-Dappdynamics.agent.applicationName='#{sm_credentials['smData']['PortfolioId']}'"
       @java_opts << "-Dappdynamics.agent.tierName='#{sm_credentials['smData']['CIName']}'"
-      @java_opts << "-Dappdynamics.agent.reuse.nodeName=true"
-      @java_opts << "-Dappdynamics.agent.reuse.nodeName.prefix='#{credentials['node-name-prefix']}#{@vcap_application[KEY_NAME]}'"
+      @java_opts << "-Dappdynamics.agent.nodeName='#{credentials['node-name-prefix']}#{@vcap_application[KEY_NAME]}-$(expr \"$VCAP_APPLICATION\" : '.*instance_id[\": ]*\"\\([a-z0-9]\\+\\)\".*')'"
       @java_opts << account_name(credentials)
       @java_opts << account_access_key(credentials)
     end
