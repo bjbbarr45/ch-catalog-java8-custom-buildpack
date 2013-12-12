@@ -44,7 +44,7 @@ module JavaBuildpack::Framework
       @java_opts << ssl_enabled(credentials)
       @java_opts << "-Dappdynamics.agent.applicationName='#{sm_credentials['smData']['PortfolioId']}'"
       @java_opts << "-Dappdynamics.agent.tierName='#{sm_credentials['smData']['CIName']}'"
-      @java_opts << "-Dappdynamics.agent.nodeName='#{credentials['node-name-prefix']}#{@vcap_application[KEY_NAME]}-$(date \"+%Y/%m/%d %H:%M:%S\")-$(expr \"$VCAP_APPLICATION\" : '.*instance_id[\": ]*\"\\([a-z0-9]\\+\\)\".*')'"
+      @java_opts << "-Dappdynamics.agent.nodeName='#{credentials['node-name-prefix']}#{@vcap_application[KEY_NAME]}[$(expr \"$VCAP_APPLICATION\" : '.*instance_index[\": ]*\\([0-9]\\+\\).*')] $(date \"+%Y/%m/%d %H:%M:%S\" --date=\"$(expr \"$VCAP_APPLICATION\" : '.*started_at[\": ]*\"\\([^\"]\\+\\)\".*')\") $(expr \"$VCAP_APPLICATION\" : '.*instance_id[\": ]*\"\\([a-z0-9]\\+\\)\".*')'"
       @java_opts << account_name(credentials)
       @java_opts << account_access_key(credentials)
     end
