@@ -45,14 +45,14 @@ module JavaBuildpack::Framework
     # @return [void]
     def compile
       install_httpproxy_agent
-      add_httpproxy_script
+      #add_httpproxy_script
     end
 
     # Add $HTTPPROXY_OPTS to the start command if it gets set
     #
     # @return [void]
     def release
-      @java_opts.concat ["$HTTPPROXY_OPTS"]
+      @java_opts.concat ["$(eval 'if [ -n \"$http_proxy\" ] || [ -n \"$https_proxy\" ]; then  echo \"#{httpproxy_opts}\"; fi')"]
     end
 
     private
