@@ -45,7 +45,6 @@ module JavaBuildpack::Framework
     # @return [void]
     def compile
       install_httpproxy_agent
-      #add_httpproxy_script
     end
 
     # Add $HTTPPROXY_OPTS to the start command if it gets set
@@ -74,19 +73,6 @@ module JavaBuildpack::Framework
         FileUtils.mkdir_p(agent_dir)
         file_path = File.join(buildpack_cache_dir, HTTPPROXY_PACKAGE)
         FileUtils.cp(file_path, File.join(agent_dir, HTTPPROXY_PACKAGE))
-      end
-      
-      def add_httpproxy_script
-        FileUtils.mkdir_p(File.join(@app_dir, ".profile.d"))
-        File.open(File.join(@app_dir, ".profile.d", "httpproxy_opts.sh"), "a") do |file|
-          file.puts(
-            <<-HTTPPROXY_BASH
-if [ -n "$http_proxy" ] || [ -n "$https_proxy" ] ; then
-  export HTTPPROXY_OPTS="#{httpproxy_opts}"
-fi
-               HTTPPROXY_BASH
-          )
-        end
       end
       
       def httpproxy_opts

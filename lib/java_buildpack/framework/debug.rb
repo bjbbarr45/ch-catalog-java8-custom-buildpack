@@ -44,14 +44,14 @@ module JavaBuildpack::Framework
     #
     # @return [void]
     def compile
-      add_debug_script
+      #add_debug_script
     end
 
     # Append the $DEBUG_OPTS environment variable to the command if it gets set.
     #
     # @return [void]
     def release
-      @java_opts.concat ["$DEBUG_OPTS"]
+      @java_opts.concat ["$(eval 'if [ -n \"$VCAP_DEBUG_MODE\" ]; then if [ \"$VCAP_DEBUG_MODE\" = \"run\" ]; then echo \"#{debug_run_opts}\"; elif [ \"$VCAP_DEBUG_MODE\" = \"suspend\" ]; then echo \"#{debug_suspend_opts}\"; fi fi')"]
     end
 
     private
