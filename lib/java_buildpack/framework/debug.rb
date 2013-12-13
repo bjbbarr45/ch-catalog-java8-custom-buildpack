@@ -44,7 +44,6 @@ module JavaBuildpack::Framework
     #
     # @return [void]
     def compile
-      #add_debug_script
     end
 
     # Append the $DEBUG_OPTS environment variable to the command if it gets set.
@@ -58,23 +57,6 @@ module JavaBuildpack::Framework
 
       CONTAINER_NAME = 'debug'.freeze
 
-      def add_debug_script
-        FileUtils.mkdir_p(File.join(@app_dir, ".profile.d"))
-        File.open(File.join(@app_dir, ".profile.d", "debug_opts.sh"), "a") do |file|
-          file.puts(
-            <<-DEBUG_BASH
-if [ -n "$VCAP_DEBUG_MODE" ]; then
-  if [ "$VCAP_DEBUG_MODE" = "run" ]; then
-    export DEBUG_OPTS="#{debug_run_opts}"
-  elif [ "$VCAP_DEBUG_MODE" = "suspend" ]; then
-    export DEBUG_OPTS="#{debug_suspend_opts}"
-  fi
-fi
-               DEBUG_BASH
-          )
-        end
-      end
-      
       def debug_run_opts
         "-Xdebug -Xrunjdwp:transport=dt_socket,address=$VCAP_DEBUG_PORT,server=y,suspend=n"
       end
