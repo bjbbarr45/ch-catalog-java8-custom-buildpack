@@ -45,14 +45,13 @@ module JavaBuildpack::Framework
     # @return [void]
     def compile
       install_jmxmp_agent
-      add_jmx_script
     end
 
     # Add $JMX_OPTS to the start command if it gets set
     #
     # @return [void]
     def release
-      @java_opts.concat ["$JMX_OPTS"]
+      @java_opts.concat ["export dude2=$(eval 'if [ -n \"$VCAP_CONSOLE_PORT\" ]; then echo \"#{jmx_opts}\"; fi')"]
     end
 
     private
@@ -74,19 +73,6 @@ module JavaBuildpack::Framework
         FileUtils.mkdir_p(agent_dir)
         file_path = File.join(buildpack_cache_dir, JMXMP_PACKAGE)
         FileUtils.cp(file_path, File.join(agent_dir, JMXMP_PACKAGE))
-      end
-      
-      def add_jmx_script
-        FileUtils.mkdir_p(File.join(@app_dir, ".profile.d"))
-        File.open(File.join(@app_dir, ".profile.d", "jmx_opts.sh"), "a") do |file|
-          file.puts(
-            <<-JMX_BASH
-if [ -n "$VCAP_CONSOLE_PORT" ]; then
-  export JMX_OPTS="#{jmx_opts}"
-fi
-               JMX_BASH
-          )
-        end
       end
       
       def jmx_opts
