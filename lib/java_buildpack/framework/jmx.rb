@@ -51,7 +51,7 @@ module JavaBuildpack::Framework
     #
     # @return [void]
     def release
-      @java_opts.concat ["export dude2=$(eval 'if [ -n \"$VCAP_CONSOLE_PORT\" ]; then echo \"#{jmx_opts}\"; fi')"]
+      @java_opts.concat ["$(eval 'if [ -n \"$VCAP_CONSOLE_PORT\" ]; then echo \"#{jmx_opts}\"; fi')"]
     end
 
     private
