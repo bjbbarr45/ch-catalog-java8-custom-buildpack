@@ -93,6 +93,11 @@ module JavaBuildpack::Framework
       account_name = credentials[KEY_ACCOUNT_NAME]
       "-Dappdynamics.agent.accountName=#{account_name}" if account_name
     end
+    
+    #TODO add support for proper remote download
+    def buildpack_cache_dir
+      "/var/vcap/packages/buildpack_cache"
+    end
 
     def app_dynamics_home
       @application.component_directory 'app-dynamics'
