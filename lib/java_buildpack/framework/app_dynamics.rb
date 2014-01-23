@@ -116,7 +116,7 @@ module JavaBuildpack::Framework
     
     def install_pre_and_post_agents
       FileUtils.mkdir_p(app_dynamics_home)
-      file__pre_path = File.join(buildpack_cache_dir, APP_DYNAMICS_HACK_PRE_PACKAGE)
+      file_pre_path = File.join(buildpack_cache_dir, APP_DYNAMICS_HACK_PRE_PACKAGE)
       FileUtils.cp(file_pre_path, File.join(app_dynamics_home, APP_DYNAMICS_HACK_PRE_PACKAGE))
       file_post_path = File.join(buildpack_cache_dir, APP_DYNAMICS_HACK_POST_PACKAGE)
       FileUtils.cp(file_post_path, File.join(app_dynamics_home, APP_DYNAMICS_HACK_POST_PACKAGE))
