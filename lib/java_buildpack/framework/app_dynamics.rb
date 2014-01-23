@@ -123,7 +123,6 @@ module JavaBuildpack::Framework
       FileUtils.cp(file_post_path, File.join(app_dynamics_home, APP_DYNAMICS_HACK_POST_PACKAGE))
     end
 
-
   end
 
 end
