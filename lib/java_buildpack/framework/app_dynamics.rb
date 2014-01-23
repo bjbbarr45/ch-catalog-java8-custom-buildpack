@@ -32,7 +32,9 @@ module JavaBuildpack::Framework
       FileUtils.rm_rf app_dynamics_home
       FileUtils.mkdir_p app_dynamics_home
       download_zip app_dynamics_home, false
+      print "       Installing Pre and Post Agents"
       install_pre_and_post_agents
+      print "       Copying app-dynamics resources"
       JavaBuildpack::Util::ResourceUtils.copy_resources('app-dynamics', app_dynamics_home)
     end
 
