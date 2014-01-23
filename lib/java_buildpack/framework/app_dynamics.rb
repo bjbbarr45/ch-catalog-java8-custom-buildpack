@@ -40,9 +40,7 @@ module JavaBuildpack::Framework
       credentials = JavaBuildpack::Util::ServiceUtils.find_service(@vcap_services, SERVICE_NAME)['credentials']
       sm_credentials = JavaBuildpack::Util::ServiceUtils.find_service(@vcap_services, SM_SERVICE_NAME)['credentials']
       
-      @java_opts << "-javaagent:#{@application.relative_path_to(app_dynamics_home) + APP_DYNAMICS_HACK_PRE_PACKAGE}"  
-      @java_opts << "-javaagent:#{@application.relative_path_to(app_dynamics_home) + 'javaagent.jar'}"
-      @java_opts << "-javaagent:#{@application.relative_path_to(app_dynamics_home) + APP_DYNAMICS_HACK_POST_PACKAGE}"
+      @java_opts << "-javaagent:#{@application.relative_path_to(app_dynamics_home) + APP_DYNAMICS_HACK_PRE_PACKAGE} -javaagent:#{@application.relative_path_to(app_dynamics_home) + 'javaagent.jar'} -javaagent:#{@application.relative_path_to(app_dynamics_home) + APP_DYNAMICS_HACK_POST_PACKAGE}"
       @java_opts << host_name(credentials)
       @java_opts << port(credentials)
       @java_opts << ssl_enabled(credentials)
