@@ -214,9 +214,9 @@
 
                 -->
 
-            	<jmx-mbean-browser-excludes>
-					<exclude object-name="java.lang:type=Runtime" attributes="*"/>
-				</jmx-mbean-browser-excludes>
+                <jmx-mbean-browser-excludes>
+                    <exclude object-name="java.lang:type=Runtime" attributes="*" />
+                </jmx-mbean-browser-excludes>
 
                 <!--
                   Add names of mbeans and attributes that are to be treated as continuosly increasing counters
