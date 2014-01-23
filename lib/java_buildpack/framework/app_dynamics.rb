@@ -32,19 +32,23 @@ module JavaBuildpack::Framework
       FileUtils.rm_rf app_dynamics_home
       FileUtils.mkdir_p app_dynamics_home
       download_zip app_dynamics_home, false
+      install_pre_and_post_agents
+      JavaBuildpack::Util::ResourceUtils.copy_resources('app-dynamics', app_dynamics_home)
     end
 
     def release
       credentials = JavaBuildpack::Util::ServiceUtils.find_service(@vcap_services, SERVICE_NAME)['credentials']
       sm_credentials = JavaBuildpack::Util::ServiceUtils.find_service(@vcap_services, SM_SERVICE_NAME)['credentials']
-        
+      
+      @java_opts << "-javaagent:#{@application.relative_path_to(app_dynamics_home) + APP_DYNAMICS_HACK_PRE_PACKAGE}"  
       @java_opts << "-javaagent:#{@application.relative_path_to(app_dynamics_home) + 'javaagent.jar'}"
+      @java_opts << "-javaagent:#{@application.relative_path_to(app_dynamics_home) + APP_DYNAMICS_HACK_POST_PACKAGE}"
       @java_opts << host_name(credentials)
       @java_opts << port(credentials)
       @java_opts << ssl_enabled(credentials)
       @java_opts << "-Dappdynamics.agent.applicationName='#{sm_credentials['smData']['PortfolioName']}'"
       @java_opts << "-Dappdynamics.agent.tierName='#{sm_credentials['smData']['CIName']}'"
-      @java_opts << "-Dappdynamics.agent.nodeName='[#{credentials['node-name-prefix']}] #{@vcap_application[KEY_NAME]}[$(expr \"$VCAP_APPLICATION\" : '.*instance_index[\": ]*\\([0-9]\\+\\).*')] $(date \"+%Y/%m/%d %H:%M:%S\" --date=\"$(expr \"$VCAP_APPLICATION\" : '.*started_at[\": ]*\"\\([^\"]\\+\\)\".*')\") $(expr \"$VCAP_APPLICATION\" : '.*instance_id[\": ]*\"\\([a-z0-9]\\+\\)\".*')'"
+      @java_opts << "-Dappdynamics.agent.nodeName='#{@vcap_application[KEY_NAME]}[$(expr \"$VCAP_APPLICATION\" : '.*instance_index[\": ]*\\([0-9]\\+\\).*')]-[#{credentials['node-name-prefix']}]'"
       @java_opts << account_name(credentials)
       @java_opts << account_access_key(credentials)
     end
@@ -73,6 +77,10 @@ module JavaBuildpack::Framework
     SERVICE_NAME = /app-dynamics/.freeze
 
     SM_SERVICE_NAME = /servicemanager-service/.freeze
+    
+    APP_DYNAMICS_HACK_PRE_PACKAGE =  "app-dynamics-hack-pre-1.0.jar".freeze
+    
+    APP_DYNAMICS_HACK_POST_PACKAGE =  "app-dynamics-hack-post-1.0.jar".freeze
 
     def account_access_key(credentials)
       account_access_key = credentials[KEY_ACCOUNT_ACCESS_KEY]
@@ -103,6 +111,15 @@ module JavaBuildpack::Framework
       ssl_enabled = credentials[KEY_SSL_ENABLED]
       "-Dappdynamics.controller.ssl.enabled=#{ssl_enabled}" if ssl_enabled
     end
+    
+    def install_pre_and_post_agents
+      FileUtils.mkdir_p(app_dynamics_home)
+      file__pre_path = File.join(buildpack_cache_dir, APP_DYNAMICS_HACK_PRE_PACKAGE)
+      FileUtils.cp(file_pre_path, File.join(app_dynamics_home, APP_DYNAMICS_HACK_PRE_PACKAGE))
+      file_post_path = File.join(buildpack_cache_dir, APP_DYNAMICS_HACK_POST_PACKAGE)
+      FileUtils.cp(file_post_path, File.join(app_dynamics_home, APP_DYNAMICS_HACK_POST_PACKAGE))
+    end
+
 
   end
 
