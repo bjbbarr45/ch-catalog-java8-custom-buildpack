@@ -15,31 +15,22 @@
 # limitations under the License.
 
 require 'spec_helper'
+require 'component_helper'
 require 'java_buildpack/framework/debug'
 
-module JavaBuildpack::Framework
+describe JavaBuildpack::Framework::Debug do
+  include_context 'component_helper'
 
-  describe Debug do
-
-    let(:java_opts) { [] }
-
-    it 'should detect always detect' do
-      detected = Debug.new(
-          java_opts: java_opts,
-          configuration: {}
-      ).detect
-
-      expect(detected).to eq('debug')
-    end
-
-    it 'should add split java_opts to context' do
-      Debug.new(
-          java_opts: java_opts,
-          configuration: {}
-      ).release
-
-      expect(java_opts).to include('$DEBUG_OPTS')
-    end
+  it 'should detect always detect' do
+    expect(component.detect).to eq('debug')
   end
 
+  context do
+    it 'should add split java_opts to context' do
+      component.release
+
+      #We only want to check the opt that we add
+      expect(java_opts.last).to include('$VCAP_DEBUG_PORT')
+    end
+  end
 end

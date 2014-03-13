@@ -14,55 +14,35 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+require 'java_buildpack/component/base_component'
 require 'java_buildpack/framework'
-require 'java_buildpack/base_component'
+require 'java_buildpack/util/dash_case'
 require 'shellwords'
 
 module JavaBuildpack::Framework
 
-  # Encapsulates the detect, compile, and release functionality for contributing custom Java options to an application
-  # at runtime.
-  class Debug < JavaBuildpack::BaseComponent
+  # Encapsulates the functionality for contributing custom Java options to an application.
+  class Debug < JavaBuildpack::Component::BaseComponent
 
-    # Creates an instance, passing in an arbitrary collection of options.
-    #
-    # @param [Hash] context the context that is provided to the instance
-    # @option context [Array<String>] :java_opts an array that Java options can be added to
-    # @option context [Hash] :configuration the properties provided by the user
-    def initialize(context)
-      super('Debug', context)
-    end
-
-    # Always contributes debug info if the app is running in debug mode
-    #
-    # @return [String] returns +java-opts+ if Java options have been set by the user
     def detect
-      CONTAINER_NAME
+      Debug.to_s.dash_case
     end
 
-    # Add the debug_opts script to the droplet
-    #
-    # @return [void]
     def compile
     end
 
-    # Append the $DEBUG_OPTS environment variable to the command if it gets set.
-    #
-    # @return [void]
     def release
-      @java_opts.concat ["$(eval 'if [ -n \"$VCAP_DEBUG_MODE\" ]; then if [ \"$VCAP_DEBUG_MODE\" = \"run\" ]; then echo \"#{debug_run_opts}\"; elif [ \"$VCAP_DEBUG_MODE\" = \"suspend\" ]; then echo \"#{debug_suspend_opts}\"; fi fi')"]
+      @droplet.java_opts.concat ["$(eval 'if [ -n \"$VCAP_DEBUG_MODE\" ]; then if [ \"$VCAP_DEBUG_MODE\" = \"run\" ]; then echo \"#{debug_run_opts}\"; elif [ \"$VCAP_DEBUG_MODE\" = \"suspend\" ]; then echo \"#{debug_suspend_opts}\"; fi fi')"]
     end
-
-    private
-
-      CONTAINER_NAME = 'debug'.freeze
-
-      def debug_run_opts
-        "-Xdebug -Xrunjdwp:transport=dt_socket,address=$VCAP_DEBUG_PORT,server=y,suspend=n"
-      end
     
-      def debug_suspend_opts
-        "-Xdebug -Xrunjdwp:transport=dt_socket,address=$VCAP_DEBUG_PORT,server=y,suspend=y"
-      end
+    private
+  
+    def debug_run_opts
+      "-Xdebug -Xrunjdwp:transport=dt_socket,address=$VCAP_DEBUG_PORT,server=y,suspend=n"
+    end
+  
+    def debug_suspend_opts
+      "-Xdebug -Xrunjdwp:transport=dt_socket,address=$VCAP_DEBUG_PORT,server=y,suspend=y"
+    end
   end
 end
