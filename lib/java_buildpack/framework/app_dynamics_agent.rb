@@ -52,6 +52,7 @@ module JavaBuildpack::Framework
                          'App Dynamics Pre Hack')
       download_jar(@post_version, @post_uri, "app-dynamics-hack-post.jar", @droplet.sandbox,
                          'App Dynamics Post Hack')
+      @droplet.copy_resources
     end
 
     # @macro base_component_release

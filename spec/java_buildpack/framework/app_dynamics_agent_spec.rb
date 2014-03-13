@@ -60,6 +60,14 @@ describe JavaBuildpack::Framework::AppDynamicsAgent do
 
       expect(sandbox + 'javaagent.jar').to exist
     end
+    
+    it 'should copy app dynamics resources',
+       cache_fixture: 'stub-app-dynamics-agent.zip' do
+
+      component.compile
+
+      expect(sandbox + 'conf/app-agent-config.xml').to exist
+    end
 
     context do
 

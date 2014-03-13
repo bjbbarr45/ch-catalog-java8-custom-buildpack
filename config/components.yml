@@ -36,4 +36,4 @@ frameworks:
   - "JavaBuildpack::Framework::SpringInsight"
   - "JavaBuildpack::Framework::Debug"
   - "JavaBuildpack::Framework::JMX"
-  - "JavaBuildpack::Framework::ProxyConfig"
+  - "JavaBuildpack::Framework::HttpProxy"
