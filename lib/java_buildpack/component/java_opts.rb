@@ -70,7 +70,7 @@ module JavaBuildpack::Component
     #
     # @return [String] the contents as an environment variable
     def as_env_var
-      "JAVA_OPTS=\"#{sort.join(' ')}\""
+      "JAVA_OPTS=\"#{self.join(' ')}\""
     end
 
     private
