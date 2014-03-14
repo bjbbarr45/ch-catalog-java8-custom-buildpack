@@ -35,5 +35,5 @@ frameworks:
   - "JavaBuildpack::Framework::SpringAutoReconfiguration"
   - "JavaBuildpack::Framework::SpringInsight"
   - "JavaBuildpack::Framework::Debug"
-  - "JavaBuildpack::Framework::JMX"
-  - "JavaBuildpack::Framework::HttpProxy"
+  - "JavaBuildpack::Framework::JMXMPAgent"
+  - "JavaBuildpack::Framework::HttpProxyAgent"
