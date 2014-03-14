@@ -61,6 +61,7 @@ module JavaBuildpack::Framework
       sm_credentials = @application.services.find_service(SM_FILTER)['credentials']
       java_opts   = @droplet.java_opts
 
+      java_opts.concat ["-javaagent:#{@droplet.java_opts.qualify_path(@droplet.sandbox + 'app-dynamics-hack-pre.jar')} -javaagent:#{@droplet.java_opts.qualify_path(@droplet.sandbox + 'javaagent.jar')} -javaagent:#{@droplet.java_opts.qualify_path(@droplet.sandbox + 'app-dynamics-hack-post.jar')}"]
       java_opts
       .add_javaagent(@droplet.sandbox + 'app-dynamics-hack-pre.jar')
       .add_javaagent(@droplet.sandbox + 'javaagent.jar')
