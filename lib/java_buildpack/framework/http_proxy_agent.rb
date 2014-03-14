@@ -42,7 +42,7 @@ module JavaBuildpack::Framework
     private
     
     def httpproxy_opts
-      "-javaagent:#{@droplet.sandbox + 'http-proxy-agent.jar'}"
+      "-javaagent:#{@droplet.java_opts.qualify_path(@droplet.sandbox + 'http-proxy-agent.jar')}"
     end
   end
 end
