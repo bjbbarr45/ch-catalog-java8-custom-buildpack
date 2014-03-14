@@ -160,7 +160,7 @@ module JavaBuildpack::Container
         puts "Finding environment for #{file} and #{env}"
         deployable_file = find_deployable_file(file, env)
         unless deployable_file.nil? 
-          puts "Found file #{deployable_file} exists? #{deployable_file.exist?}"
+          puts "Found file #{deployable_file}"
           puts "For #{file} using '#{deployable_file.basename.to_s}' from deployable"
           FileUtils.ln_sf(deployable_file.relative_path_from(tomcat_conf),  tomcat_conf+file)
         end
