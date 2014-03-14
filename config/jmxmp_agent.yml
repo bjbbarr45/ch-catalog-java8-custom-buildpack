@@ -15,4 +15,4 @@
 
 ---
 version: 1.+
-repository_root: "{default.repository.root}/http-proxy"
+repository_root: "{default.repository.root}/jmxmp-agent"

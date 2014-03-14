@@ -16,21 +16,21 @@
 
 require 'spec_helper'
 require 'component_helper'
-require 'java_buildpack/framework/http_proxy'
+require 'java_buildpack/framework/jmxmp_agent'
 
-describe JavaBuildpack::Framework::HttpProxy do
+describe JavaBuildpack::Framework::JMXMPAgent do
   include_context 'component_helper'
 
   it 'should detect always detect' do
-    expect(component.detect).to eq('http-proxy')
+    expect(component.detect).to eq('jmxmp-agent')
   end
 
-  it 'should download the proxy agent',
+  it 'should download the JMXMP agent',
      cache_fixture: 'stub-download.jar' do
 
     component.compile
 
-    expect(sandbox + "httpproxy-agent.jar").to exist
+    expect(sandbox + "jmxmp-agent.jar").to exist
   end
 
   it 'should add the correct java opts',
@@ -38,6 +38,6 @@ describe JavaBuildpack::Framework::HttpProxy do
 
     component.release
 
-       expect(java_opts.last).to include('httpproxy-agent.jar')
+       expect(java_opts.last).to include('jmxmp-agent.jar')
   end
 end

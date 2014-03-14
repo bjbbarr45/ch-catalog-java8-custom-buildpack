@@ -21,18 +21,18 @@ require 'java_buildpack/util/dash_case'
 module JavaBuildpack::Framework
 
   # Encapsulates the functionality for contributing custom Java options to an application.
-  class JMX < JavaBuildpack::Component::VersionedDependencyComponent
+  class HttpProxyAgent < JavaBuildpack::Component::VersionedDependencyComponent
 
     def detect
-      JMX.to_s.dash_case
+      HttpProxyAgent.to_s.dash_case
     end
 
     def compile
-      download_jar "jmxmp-agent.jar"
+      download_jar "http-proxy-agent.jar"
     end
 
     def release
-      @droplet.java_opts.concat ["$(eval 'if [ -n \"$VCAP_CONSOLE_PORT\" ]; then echo \"#{jmx_opts}\"; fi')"]
+      @droplet.java_opts.concat ["$(eval 'if [ -n \"$http_proxy\" ] || [ -n \"$https_proxy\" ]; then  echo \"#{httpproxy_opts}\"; fi')"]
     end
     
     def supports?
@@ -41,8 +41,8 @@ module JavaBuildpack::Framework
     
     private
     
-    def jmx_opts
-      "-javaagent:#{@droplet.sandbox + 'jmxmp-agent.jar'} -Dorg.lds.cloudfoundry.jmxmp.host=$VCAP_CONSOLE_IP -Dorg.lds.cloudfoundry.jmxmp.port=$VCAP_CONSOLE_PORT"
+    def httpproxy_opts
+      "-javaagent:#{@droplet.sandbox + 'http-proxy-agent.jar'}"
     end
   end
 end
