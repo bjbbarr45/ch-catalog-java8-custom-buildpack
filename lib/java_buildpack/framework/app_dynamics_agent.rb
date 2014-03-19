@@ -68,7 +68,7 @@ module JavaBuildpack::Framework
       .add_system_property('appdynamics.agent.applicationName', "'#{sm_credentials['smData']['PortfolioName']}'")
       .add_system_property('appdynamics.agent.tierName', "'#{sm_credentials['smData']['CIName']}'")
       .add_system_property('appdynamics.agent.nodeName',
-                           "'#{@application.details['application_name']}[$(expr \"$VCAP_APPLICATION\" : '.*instance_index[\": ]*\"\\([0-9]\\+\\).*')]-[#{credentials['node-name-prefix']}]'")
+                           "'#{@application.details['application_name']}[$(expr \"$VCAP_APPLICATION\" : '.*instance_index[\": ]*\\([0-9]\\+\\).*')]-[#{credentials['node-name-prefix']}]'")
 
       account_access_key(java_opts, credentials)
       account_name(java_opts, credentials)
