@@ -82,7 +82,7 @@ describe JavaBuildpack::Framework::AppDynamicsAgent do
         expect(java_opts).to include('-Dappdynamics.controller.hostName=test-host-name')
         expect(java_opts).to include("-Dappdynamics.agent.applicationName='Portfolio'")
         expect(java_opts).to include("-Dappdynamics.agent.tierName='Some CI - Development'")
-        expect(java_opts).to include("-Dappdynamics.agent.nodeName='test-application-name[$(expr \"$VCAP_APPLICATION\" : '.*instance_index[\": ]*\"\\([0-9]\\+\\).*')]-[cf]'")
+        expect(java_opts).to include("-Dappdynamics.agent.nodeName='test-application-name[$(expr \"$VCAP_APPLICATION\" : '.*\"instance_index[\": ]*\\([0-9]\\+\\).*')]-[cf]'")
       end
 
       context do
