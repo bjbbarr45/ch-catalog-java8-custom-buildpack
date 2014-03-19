@@ -47,7 +47,8 @@ module JavaBuildpack::Framework
 
     def check_single_options(opts)
       opts.each do |option|
-        fail "Invalid Java option contains more than one option: '#{option}'" if option.shellsplit.length > 1
+# Disabled https://github.com/cloudfoundry/java-buildpack/issues/43
+#        fail "Invalid Java option contains more than one option: '#{option}'" if option.shellsplit.length > 1
       end
     end
 

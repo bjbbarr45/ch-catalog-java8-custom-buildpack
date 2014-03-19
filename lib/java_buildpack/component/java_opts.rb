@@ -70,6 +70,7 @@ module JavaBuildpack::Component
     #
     # @return [String] the contents as an environment variable
     def as_env_var
+    # Removed sort https://github.com/cloudfoundry/java-buildpack/issues/41
       "JAVA_OPTS=\"#{self.join(' ')}\""
     end
 
