@@ -60,6 +60,7 @@ module JavaBuildpack::Container
             raise "jvmargs.properties value '#{arg}' uses the memory argument '#{param}'.  Memory customization should be done using the java-buildpack instead. (https://github.com/cloudfoundry/java-buildpack/blob/master/docs/jre-openjdk.md)" if arg.include? param
         end
       end
+      puts "jvmargs: #{jvm_args}"
       #@droplet.java_opts.concat parsed_java_opts(jvm_args.join(" "))
       puts "Droplet java_options now include: #{@droplet.java_opts}"
       copy_wars_to_tomcat(catalina_props)
