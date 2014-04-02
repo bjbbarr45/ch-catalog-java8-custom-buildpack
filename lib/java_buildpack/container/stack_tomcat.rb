@@ -70,7 +70,7 @@ module JavaBuildpack::Container
     end
 
     def release
-      @droplet.java_opts.concat parsed_java_opts(java_opts(env).join(" "))
+      @droplet.java_opts.concat parsed_java_opts(java_opts(@configuration[DEPLOYABLE_ENV]).join(" "))
       @droplet.java_opts.add_system_property 'http.port', '$PORT'
       @droplet.java_opts.add_system_property 'user.timezone', 'America/Denver'
 
