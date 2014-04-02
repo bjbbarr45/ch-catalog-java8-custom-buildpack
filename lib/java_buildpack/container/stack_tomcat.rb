@@ -60,7 +60,7 @@ module JavaBuildpack::Container
             raise "jvmargs.properties value '#{arg}' uses the memory argument '#{param}'.  Memory customization should be done using the java-buildpack instead. (https://github.com/cloudfoundry/java-buildpack/blob/master/docs/jre-openjdk.md)" if arg.include? param
         end
       end
-      @droplet.java_opts.concat parsed_java_opts(jvm_args.join(" "))
+      #@droplet.java_opts.concat parsed_java_opts(jvm_args.join(" "))
       puts "Droplet java_options now include: #{@droplet.java_opts}"
       copy_wars_to_tomcat(catalina_props)
       copy_applib_dir
@@ -70,6 +70,7 @@ module JavaBuildpack::Container
     end
 
     def release
+      @droplet.java_opts.concat parsed_java_opts(java_opts(env).join(" "))
       @droplet.java_opts.add_system_property 'http.port', '$PORT'
       @droplet.java_opts.add_system_property 'user.timezone', 'America/Denver'
 
