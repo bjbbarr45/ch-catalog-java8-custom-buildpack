@@ -253,7 +253,7 @@ module JavaBuildpack::Container
         args[command_key] = v if k == command_key && !args.include?(command_key)
         args[command_key] = v if k == "#{env}.#{command_key}"
       end
-      puts "We found these args in the jvmargs.properties file: #{args}"
+      #puts "We found these args in the jvmargs.properties file: #{args}"
       args.values
     end
     
