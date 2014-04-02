@@ -61,6 +61,7 @@ module JavaBuildpack::Container
         end
       end
       @droplet.java_opts.concat parsed_java_opts(jvm_args.join(" "))
+      puts "Droplet java_options now include: #{@droplet.java_opts}"
       copy_wars_to_tomcat(catalina_props)
       copy_applib_dir
       copy_endorsed_dir
@@ -251,6 +252,7 @@ module JavaBuildpack::Container
         args[command_key] = v if k == command_key && !args.include?(command_key)
         args[command_key] = v if k == "#{env}.#{command_key}"
       end
+      puts "We found these args in the jvmargs.properties file: #{args}"
       args.values
     end
     
