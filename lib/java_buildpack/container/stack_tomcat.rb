@@ -56,13 +56,11 @@ module JavaBuildpack::Container
       end
       jvm_args = java_opts(env)
       jvm_args.each do |arg|
-          ["-Xms", "-Xmx", "-XX:MaxMetaspaceSize", "-XX:MaxPermSize", "-Xss"].each do |param|
-            raise "jvmargs.properties value '#{arg}' uses the memory argument '#{param}'.  Memory customization should be done using the java-buildpack instead. (https://github.com/cloudfoundry/java-buildpack/blob/master/docs/jre-openjdk.md)" if arg.include? param
+          ["-Xms", "-Xmx", "-XX:PermSize", "-XX:MaxMetaspaceSize", "-XX:MetaspaceSize", "-XX:MaxPermSize", "-Xss", "-XX:-UseConcMarkSweepGC", "-XX:-UseParallelGC", "-XX:-UseParallelOldGC", "-XX:-UseSerialGC", "-XX:+UseG1GC"].each do |param|
+            raise "jvmargs.properties value '#{arg}' uses the argument '#{param}'.  Memory and GC customization should be done using the java-buildpack instead. (https://github.com/cloudfoundry/java-buildpack/blob/master/docs/jre-openjdk.md)" if arg.include? param
         end
       end
-      puts "jvmargs: #{jvm_args}"
-      #@droplet.java_opts.concat parsed_java_opts(jvm_args.join(" "))
-      puts "Droplet java_options now include: #{@droplet.java_opts}"
+      puts "Adding these jvmargs: #{jvm_args}"
       copy_wars_to_tomcat(catalina_props)
       copy_applib_dir
       copy_endorsed_dir
@@ -254,7 +252,6 @@ module JavaBuildpack::Container
         args[command_key] = v if k == command_key && !args.include?(command_key)
         args[command_key] = v if k == "#{env}.#{command_key}"
       end
-      #puts "We found these args in the jvmargs.properties file: #{args}"
       args.values
     end
     

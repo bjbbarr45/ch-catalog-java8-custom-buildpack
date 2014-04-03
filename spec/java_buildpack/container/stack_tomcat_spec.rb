@@ -150,10 +150,9 @@ describe JavaBuildpack::Container::StackTomcat do
      app_fixture: 'container_stack_tomcat',
      cache_fixture: 'stub-tomcat.tar.gz' do
        
-    component.compile
+    component.release
 
-    expect(component.release).to eq("#{java_home.as_env_var} JAVA_OPTS=\"-Dhttp.port=$PORT -Dsomevalue=10 -Duser.timezone=America/Denver test-opt-1 test-opt-2\" " +
-                                        '$PWD/.java-buildpack/stack_tomcat/bin/catalina.sh run')
+    expect(component.release).to eq("#{java_home.as_env_var} JAVA_OPTS=\"test-opt-2 test-opt-1 -Dsomevalue=10 -Dhttp.port=$PORT -Duser.timezone=America/Denver -Dsomevalue=10 -Dhttp.port=$PORT -Duser.timezone=America/Denver\" $PWD/.java-buildpack/stack_tomcat/bin/catalina.sh run")
                                         
     expect(java_opts).to include('-Duser.timezone=America/Denver')
   end
