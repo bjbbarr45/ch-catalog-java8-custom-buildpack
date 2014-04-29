@@ -21,11 +21,6 @@ require 'java_buildpack/util/play/pre22_staged'
 describe JavaBuildpack::Util::Play::Pre22Staged do
   include_context 'component_helper'
 
-  before do
-    java_home
-    java_opts
-  end
-
   context do
 
     let(:trigger) { described_class.new(droplet).supports? }
@@ -63,6 +58,24 @@ describe JavaBuildpack::Util::Play::Pre22Staged do
 
       expect(trigger).not_to be
     end
+
+    it 'should not recognize a Ratpack application',
+       app_fixture: 'container_ratpack_dist' do
+
+      expect(trigger).not_to be
+    end
+
+    it 'should not recognize a Spring Boot application',
+       app_fixture: 'container_spring_boot_dist' do
+
+      expect(trigger).not_to be
+    end
+
+    it 'should not recognize a distZip application',
+       app_fixture: 'container_dist_zip' do
+
+      expect(trigger).not_to be
+    end
   end
 
   context app_fixture: 'container_play_2.1_staged' do
@@ -90,8 +103,8 @@ describe JavaBuildpack::Util::Play::Pre22Staged do
     end
 
     it 'should return command' do
-      expect(play_app.release).to eq("PATH=#{java_home.root}/bin:$PATH #{java_home.as_env_var} $PWD/start " +
-                                         'test-opt-2 test-opt-1 -Dhttp.port=$PORT')
+      expect(play_app.release).to eq("PATH=#{java_home.root}/bin:$PATH #{java_home.as_env_var} $PWD/start " \
+                                       'test-opt-2 test-opt-1 -Dhttp.port=$PORT')
     end
 
   end

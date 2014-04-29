@@ -21,11 +21,6 @@ require 'java_buildpack/util/play/post22_staged'
 describe JavaBuildpack::Util::Play::Post22Staged do
   include_context 'component_helper'
 
-  before do
-    java_home
-    java_opts
-  end
-
   context do
 
     let(:trigger) { described_class.new(droplet).supports? }
@@ -54,6 +49,24 @@ describe JavaBuildpack::Util::Play::Post22Staged do
 
     it 'should not recognize Play 2.2 dist applications',
        app_fixture: 'container_play_2.2_dist' do
+
+      expect(trigger).not_to be
+    end
+
+    it 'should not recognize a Ratpack application',
+       app_fixture: 'container_ratpack_dist' do
+
+      expect(trigger).not_to be
+    end
+
+    it 'should not recognize a Spring Boot application',
+       app_fixture: 'container_spring_boot_dist' do
+
+      expect(trigger).not_to be
+    end
+
+    it 'should not recognize a distZip application',
+       app_fixture: 'container_dist_zip' do
 
       expect(trigger).not_to be
     end

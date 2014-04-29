@@ -27,13 +27,8 @@ describe JavaBuildpack::Container::StackTomcat do
   let(:configuration) { { 'support' => support_configuration, "env" => env } }
   let(:env) { "cf" }
   let(:support_configuration) { {} }
-  let(:support_uri) { 'test-support-uri' }
+  let(:support_uri) { 'test-uri' }
   let(:support_version) { '1.1.1' }
-
-  before do
-    allow(application_cache).to receive(:get).with(support_uri)
-                                .and_yield(Pathname.new('spec/fixtures/stub-support.jar').open)
-  end
 
   before do
     tokenized_version = JavaBuildpack::Util::TokenizedVersion.new(support_version)

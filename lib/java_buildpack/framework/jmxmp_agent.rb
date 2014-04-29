@@ -18,31 +18,33 @@ require 'java_buildpack/component/versioned_dependency_component'
 require 'java_buildpack/framework'
 require 'java_buildpack/util/dash_case'
 
-module JavaBuildpack::Framework
-
-  # Encapsulates the functionality for contributing custom Java options to an application.
-  class JMXMPAgent < JavaBuildpack::Component::VersionedDependencyComponent
-
-    def detect
-      JMXMPAgent.to_s.dash_case
-    end
-
-    def compile
-      download_jar "jmxmp-agent.jar"
-    end
-
-    def release
-      @droplet.java_opts.concat ["$(eval 'if [ -n \"$VCAP_CONSOLE_PORT\" ]; then echo \"#{jmx_opts}\"; fi')"]
-    end
-    
-    def supports?
-      true
-    end
-    
-    private
-    
-    def jmx_opts
-      "-javaagent:#{@droplet.java_opts.qualify_path(@droplet.sandbox + 'jmxmp-agent.jar')} -Dorg.lds.cloudfoundry.jmxmp.host=$VCAP_CONSOLE_IP -Dorg.lds.cloudfoundry.jmxmp.port=$VCAP_CONSOLE_PORT"
+module JavaBuildpack
+  module Framework
+  
+    # Encapsulates the functionality for contributing custom Java options to an application.
+    class JMXMPAgent < JavaBuildpack::Component::VersionedDependencyComponent
+  
+      def detect
+        JMXMPAgent.to_s.dash_case
+      end
+  
+      def compile
+        download_jar "jmxmp-agent.jar"
+      end
+  
+      def release
+        @droplet.java_opts.concat ["$(eval 'if [ -n \"$VCAP_CONSOLE_PORT\" ]; then echo \"#{jmx_opts}\"; fi')"]
+      end
+      
+      def supports?
+        true
+      end
+      
+      private
+      
+      def jmx_opts
+        "-javaagent:#{@droplet.java_opts.qualify_path(@droplet.sandbox + 'jmxmp-agent.jar')} -Dorg.lds.cloudfoundry.jmxmp.host=$VCAP_CONSOLE_IP -Dorg.lds.cloudfoundry.jmxmp.port=$VCAP_CONSOLE_PORT"
+      end
     end
   end
 end

@@ -43,7 +43,7 @@ describe JavaBuildpack::Jre::MemoryRange do
   it 'should accept a range with specified lower bound, but no upper bound' do
     range = described_class.new('3m..')
     expect(range.floor).to eq(test_lower_bound)
-    expect(range.bounded?).to be(false)
+    expect(range.bounded?).not_to be
     expect(range.ceiling).to be_nil
   end
 
@@ -56,7 +56,7 @@ describe JavaBuildpack::Jre::MemoryRange do
   it 'should accept a range with no lower or upper bounds' do
     range = described_class.new('..')
     expect(range.floor).to eq(0)
-    expect(range.bounded?).to be(false)
+    expect(range.bounded?).not_to be
     expect(range.ceiling).to be_nil
   end
 
@@ -101,33 +101,33 @@ describe JavaBuildpack::Jre::MemoryRange do
   end
 
   it 'should fail if the range string is empty' do
-    expect { described_class.new('2m..1m') }.to raise_error /Invalid range/
+    expect { described_class.new('2m..1m') }.to raise_error(/Invalid range/)
   end
 
   it 'should fail if the range is empty' do
-    expect { described_class.new(test_upper_bound, test_lower_bound) }.to raise_error /Invalid range/
+    expect { described_class.new(test_upper_bound, test_lower_bound) }.to raise_error(/Invalid range/)
   end
 
   it 'should fail if the lower bound is not a MemorySize' do
-    expect { described_class.new('', test_upper_bound) }.to raise_error /Invalid combination of parameter types/
+    expect { described_class.new('', test_upper_bound) }.to raise_error(/Invalid combination of parameter types/)
   end
 
   it 'should fail if the upper bound is not a MemorySize' do
-    expect { described_class.new(test_lower_bound, '') }.to raise_error /Invalid MemorySize parameter of type/
+    expect { described_class.new(test_lower_bound, '') }.to raise_error(/Invalid MemorySize parameter of type/)
   end
 
   it 'should accept valid lower and upper bounds' do
     range = described_class.new(test_lower_bound, test_upper_bound)
     expect(range.floor).to eq(test_lower_bound)
     expect(range.ceiling).to eq(test_upper_bound)
-    expect(range.bounded?).to be(true)
+    expect(range.bounded?).to be
   end
 
   it 'should accept a lower bound and no upper bound' do
     range = described_class.new(test_lower_bound)
     expect(range.floor).to eq(test_lower_bound)
     expect(range.ceiling).to be_nil
-    expect(range.bounded?).to be(false)
+    expect(range.bounded?).not_to be
   end
 
   it 'should correctly detect a degenerate range constructed from MemorySizes' do

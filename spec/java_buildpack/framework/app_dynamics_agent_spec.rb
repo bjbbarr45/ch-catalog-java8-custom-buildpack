@@ -69,6 +69,10 @@ describe JavaBuildpack::Framework::AppDynamicsAgent do
       expect(sandbox + 'conf/app-agent-config.xml').to exist
     end
 
+    it 'should raise error if host-name not specified' do
+      expect { component.release }.to raise_error(/'host-name' credential must be set/)
+    end
+
     context do
 
       let(:credentials) { { 'host-name' => 'test-host-name', "node-name-prefix" => "cf" } }
@@ -80,6 +84,7 @@ describe JavaBuildpack::Framework::AppDynamicsAgent do
         expect(java_opts).to include('-javaagent:$PWD/.java-buildpack/app_dynamics_agent/app-dynamics-hack-post.jar')
         expect(java_opts).to include('-javaagent:$PWD/.java-buildpack/app_dynamics_agent/javaagent.jar')
         expect(java_opts).to include('-Dappdynamics.controller.hostName=test-host-name')
+
         expect(java_opts).to include("-Dappdynamics.agent.applicationName='Portfolio'")
         expect(java_opts).to include("-Dappdynamics.agent.tierName='Some CI - Development'")
         expect(java_opts).to include("-Dappdynamics.agent.nodeName='test-application-name[$(expr \"$VCAP_APPLICATION\" : '.*\"instance_index[\": ]*\\([0-9]\\+\\).*')]-[cf]'")

@@ -18,31 +18,33 @@ require 'java_buildpack/component/versioned_dependency_component'
 require 'java_buildpack/framework'
 require 'java_buildpack/util/dash_case'
 
-module JavaBuildpack::Framework
-
-  # Encapsulates the functionality for contributing custom Java options to an application.
-  class HttpProxyAgent < JavaBuildpack::Component::VersionedDependencyComponent
-
-    def detect
-      HttpProxyAgent.to_s.dash_case
-    end
-
-    def compile
-      download_jar "http-proxy-agent.jar"
-    end
-
-    def release
-      @droplet.java_opts.concat ["$(eval 'if [ -n \"$http_proxy\" ] || [ -n \"$https_proxy\" ]; then  echo \"#{httpproxy_opts}\"; fi')"]
-    end
-    
-    def supports?
-      true
-    end
-    
-    private
-    
-    def httpproxy_opts
-      "-javaagent:#{@droplet.java_opts.qualify_path(@droplet.sandbox + 'http-proxy-agent.jar')}"
+module JavaBuildpack
+  module Framework
+  
+    # Encapsulates the functionality for contributing custom Java options to an application.
+    class HttpProxyAgent < JavaBuildpack::Component::VersionedDependencyComponent
+  
+      def detect
+        HttpProxyAgent.to_s.dash_case
+      end
+  
+      def compile
+        download_jar "http-proxy-agent.jar"
+      end
+  
+      def release
+        @droplet.java_opts.concat ["$(eval 'if [ -n \"$http_proxy\" ] || [ -n \"$https_proxy\" ]; then  echo \"#{httpproxy_opts}\"; fi')"]
+      end
+      
+      def supports?
+        true
+      end
+      
+      private
+      
+      def httpproxy_opts
+        "-javaagent:#{@droplet.java_opts.qualify_path(@droplet.sandbox + 'http-proxy-agent.jar')}"
+      end
     end
   end
 end
