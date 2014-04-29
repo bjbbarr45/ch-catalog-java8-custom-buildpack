@@ -15,4 +15,4 @@
 
 # Repository configuration
 ---
-default_repository_root: http://cfdownloads.ldschurch.org/java-buildpack
+default_repository_root: http://cfdownloads.ldschurch.org/java-buildpack2
