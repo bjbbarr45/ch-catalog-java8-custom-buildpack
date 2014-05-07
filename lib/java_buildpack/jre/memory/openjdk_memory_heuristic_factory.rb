@@ -46,7 +46,7 @@ module JavaBuildpack
         private_constant :VALID_TYPES
 
         JAVA_OPTS = {
-          'heap'      => ->(v) { %W(-Xmx#{v} -Xms#{v}) },
+          'heap'      => ->(v) { %W(-Xmx#{v}) },
           'metaspace' => ->(v) { %W(-XX:MaxMetaspaceSize=#{v} -XX:MetaspaceSize=#{v}) },
           'permgen'   => ->(v) { %W(-XX:MaxPermSize=#{v} -XX:PermSize=#{v}) },
           'stack'     => ->(v) { ["-Xss#{v}"] }
