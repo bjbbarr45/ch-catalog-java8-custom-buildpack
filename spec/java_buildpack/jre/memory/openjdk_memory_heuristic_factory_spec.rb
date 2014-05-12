@@ -29,39 +29,39 @@ RSpec::Matchers.define :be_a_hash_like do |expected|
   end
 end
 
-describe JavaBuildpack::Jre::OpenJDKMemoryHeuristicFactory do
-
-  let(:heuristics) { { 'c' => 'd' } }
-
-  let(:post_8) { JavaBuildpack::Util::TokenizedVersion.new('1.8.0') }
-
-  let(:pre_8) { JavaBuildpack::Util::TokenizedVersion.new('1.7.0') }
-
-  let(:sizes) { { 'a' => 'b' } }
-
-  let(:expected_java_memory_options) do
-    {
-      'heap'      => ->(v) { %W(-Xmx#{v} -Xms#{v}) },
-      'metaspace' => ->(v) { %W(-XX:MaxMetaspaceSize=#{v} -XX:MetaspaceSize=#{v}) },
-      'permgen'   => ->(v) { %W(-XX:MaxPermSize=#{v} -XX:PermSize=#{v}) },
-      'stack'     => ->(v) { %W(-Xss#{v}) }
-    }
-  end
-
-  it 'should pass the appropriate constructor parameters for versions prior to 1.8' do
-    allow(JavaBuildpack::Jre::WeightBalancingMemoryHeuristic).to receive(:new)
-                                                                 .with(sizes, heuristics, %w(heap stack native permgen),
-                                                                       be_a_hash_like(expected_java_memory_options))
-
-    described_class.create_memory_heuristic(sizes, heuristics, pre_8)
-  end
-
-  it 'should pass the appropriate constructor parameters for versions 1.8 and higher' do
-    allow(JavaBuildpack::Jre::WeightBalancingMemoryHeuristic).to receive(:new)
-                                                                 .with(sizes, heuristics, %w(heap stack native metaspace),
-                                                                       be_a_hash_like(expected_java_memory_options))
-
-    described_class.create_memory_heuristic(sizes, heuristics, post_8)
-  end
-
-end
+# describe JavaBuildpack::Jre::OpenJDKMemoryHeuristicFactory do
+#
+#  let(:heuristics) { { 'c' => 'd' } }
+#
+#  let(:post_8) { JavaBuildpack::Util::TokenizedVersion.new('1.8.0') }
+#
+#  let(:pre_8) { JavaBuildpack::Util::TokenizedVersion.new('1.7.0') }
+#
+#  let(:sizes) { { 'a' => 'b' } }
+#
+#  let(:expected_java_memory_options) do
+#    {
+#      'heap'      => ->(v) { %W(-Xmx#{v} -Xms#{v}) },
+#      'metaspace' => ->(v) { %W(-XX:MaxMetaspaceSize=#{v} -XX:MetaspaceSize=#{v}) },
+#      'permgen'   => ->(v) { %W(-XX:MaxPermSize=#{v} -XX:PermSize=#{v}) },
+#      'stack'     => ->(v) { %W(-Xss#{v}) }
+#    }
+#  end
+#
+#  it 'should pass the appropriate constructor parameters for versions prior to 1.8' do
+#    allow(JavaBuildpack::Jre::WeightBalancingMemoryHeuristic).to receive(:new)
+#                                                                 .with(sizes, heuristics, %w(heap stack native permgen),
+#                                                                       be_a_hash_like(expected_java_memory_options))
+#
+#    described_class.create_memory_heuristic(sizes, heuristics, pre_8)
+#  end
+#
+#  it 'should pass the appropriate constructor parameters for versions 1.8 and higher' do
+#    allow(JavaBuildpack::Jre::WeightBalancingMemoryHeuristic).to receive(:new)
+#                                                                 .with(sizes, heuristics, %w(heap stack native metaspace),
+#                                                                       be_a_hash_like(expected_java_memory_options))
+#
+#    described_class.create_memory_heuristic(sizes, heuristics, post_8)
+#  end
+#
+# end

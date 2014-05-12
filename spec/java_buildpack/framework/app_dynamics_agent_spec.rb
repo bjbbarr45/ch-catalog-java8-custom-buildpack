@@ -29,8 +29,8 @@ describe JavaBuildpack::Framework::AppDynamicsAgent do
 
   context do
 
-    let(:credentials) { {"node-name-prefix" => "cf"} }
-    let(:sm_credentials) { {'smData' => { 'PortfolioName' => "Portfolio", 'CIName' => "Some CI - Development"} } }
+    let(:credentials) { { 'node-name-prefix' => 'cf' } }
+    let(:sm_credentials) { { 'smData' => { 'PortfolioName' => 'Portfolio', 'CIName' => 'Some CI - Development' } } }
 
     before do
       allow(services).to receive(:one_service?).with(/app-dynamics/).and_return(true)
@@ -47,7 +47,7 @@ describe JavaBuildpack::Framework::AppDynamicsAgent do
       before do
         allow(services).to receive(:one_service?).with(/servicemanager-service/).and_return(nil)
       end
-      
+
       it 'should not detect without servicemanager-service' do
         expect(component.detect).to be_nil
       end
@@ -60,7 +60,7 @@ describe JavaBuildpack::Framework::AppDynamicsAgent do
 
       expect(sandbox + 'javaagent.jar').to exist
     end
-    
+
     it 'should copy app dynamics resources',
        cache_fixture: 'stub-app-dynamics-agent.zip' do
 
@@ -75,7 +75,7 @@ describe JavaBuildpack::Framework::AppDynamicsAgent do
 
     context do
 
-      let(:credentials) { { 'host-name' => 'test-host-name', "node-name-prefix" => "cf" } }
+      let(:credentials) { { 'host-name' => 'test-host-name', 'node-name-prefix' => 'cf' } }
 
       it 'should update JAVA_OPTS' do
         component.release
@@ -87,7 +87,7 @@ describe JavaBuildpack::Framework::AppDynamicsAgent do
 
         expect(java_opts).to include("-Dappdynamics.agent.applicationName='Portfolio'")
         expect(java_opts).to include("-Dappdynamics.agent.tierName='Some CI - Development'")
-        expect(java_opts).to include("-Dappdynamics.agent.nodeName='test-application-name[$(expr \"$VCAP_APPLICATION\" : '.*\"instance_index[\": ]*\\([0-9]\\+\\).*')]-[cf]'")
+        expect(java_opts).to include("-Dappdynamics.agent.nodeName=test-application-name[$(expr \"$VCAP_APPLICATION\" : '.*\"instance_index[\": ]*\\([0-9]\\+\\).*')]-[cf]")
       end
 
       context do

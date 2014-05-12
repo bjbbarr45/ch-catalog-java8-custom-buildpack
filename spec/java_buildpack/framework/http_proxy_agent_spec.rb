@@ -30,14 +30,12 @@ describe JavaBuildpack::Framework::HttpProxyAgent do
 
     component.compile
 
-    expect(sandbox + "http-proxy-agent.jar").to exist
+    expect(sandbox + 'http-proxy-agent.jar').to exist
   end
 
-  it 'should add the correct java opts',
-     cache_fixture: 'stub-download.jar' do
+  it 'should add the correct java opts', cache_fixture: 'stub-download.jar' do
 
     component.release
-
-       expect(java_opts.last).to include('http-proxy-agent.jar')
+    expect(java_opts.last).to include('http-proxy-agent.jar')
   end
 end

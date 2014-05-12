@@ -29,7 +29,7 @@ describe JavaBuildpack::Framework::Debug do
     it 'should add split java_opts to context' do
       component.release
 
-      #We only want to check the opt that we add
+      # We only want to check the opt that we add
       expect(java_opts.last).to include('$VCAP_DEBUG_PORT')
     end
   end

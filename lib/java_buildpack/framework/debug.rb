@@ -24,26 +24,29 @@ module JavaBuildpack
 
   # Encapsulates the functionality for contributing custom Java options to an application.
     class Debug < JavaBuildpack::Component::BaseComponent
-  
+
+      # (see JavaBuildpack::Component::BaseComponent#detect)
       def detect
         Debug.to_s.dash_case
       end
-  
+
+      # (see JavaBuildpack::Component::BaseComponent#compile)
       def compile
       end
-  
+
+      # (see JavaBuildpack::Component::BaseComponent#release)
       def release
         @droplet.java_opts.concat ["$(eval 'if [ -n \"$VCAP_DEBUG_MODE\" ]; then if [ \"$VCAP_DEBUG_MODE\" = \"run\" ]; then echo \"#{debug_run_opts}\"; elif [ \"$VCAP_DEBUG_MODE\" = \"suspend\" ]; then echo \"#{debug_suspend_opts}\"; fi fi')"]
       end
-      
+
       private
-    
+
       def debug_run_opts
-        "-Xdebug -Xrunjdwp:transport=dt_socket,address=$VCAP_DEBUG_PORT,server=y,suspend=n"
+        '-Xdebug -Xrunjdwp:transport=dt_socket,address=$VCAP_DEBUG_PORT,server=y,suspend=n'
       end
-    
+
       def debug_suspend_opts
-        "-Xdebug -Xrunjdwp:transport=dt_socket,address=$VCAP_DEBUG_PORT,server=y,suspend=y"
+        '-Xdebug -Xrunjdwp:transport=dt_socket,address=$VCAP_DEBUG_PORT,server=y,suspend=y'
       end
     end
   end

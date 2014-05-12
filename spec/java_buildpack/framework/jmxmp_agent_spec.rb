@@ -30,14 +30,12 @@ describe JavaBuildpack::Framework::JMXMPAgent do
 
     component.compile
 
-    expect(sandbox + "jmxmp-agent.jar").to exist
+    expect(sandbox + 'jmxmp-agent.jar').to exist
   end
 
-  it 'should add the correct java opts',
-     cache_fixture: 'stub-download.jar' do
+  it 'should add the correct java opts', cache_fixture: 'stub-download.jar' do
 
     component.release
-
-       expect(java_opts.last).to include('jmxmp-agent.jar')
+    expect(java_opts.last).to include('jmxmp-agent.jar')
   end
 end

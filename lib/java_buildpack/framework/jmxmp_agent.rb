@@ -20,28 +20,31 @@ require 'java_buildpack/util/dash_case'
 
 module JavaBuildpack
   module Framework
-  
+
     # Encapsulates the functionality for contributing custom Java options to an application.
     class JMXMPAgent < JavaBuildpack::Component::VersionedDependencyComponent
-  
+
+      # (see JavaBuildpack::Component::BaseComponent#detect)
       def detect
         JMXMPAgent.to_s.dash_case
       end
-  
+
+      # (see JavaBuildpack::Component::BaseComponent#compile)
       def compile
-        download_jar "jmxmp-agent.jar"
+        download_jar 'jmxmp-agent.jar'
       end
-  
+
+      # (see JavaBuildpack::Component::BaseComponent#release)
       def release
         @droplet.java_opts.concat ["$(eval 'if [ -n \"$VCAP_CONSOLE_PORT\" ]; then echo \"#{jmx_opts}\"; fi')"]
       end
-      
+
       def supports?
         true
       end
-      
+
       private
-      
+
       def jmx_opts
         "-javaagent:#{@droplet.java_opts.qualify_path(@droplet.sandbox + 'jmxmp-agent.jar')} -Dorg.lds.cloudfoundry.jmxmp.host=$VCAP_CONSOLE_IP -Dorg.lds.cloudfoundry.jmxmp.port=$VCAP_CONSOLE_PORT"
       end
