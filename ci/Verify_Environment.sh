@@ -20,24 +20,11 @@ else
     exit 1;
 fi
 
-echo "Checking for rbenv and Ruby ${p:ruby.version}"
-if rbenv version | grep -q "${p:ruby.version}"; then
-    echo "Ruby ${p:ruby.version} found"
-else
-    echo "Ruby ${p:ruby.version} not found"
-    exit 1;
-fi
-
 echo "Making sure 'ruby' is on path."
 type ruby
 
-echo "Checking to see if bundler is installed, any version"
-if gem list | grep bundler | grep -q "bundler"; then
-    echo "Bundler found"
-else
-    echo "Bundler not found."
-    exit 1
-fi
-
 echo "Making sure 'bundle' is on path."
 type bundle
+
+echo "Making sure 'cf' is on path."
+type cf
