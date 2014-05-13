@@ -84,8 +84,8 @@ module JavaBuildpack
         redhat_release = Pathname.new('/etc/redhat-release')
 
         if redhat_release.exist?
-          "centos#{redhat_release.read.match(/Red Hat Enterprise Linux Server release (\d)/)[1]}" if redhat_release.read.start_with?("Red Hat Enterprise Linux Server release")
-          "centos#{redhat_release.read.match(/CentOS release (\d)/)[1]}" if redhat_release.read.start_with?("CentOS release")
+          "centos#{redhat_release.read.match(/Red Hat Enterprise Linux Server release (\d)/)[1]}" if redhat_release.read.start_with?('Red Hat Enterprise Linux Server release')
+          "centos#{redhat_release.read.match(/CentOS release (\d)/)[1]}" if redhat_release.read.start_with?('CentOS release')
         elsif `uname -s` =~ /Darwin/
           'mountainlion'
         elsif !`which lsb_release 2> /dev/null`.empty?
