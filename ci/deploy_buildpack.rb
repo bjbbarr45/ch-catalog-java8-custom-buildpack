@@ -37,7 +37,7 @@ Dir["release/*"].each do |file|
     system({"HOME" => home_directory}, "cf create-buildpack #{buildpack} #{filename} #{position} 2>&1")
   end
   
-  puts "Locking buildpack #{ARGV[0]}"
+  puts "Locking buildpack #{buildpack}"
   system({"HOME" => home_directory}, "cf update-buildpack #{buildpack} --lock 2>&1")
   exit $?.exitstatus unless $?.exitstatus == 0
 end
