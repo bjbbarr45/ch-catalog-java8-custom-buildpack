@@ -69,12 +69,14 @@ module JavaBuildpack
     #
     # @return [String] The payload required to run the application.
     def release
+      @logger.warn { 'entering release' }
       container = component_detection('container', @containers, true).first
       fail 'No container can run this application' unless container
 
       component_detection('JRE', @jres, true).first.release
       component_detection('framework', @frameworks, false).each { |framework| framework.release }
       command = container.release
+      @logger.warn { 'Executed container.release' }
 
       payload = {
         'addons'                => [],
