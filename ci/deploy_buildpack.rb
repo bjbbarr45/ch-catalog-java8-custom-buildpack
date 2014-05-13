@@ -17,14 +17,14 @@ exit $?.exitstatus unless $?.exitstatus == 0
 system({"HOME" => home_directory}, "cf auth '#{username}' '#{password}' 2>&1")
 exit $?.exitstatus unless $?.exitstatus == 0
 
-Dir["*"].each do |file|
+Dir["release/*"].each do |file|
   
   next unless file.end_with?(".zip.#{buildpack_file_suffix}")
   
-  filename = file[0..file.rindex('.')-1]
+  filename = file["release/".length..file.rindex('.')-1]
 
   FileUtils.rm_f(filename)
-  FileUtils.cp("#{filename}.#{buildpack_file_suffix}", filename)
+  FileUtils.cp("release/#{filename}.#{buildpack_file_suffix}", filename)
 
   puts "Seeing if #{buildpack} already exists"
   buildpacks = `cf buildpacks`
