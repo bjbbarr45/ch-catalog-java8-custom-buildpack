@@ -24,26 +24,13 @@ require 'java_buildpack/util/tokenized_version'
 describe JavaBuildpack::Container::StackTomcat do
   include_context 'component_helper'
 
-  let(:configuration) { { 'support' => support_configuration, 'env' => env } }
+  let(:configuration) { { 'env' => env } }
   let(:env) { 'cf' }
-  let(:support_configuration) { {} }
-  let(:support_uri) { 'test-uri' }
-  let(:support_version) { '1.1.1' }
-
-  before do
-    tokenized_version = JavaBuildpack::Util::TokenizedVersion.new(support_version)
-
-    allow(JavaBuildpack::Repository::ConfiguredItem).to receive(:find_item).with(an_instance_of(String),
-                                                                                 support_configuration) do |&block|
-      block.call(tokenized_version) if block
-    end.and_return([tokenized_version, support_uri])
-  end
 
   it 'should detect Tomcat Deployable', app_fixture: 'container_stack_tomcat' do
     detected = component.detect
 
     expect(detected).to include("tomcat=#{version}")
-    expect(detected).to include("tomcat-buildpack-support=#{support_version}")
   end
 
   it 'should not detect Tomcat Deployable', app_fixture: 'container_tomcat' do
@@ -67,7 +54,6 @@ describe JavaBuildpack::Container::StackTomcat do
     component.compile
 
     expect(sandbox + 'bin/catalina.sh').to exist
-    expect(sandbox + 'lib/tomcat_buildpack_support-1.1.1.jar').to exist
   end
 
   it 'should link the wars to the webapp directory',

@@ -33,17 +33,14 @@ module JavaBuildpack
         if supports?
           @tomcat_version, @tomcat_uri   = JavaBuildpack::Repository::ConfiguredItem
           .find_item(@component_name, @configuration) { |candidate_version| candidate_version.check_size(3) }
-          @support_version, @support_uri = JavaBuildpack::Repository::ConfiguredItem
-          .find_item(@component_name, @configuration['support'])
         else
           @tomcat_version, @tomcat_uri   = nil, nil
-          @support_version, @support_uri = nil, nil
         end
       end
 
       # (see JavaBuildpack::Component::BaseComponent#detect)
       def detect
-        @tomcat_version && @support_version ? [tomcat_id(@tomcat_version), support_id(@support_version), 'StackTomcat=3.2+'] : nil
+        @tomcat_version ? [tomcat_id(@tomcat_version), 'StackTomcat=3.2+'] : nil
       end
 
       # (see JavaBuildpack::Component::BaseComponent#compile)
@@ -51,7 +48,6 @@ module JavaBuildpack
         env = @configuration[DEPLOYABLE_ENV]
         catalina = find_deployable_file('catalina.properties', env)
         download_tomcat
-        download_support
         catalina_props = properties(catalina)
         unless catalina_props.key?('org.apache.tomcat.util.digester.PROPERTY_SOURCE')
           puts "Warning: #{catalina.basename} doesn't appear to specify a 'org.apache.tomcat.util.digester.PROPERTY_SOURCE'.  Resolving environment variables may not work."
@@ -90,10 +86,6 @@ module JavaBuildpack
         "#{Tomcat.to_s.dash_case}=#{version}"
       end
 
-      def support_id(version)
-        "tomcat-buildpack-support=#{version}"
-      end
-
       def supports?
         deployable?
       end
@@ -104,11 +96,6 @@ module JavaBuildpack
 
       def download_tomcat
         download(@tomcat_version, @tomcat_uri) { |file| expand file }
-      end
-
-      def download_support
-        download_jar(@support_version, @support_uri, support_jar_name, @droplet.sandbox + 'lib',
-                     'Buildpack Stack Tomcat Support')
       end
 
       def parsed_java_opts(java_opts)
@@ -122,22 +109,6 @@ module JavaBuildpack
           FileUtils.mkdir_p @droplet.sandbox
           shell "tar xzf #{file.path} -C #{@droplet.sandbox} --strip 1 --exclude webapps 2>&1"
         end
-      end
-
-      def root
-        webapps + 'ROOT'
-      end
-
-      def support_jar_name
-        "tomcat_buildpack_support-#{@support_version}.jar"
-      end
-
-      def tomcat_datasource_jar
-        tomcat_lib + 'tomcat-jdbc.jar'
-      end
-
-      def tomcat_lib
-        @droplet.sandbox + 'lib'
       end
 
       def webapps
