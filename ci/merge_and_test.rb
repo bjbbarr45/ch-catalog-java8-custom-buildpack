@@ -10,8 +10,4 @@ exit $?.exitstatus unless $?.exitstatus == 0
 puts "Execute tests on branch #{ARGV[0]} after merge"
 system("bundle exec rake 2>&1")
 exit $?.exitstatus unless $?.exitstatus == 0
-
-puts "Execute tests on branch #{ARGV[0]} after merge"
-system("bundle exec rake 2>&1")
-exit $?.exitstatus unless $?.exitstatus == 0
 # rubocop:enable all
