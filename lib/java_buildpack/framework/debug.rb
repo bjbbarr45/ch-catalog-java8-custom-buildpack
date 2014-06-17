@@ -22,7 +22,7 @@ require 'shellwords'
 module JavaBuildpack
   module Framework
 
-  # Encapsulates the functionality for contributing custom Java options to an application.
+    # Encapsulates the functionality for contributing custom Java options to an application.
     class Debug < JavaBuildpack::Component::BaseComponent
 
       # (see JavaBuildpack::Component::BaseComponent#detect)

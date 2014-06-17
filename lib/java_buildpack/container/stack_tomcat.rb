@@ -132,36 +132,33 @@ module JavaBuildpack
         CONFIG_FILES.each do | file |
           puts "Finding environment for #{file} and #{env}"
           deployable_file = find_deployable_file(file, env)
-          unless deployable_file.nil?
-            puts "Found file #{deployable_file}"
-            puts "For #{file} using '#{deployable_file.basename}' from deployable"
-            FileUtils.ln_sf(deployable_file.relative_path_from(tomcat_conf),  tomcat_conf + file)
-          end
+          next if deployable_file.nil?
+          puts "Found file #{deployable_file}"
+          puts "For #{file} using '#{deployable_file.basename}' from deployable"
+          FileUtils.ln_sf(deployable_file.relative_path_from(tomcat_conf),  tomcat_conf + file)
         end
       end
 
       def copy_endorsed_dir
         endorsed = @application.root.join('endorsed')
-        if endorsed.exist?
-          puts 'Copying endorsed jars from deployable.'
-          FileUtils.mkdir_p(tomcat_endorsed)
-          endorsed.each_child do |file|
-            next unless file.file?
-            next unless file.basename.to_s.end_with?('.jar')
-            FileUtils.ln_sf(file.relative_path_from(tomcat_endorsed),  tomcat_endorsed + file.basename)
-          end
+        return unless endorsed.exist?
+        puts 'Copying endorsed jars from deployable.'
+        FileUtils.mkdir_p(tomcat_endorsed)
+        endorsed.each_child do |file|
+          next unless file.file?
+          next unless file.basename.to_s.end_with?('.jar')
+          FileUtils.ln_sf(file.relative_path_from(tomcat_endorsed),  tomcat_endorsed + file.basename)
         end
       end
 
       def copy_applib_dir
         applib = @application.root.join('applib')
-        if applib.exist? && applib.directory?
-          puts 'Copying applib jars from deployable.'
-          applib.each_child do |file|
-            next unless file.file?
-            next unless file.basename.to_s.end_with?('.jar')
-            @droplet.additional_libraries << file
-          end
+        return unless applib.exist? && applib.directory?
+        puts 'Copying applib jars from deployable.'
+        applib.each_child do |file|
+          next unless file.file?
+          next unless file.basename.to_s.end_with?('.jar')
+          @droplet.additional_libraries << file
         end
       end
 
@@ -239,9 +236,8 @@ module JavaBuildpack
 
           war_exists = true if file.to_s.end_with?('.war')
 
-          if file.basename.to_s == 'catalina.properties' || file.basename.to_s == "#{env}.catalina.properties"
-            catalina_properties_exists = true
-          end
+          next unless file.basename.to_s == 'catalina.properties' || file.basename.to_s == "#{env}.catalina.properties"
+          catalina_properties_exists = true
         end
         war_exists && catalina_properties_exists
       end
