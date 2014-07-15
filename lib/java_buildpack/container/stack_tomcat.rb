@@ -163,6 +163,8 @@ module JavaBuildpack
       end
 
       def copy_wars_to_tomcat(catalina_props)
+        FileUtils.rm_rf webapps
+        FileUtils.mkdir_p webapps
         @application.root.each_child do |war_file|
           next unless war_file.file?
           next unless war_file.basename.to_s.end_with?('.war')
@@ -175,8 +177,6 @@ module JavaBuildpack
           FileUtils.mkdir_p(webapps)
           puts "Deploying #{war_file} to webapps with context root #{context_root}"
 
-          FileUtils.rm_rf webapps
-          FileUtils.mkdir_p webapps
           new_war = webapps + context_root_war_name
           FileUtils.ln_sf(war_file.relative_path_from(webapps),  new_war)
         end
