@@ -14,38 +14,26 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-require 'java_buildpack/component/versioned_dependency_component'
+require 'java_buildpack/component/base_component'
+require 'java_buildpack/container'
 
 module JavaBuildpack
   module Container
 
-    # Encapsulates the detect, compile, and release functionality for Tomcat logging support.
-    class TomcatLoggingSupport < JavaBuildpack::Component::VersionedDependencyComponent
+    # Encapsulates the functionality for contributing really long detect tags.
+    class LongDetectTags < JavaBuildpack::Component::BaseComponent
+
+      # (see JavaBuildpack::Component::BaseComponent#detect)
+      def detect
+        [[].fill(0, 300) { 'A' }.join]
+      end
 
       # (see JavaBuildpack::Component::BaseComponent#compile)
       def compile
-        download_jar(jar_name, endorsed)
       end
 
       # (see JavaBuildpack::Component::BaseComponent#release)
       def release
-      end
-
-      protected
-
-      # (see JavaBuildpack::Component::VersionedDependencyComponent#supports?)
-      def supports?
-        true
-      end
-
-      private
-
-      def endorsed
-        @droplet.sandbox + 'endorsed'
-      end
-
-      def jar_name
-        "tomcat_logging_support-#{@version}.jar"
       end
 
     end
