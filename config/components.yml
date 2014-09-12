@@ -44,4 +44,5 @@ frameworks:
   - "JavaBuildpack::Framework::SpringInsight"
   - "JavaBuildpack::Framework::Debug"
   - "JavaBuildpack::Framework::JMXMPAgent"
-  - "JavaBuildpack::Framework::HttpProxyAgent"
+# Disabled for now since we're not using http proxy.
+#  - "JavaBuildpack::Framework::HttpProxyAgent"
