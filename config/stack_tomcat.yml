@@ -15,6 +15,6 @@
 
 # Configuration for the Stack Tomcat container
 ---
-version: 7.0.+
+version: 7.0.55
 repository_root: "{default.repository.root}/tomcat"
 env: cf
