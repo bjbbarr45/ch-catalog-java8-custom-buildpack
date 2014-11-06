@@ -23,3 +23,4 @@ pre_agent:
 post_agent:
   version: 1.0.+
   repository_root: "{default.repository.root}/app-dynamics/post"
+default_tier_name: cf

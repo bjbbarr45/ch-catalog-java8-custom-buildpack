@@ -93,6 +93,10 @@ module JavaBuildpack
 
       SM_FILTER = /servicemanager-service/.freeze
 
+      def tier_name(credentials)
+        credentials.key?('tier-name') ? credentials['tier-name'] : @configuration['default_tier_name']
+      end
+
       def application_name
         @application.details['application_name']
       end
