@@ -91,7 +91,7 @@ module JavaBuildpack
       def supports?
         @application.services.one_service?(FILTER) &&
           (@application.services.one_service?(SM_FILTER) ||
-            @application.services.one_service?(SN_FILTER)) 
+            @application.services.one_service?(SN_FILTER))
       end
 
       private
