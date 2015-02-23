@@ -60,15 +60,21 @@ module JavaBuildpack
       # (see JavaBuildpack::Component::BaseComponent#release)
       def release
         credentials = @application.services.find_service(FILTER)['credentials']
-        sm_credentials = @application.services.find_service(SM_FILTER)['credentials']
+        sm_credentials = @application.services.find_service(SM_FILTER)
+        sn_credentials = @application.services.find_service(SN_FILTER)
         java_opts   = @droplet.java_opts
 
         java_opts
         .add_javaagent(@droplet.sandbox + 'app-dynamics-hack-pre.jar')
         .add_javaagent(@droplet.sandbox + 'javaagent.jar')
         .add_javaagent(@droplet.sandbox + 'app-dynamics-hack-post.jar')
-        .add_system_property('appdynamics.agent.applicationName', "'#{sm_credentials['smData']['PortfolioName']}'")
-        .add_system_property('appdynamics.agent.tierName', "'#{sm_credentials['smData']['CIName']}'")
+        if sm_credentials
+          java_opts.add_system_property('appdynamics.agent.applicationName', "'#{sm_credentials['credentials']['smData']['PortfolioName']}'")
+                   .add_system_property('appdynamics.agent.tierName', "'#{sm_credentials['credentials']['smData']['CIName']}'")
+        elsif sn_credentials
+          java_opts.add_system_property('appdynamics.agent.applicationName', "'#{sn_credentials['credentials']['PortfolioName']}'")
+                   .add_system_property('appdynamics.agent.tierName', "'#{sn_credentials['credentials']['ServiceOffering']}'")
+        end
         .add_system_property('appdynamics.agent.nodeName',
                              "#{@application.details['application_name']}[$(expr \"$VCAP_APPLICATION\" : '.*\"instance_index[\": ]*\\([0-9]\\+\\).*')]-[#{credentials['node-name-prefix']}]")
 
@@ -84,7 +90,8 @@ module JavaBuildpack
       # @macro versioned_dependency_component_supports
       def supports?
         @application.services.one_service?(FILTER) &&
-          @application.services.one_service?(SM_FILTER)
+          (@application.services.one_service?(SM_FILTER) ||
+            @application.services.one_service?(SN_FILTER)) 
       end
 
       private
@@ -92,6 +99,8 @@ module JavaBuildpack
       FILTER = /app-dynamics/.freeze
 
       SM_FILTER = /servicemanager-service/.freeze
+
+      SN_FILTER = /ServiceNow/.freeze
 
       def tier_name(credentials)
         credentials.key?('tier-name') ? credentials['tier-name'] : @configuration['default_tier_name']
