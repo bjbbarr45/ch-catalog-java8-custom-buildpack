@@ -35,8 +35,10 @@ describe JavaBuildpack::Framework::AppDynamicsAgent do
     before do
       allow(services).to receive(:one_service?).with(/app-dynamics/).and_return(true)
       allow(services).to receive(:one_service?).with(/servicemanager-service/).and_return(true)
+      allow(services).to receive(:one_service?).with(/ServiceNow/).and_return(false)
       allow(services).to receive(:find_service).with(/app-dynamics/).and_return('credentials' => credentials)
       allow(services).to receive(:find_service).with(/servicemanager-service/).and_return('credentials' => sm_credentials)
+      allow(services).to receive(:find_service).with(/ServiceNow/).and_return(nil)
     end
 
     it 'should detect with app-dynamics-n/a service' do
