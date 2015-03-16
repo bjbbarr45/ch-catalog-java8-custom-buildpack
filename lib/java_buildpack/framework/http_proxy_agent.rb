@@ -36,7 +36,9 @@ module JavaBuildpack
 
       # (see JavaBuildpack::Component::BaseComponent#release)
       def release
-        @droplet.java_opts.concat ["$(eval 'if [ -n \"$http_proxy\" ] || [ -n \"$https_proxy\" ]; then  echo \"#{httpproxy_opts}\"; fi')"]
+        @droplet.java_opts.concat ['$(eval \'if [ -n "$http_proxy" ] || ' \
+                                     '[ -n "$https_proxy" ]; then ' \
+                                     "echo \"#{httpproxy_opts}\"; fi')"]
       end
 
       def supports?

@@ -21,11 +21,11 @@ require 'java_buildpack/framework/http_proxy_agent'
 describe JavaBuildpack::Framework::HttpProxyAgent do
   include_context 'component_helper'
 
-  it 'should detect always detect' do
+  it 'detect always detect' do
     expect(component.detect).to eq('http-proxy-agent')
   end
 
-  it 'should download the proxy agent',
+  it 'download the proxy agent',
      cache_fixture: 'stub-download.jar' do
 
     component.compile
@@ -33,7 +33,7 @@ describe JavaBuildpack::Framework::HttpProxyAgent do
     expect(sandbox + 'http-proxy-agent.jar').to exist
   end
 
-  it 'should add the correct java opts', cache_fixture: 'stub-download.jar' do
+  it 'add the correct java opts', cache_fixture: 'stub-download.jar' do
 
     component.release
     expect(java_opts.last).to include('http-proxy-agent.jar')

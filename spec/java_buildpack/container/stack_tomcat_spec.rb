@@ -27,27 +27,27 @@ describe JavaBuildpack::Container::StackTomcat do
   let(:configuration) { { 'env' => env } }
   let(:env) { 'cf' }
 
-  it 'should detect Tomcat Deployable', app_fixture: 'container_stack_tomcat' do
+  it 'detect Tomcat Deployable', app_fixture: 'container_stack_tomcat' do
     detected = component.detect
 
     expect(detected).to include("tomcat=#{version}")
   end
 
-  it 'should not detect Tomcat Deployable', app_fixture: 'container_tomcat' do
+  it 'not detect Tomcat Deployable', app_fixture: 'container_tomcat' do
     expect(component.detect).to be_nil
   end
 
   context do
     let(:version) { '7.0.47_10' }
 
-    it 'should fail when a malformed version is detected',
+    it 'fail when a malformed version is detected',
        app_fixture: 'container_stack_tomcat' do
 
       expect { component.detect }.to raise_error(/Malformed version/)
     end
   end
 
-  it 'should extract Tomcat from a GZipped TAR',
+  it 'extract Tomcat from a GZipped TAR',
      app_fixture:   'container_stack_tomcat',
      cache_fixture: 'stub-tomcat.tar.gz' do
 
@@ -56,7 +56,7 @@ describe JavaBuildpack::Container::StackTomcat do
     expect(sandbox + 'bin/catalina.sh').to exist
   end
 
-  it 'should link the wars to the webapp directory',
+  it 'link the wars to the webapp directory',
      app_fixture:   'container_stack_tomcat',
      cache_fixture: 'stub-tomcat.tar.gz' do
 
@@ -69,7 +69,7 @@ describe JavaBuildpack::Container::StackTomcat do
 
   context do
     let(:env) { 'root' }
-    it 'should link the wars to the ROOT directory',
+    it 'link the wars to the ROOT directory',
        app_fixture:   'container_stack_tomcat',
        cache_fixture: 'stub-tomcat.tar.gz' do
 
@@ -81,7 +81,7 @@ describe JavaBuildpack::Container::StackTomcat do
     end
   end
 
-  it 'should link the applib directory',
+  it 'link the applib directory',
      app_fixture:   'container_stack_tomcat',
      cache_fixture: 'stub-tomcat.tar.gz' do
 
@@ -92,7 +92,7 @@ describe JavaBuildpack::Container::StackTomcat do
     expect(jar).to exist
   end
 
-  it 'should link the endorsed directory',
+  it 'link the endorsed directory',
      app_fixture:   'container_stack_tomcat',
      cache_fixture: 'stub-tomcat.tar.gz' do
 
@@ -103,7 +103,7 @@ describe JavaBuildpack::Container::StackTomcat do
     expect(jar).to exist
   end
 
-  it 'should link the conf directory entries',
+  it 'link the conf directory entries',
      app_fixture:   'container_stack_tomcat',
      cache_fixture: 'stub-tomcat.tar.gz' do
 
@@ -119,21 +119,22 @@ describe JavaBuildpack::Container::StackTomcat do
 
   context do
     let(:env) { 'invalidarg' }
-    it 'should fail because we have a jvm arg the supplies memory settings',
+    it 'fail because we have a jvm arg the supplies memory settings',
        app_fixture:   'container_stack_tomcat',
        cache_fixture: 'stub-tomcat.tar.gz' do
       expect { component.compile }.to raise_error(RuntimeError)
     end
   end
 
-  it 'should return command',
+  it 'return command',
      app_fixture: 'container_stack_tomcat',
      cache_fixture: 'stub-tomcat.tar.gz' do
 
     component.release
 
+# rubocop:disable all
     expect(component.release).to eq("#{java_home.as_env_var} JAVA_OPTS=\"test-opt-2 test-opt-1 -Dsomevalue=10 -Dhttp.port=$PORT -Duser.timezone=America/Denver -Dsomevalue=10 -Dhttp.port=$PORT -Duser.timezone=America/Denver\" $PWD/.java-buildpack/stack_tomcat/bin/catalina.sh run")
-
+# rubocop:enable all
     expect(java_opts).to include('-Duser.timezone=America/Denver')
   end
 

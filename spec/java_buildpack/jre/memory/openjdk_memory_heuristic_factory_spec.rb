@@ -28,8 +28,8 @@ RSpec::Matchers.define :be_a_hash_like do |expected|
       expected['stack']['4m'] == actual['stack']['4m']
   end
 end
-
-# describe JavaBuildpack::Jre::OpenJDKMemoryHeuristicFactory do
+# rubocop:disable all
+#describe JavaBuildpack::Jre::OpenJDKMemoryHeuristicFactory do
 #
 #  let(:heuristics) { { 'c' => 'd' } }
 #
@@ -48,20 +48,21 @@ end
 #    }
 #  end
 #
-#  it 'should pass the appropriate constructor parameters for versions prior to 1.8' do
-#    allow(JavaBuildpack::Jre::WeightBalancingMemoryHeuristic).to receive(:new)
-#                                                                 .with(sizes, heuristics, %w(heap stack native permgen),
-#                                                                       be_a_hash_like(expected_java_memory_options))
+#  it 'passes the appropriate constructor parameters for versions prior to 1.8' do
+#    allow(JavaBuildpack::Jre::WeightBalancingMemoryHeuristic)
+#      .to receive(:new).with(sizes, heuristics, %w(heap stack native permgen),
+#                             be_a_hash_like(expected_java_memory_options))
 #
 #    described_class.create_memory_heuristic(sizes, heuristics, pre_8)
 #  end
 #
-#  it 'should pass the appropriate constructor parameters for versions 1.8 and higher' do
-#    allow(JavaBuildpack::Jre::WeightBalancingMemoryHeuristic).to receive(:new)
-#                                                                 .with(sizes, heuristics, %w(heap stack native metaspace),
-#                                                                       be_a_hash_like(expected_java_memory_options))
+#  it 'passes the appropriate constructor parameters for versions 1.8 and higher' do
+#    allow(JavaBuildpack::Jre::WeightBalancingMemoryHeuristic)
+#      .to receive(:new).with(sizes, heuristics, %w(heap stack native metaspace),
+#                             be_a_hash_like(expected_java_memory_options))
 #
 #    described_class.create_memory_heuristic(sizes, heuristics, post_8)
 #  end
 #
-# end
+#end
+# rubocop:enable all

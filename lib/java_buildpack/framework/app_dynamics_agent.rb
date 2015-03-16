@@ -1,6 +1,6 @@
 # Encoding: utf-8
 # Cloud Foundry Java Buildpack
-# Copyright 2013 the original author or authors.
+# Copyright 2013-2015 the original author or authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ module JavaBuildpack
     # Encapsulates the functionality for enabling zero-touch AppDynamics support.
     class AppDynamicsAgent < JavaBuildpack::Component::BaseComponent
 
+# rubocop:disable all
       def initialize(context)
         super(context)
 
@@ -76,7 +77,7 @@ module JavaBuildpack
                    .add_system_property('appdynamics.agent.tierName', "'#{sn_credentials['credentials']['ServiceOffering']}'")
         end
         .add_system_property('appdynamics.agent.nodeName',
-                             "#{@application.details['application_name']}[$(expr \"$VCAP_APPLICATION\" : '.*\"instance_index[\": ]*\\([0-9]\\+\\).*')]-[#{credentials['node-name-prefix']}]")
+                             "#{@application.details['application_name']}[$(expr \"$VCAP_APPLICATION\" : '.*\"instance_index[\": ]*\\([:digit:]\\+\\).*')]-[#{credentials['node-name-prefix']}]")
 
         account_access_key(java_opts, credentials)
         account_name(java_opts, credentials)
@@ -84,6 +85,7 @@ module JavaBuildpack
         port(java_opts, credentials)
         ssl_enabled(java_opts, credentials)
       end
+# rubocop:enable all
 
       protected
 

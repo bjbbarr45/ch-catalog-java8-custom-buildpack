@@ -46,7 +46,8 @@ module JavaBuildpack
       private
 
       def jmx_opts
-        "-javaagent:#{@droplet.java_opts.qualify_path(@droplet.sandbox + 'jmxmp-agent.jar')} -Dorg.lds.cloudfoundry.jmxmp.host=$VCAP_CONSOLE_IP -Dorg.lds.cloudfoundry.jmxmp.port=$VCAP_CONSOLE_PORT"
+        "-javaagent:#{@droplet.java_opts.qualify_path(@droplet.sandbox + 'jmxmp-agent.jar')} " \
+          '-Dorg.lds.cloudfoundry.jmxmp.host=$VCAP_CONSOLE_IP -Dorg.lds.cloudfoundry.jmxmp.port=$VCAP_CONSOLE_PORT'
       end
     end
   end

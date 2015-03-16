@@ -36,7 +36,11 @@ module JavaBuildpack
 
       # (see JavaBuildpack::Component::BaseComponent#release)
       def release
-        @droplet.java_opts.concat ["$(eval 'if [ -n \"$VCAP_DEBUG_MODE\" ]; then if [ \"$VCAP_DEBUG_MODE\" = \"run\" ]; then echo \"#{debug_run_opts}\"; elif [ \"$VCAP_DEBUG_MODE\" = \"suspend\" ]; then echo \"#{debug_suspend_opts}\"; fi fi')"]
+        @droplet.java_opts.concat ['$(eval \'if [ -n "$VCAP_DEBUG_MODE" ]; then ' \
+                                     'if [ "$VCAP_DEBUG_MODE" = "run" ]; then ' \
+                                     "echo \"#{debug_run_opts}\"; elif " \
+                                     '[ "$VCAP_DEBUG_MODE" = "suspend" ]; then ' \
+                                     "echo \"#{debug_suspend_opts}\"; fi fi')"]
       end
 
       private

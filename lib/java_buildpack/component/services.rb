@@ -1,6 +1,6 @@
 # Encoding: utf-8
 # Cloud Foundry Java Buildpack
-# Copyright 2013 the original author or authors.
+# Copyright 2013-2015 the original author or authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -46,7 +46,7 @@ module JavaBuildpack
             match = true
           else
             logger = JavaBuildpack::Logging::LoggerFactory.instance.get_logger Services
-            logger.warn do
+            logger.debug do
               "A service with a name label or tag matching #{filter} was found, but was missing one of the required" \
             " credentials #{required_credentials}"
             end

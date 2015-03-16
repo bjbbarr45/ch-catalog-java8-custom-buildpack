@@ -21,11 +21,11 @@ require 'java_buildpack/framework/jmxmp_agent'
 describe JavaBuildpack::Framework::JMXMPAgent do
   include_context 'component_helper'
 
-  it 'should detect always detect' do
+  it 'detect always detect' do
     expect(component.detect).to eq('jmxmp-agent')
   end
 
-  it 'should download the JMXMP agent',
+  it 'download the JMXMP agent',
      cache_fixture: 'stub-download.jar' do
 
     component.compile
@@ -33,7 +33,7 @@ describe JavaBuildpack::Framework::JMXMPAgent do
     expect(sandbox + 'jmxmp-agent.jar').to exist
   end
 
-  it 'should add the correct java opts', cache_fixture: 'stub-download.jar' do
+  it 'add the correct java opts', cache_fixture: 'stub-download.jar' do
 
     component.release
     expect(java_opts.last).to include('jmxmp-agent.jar')

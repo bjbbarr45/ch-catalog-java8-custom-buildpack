@@ -21,12 +21,12 @@ require 'java_buildpack/framework/debug'
 describe JavaBuildpack::Framework::Debug do
   include_context 'component_helper'
 
-  it 'should detect always detect' do
+  it 'detect always detect' do
     expect(component.detect).to eq('debug')
   end
 
   context do
-    it 'should add split java_opts to context' do
+    it 'add split java_opts to context' do
       component.release
 
       # We only want to check the opt that we add

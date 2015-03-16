@@ -43,6 +43,7 @@ module JavaBuildpack
         @tomcat_version ? [tomcat_id(@tomcat_version), 'StackTomcat=3.2+'] : nil
       end
 
+# rubocop:disable all
       # (see JavaBuildpack::Component::BaseComponent#compile)
       def compile
         env = @configuration[DEPLOYABLE_ENV]
@@ -92,7 +93,8 @@ module JavaBuildpack
 
       DEPLOYABLE_ENV = 'env'.freeze
 
-      CONFIG_FILES = ['catalina.policy', 'catalina.properties', 'context.xml', 'logging.properties', 'server.xml', 'web.xml']
+      CONFIG_FILES = ['catalina.policy', 'catalina.properties', 'context.xml',
+                        'logging.properties', 'server.xml', 'web.xml']
 
       def download_tomcat
         download(@tomcat_version, @tomcat_uri) { |file| expand file }
@@ -129,7 +131,7 @@ module JavaBuildpack
 
       def copy_env_files_to_conf(env)
         FileUtils.mkdir_p(tomcat_conf)
-        CONFIG_FILES.each do | file |
+        CONFIG_FILES.each do |file|
           puts "Finding environment for #{file} and #{env}"
           deployable_file = find_deployable_file(file, env)
           next if deployable_file.nil?
@@ -192,8 +194,9 @@ module JavaBuildpack
         end
         file_found
       end
+# rubocop:enable all
 
-      # rubocop:disable all
+# rubocop:disable all
       def properties(props_file)
         properties = {}
         IO.foreach(props_file.to_path) do |line|
@@ -211,11 +214,12 @@ module JavaBuildpack
         end
         properties
       end
-      # rubocop:enable all
 
       def java_opts(env = 'cf')
         props = {}
-        props = properties(@application.root.join('jvmargs.properties')) if @application.root.join('jvmargs.properties').exist?
+        if @application.root.join('jvmargs.properties').exist?
+          props = properties(@application.root.join('jvmargs.properties'))
+        end
         args = {}
         props.map do |k, v|
           next if k.rindex('jvmarg').nil?
@@ -225,6 +229,7 @@ module JavaBuildpack
         end
         args.values
       end
+# rubocop:enable all
 
       def deployable?
         env = @configuration[DEPLOYABLE_ENV]
