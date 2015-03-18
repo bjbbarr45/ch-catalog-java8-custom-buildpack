@@ -25,7 +25,7 @@
 		<Engine defaultHost='localhost' name='Catalina'>
 			<Valve className="org.apache.catalina.valves.RemoteIpValve" protocolHeader="X-Forwarded-Scheme" />
 			<Valve className="com.gopivotal.cloudfoundry.tomcat.logging.access.CloudFoundryAccessLoggingValve"
-				pattern='[ACCESS] %{org.apache.catalina.AccessLog.RemoteAddr}r %l %t %D %F %B %S vcap_request_id:%{X-Vcap-Request-Id}i User-Agent:%{User-Agent}i Accept:%{Accept}i Accept-Encoding:%{Accept-Encoding}i Accept-Encoding:%{Accept-Encoding}i'
+				pattern='[ACCESS] %{org.apache.catalina.AccessLog.RemoteAddr}r %l %t %D %F %B %S vcap_request_id:%{X-Vcap-Request-Id}i User-Agent:%{User-Agent}i Accept:%{Accept}i Accept-Encoding:%{Accept-Encoding}i Accept-Encoding:%{Accept-Encoding}i Content-Type:%{Content-Type}i'
 				enabled="${access.logging.enabled}" />
 			<Host name='localhost'>
 				<Listener className="com.gopivotal.cloudfoundry.tomcat.lifecycle.ApplicationStartupFailureDetectingLifecycleListener" />
