@@ -92,7 +92,7 @@ describe JavaBuildpack::Framework::AppDynamicsAgent do
         expect(java_opts).to include("-Dappdynamics.agent.tierName='Some CI - Development'")
         expect(java_opts).to include('-Dappdynamics.agent.nodeName=test-application-name' \
                                        '[$(expr "$VCAP_APPLICATION" : ' \
-                                       '\'.*"instance_index[": ]*\\([:digit:]\\+\\).*\')]' \
+                                       '\'.*"instance_index[": ]*\\([0-9]\\+\\).*\')]' \
                                        '-[cf]')
       end
 
