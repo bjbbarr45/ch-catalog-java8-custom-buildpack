@@ -21,7 +21,10 @@ require 'java_buildpack/framework/app_dynamics_agent'
 describe JavaBuildpack::Framework::AppDynamicsAgent do
   include_context 'component_helper'
 
-  let(:configuration) { { 'default_tier_name' => 'test-tier-name' } }
+  let(:configuration) do
+    { 'default_tier_name' => 'test-tier-name',
+      'default_node_name' => "$(expr \"$VCAP_APPLICATION\" : '.*instance_index[\": ]*\\([[:digit:]]*\\).*')" }
+  end
 
   it 'does not detect without app-dynamics-n/a service' do
     expect(component.detect).to be_nil

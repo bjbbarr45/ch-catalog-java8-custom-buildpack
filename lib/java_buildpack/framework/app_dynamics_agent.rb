@@ -64,6 +64,7 @@ module JavaBuildpack
         sm_credentials = @application.services.find_service(SM_FILTER)
         sn_credentials = @application.services.find_service(SN_FILTER)
         java_opts   = @droplet.java_opts
+        java_opts.add_javaagent(@droplet.sandbox + 'javaagent.jar')
 
         java_opts
         .add_javaagent(@droplet.sandbox + 'app-dynamics-hack-pre.jar')
@@ -104,12 +105,11 @@ module JavaBuildpack
 
       SN_FILTER = /ServiceNow/.freeze
 
-      def tier_name(credentials)
-        credentials.key?('tier-name') ? credentials['tier-name'] : @configuration['default_tier_name']
-      end
-
-      def application_name
-        @application.details['application_name']
+      def application_name(java_opts, credentials)
+        name = credentials.key?('application-name') ? credentials['application-name'] :
+          @configuration['default_application_name']
+        name = name ? name : @application.details['application_name']
+        java_opts.add_system_property('appdynamics.agent.applicationName', "'#{name}'")
       end
 
       def account_access_key(java_opts, credentials)
@@ -128,6 +128,11 @@ module JavaBuildpack
         java_opts.add_system_property 'appdynamics.controller.hostName', host_name
       end
 
+      def node_name(java_opts, credentials)
+        name = credentials.key?('node-name') ? credentials['node-name'] : @configuration['default_node_name']
+        java_opts.add_system_property('appdynamics.agent.nodeName', "#{name}")
+      end
+
       def port(java_opts, credentials)
         port = credentials['port']
         java_opts.add_system_property 'appdynamics.controller.port', port if port
@@ -136,6 +141,11 @@ module JavaBuildpack
       def ssl_enabled(java_opts, credentials)
         ssl_enabled = credentials['ssl-enabled']
         java_opts.add_system_property 'appdynamics.controller.ssl.enabled', ssl_enabled if ssl_enabled
+      end
+
+      def tier_name(java_opts, credentials)
+        name = credentials.key?('tier-name') ? credentials['tier-name'] : @configuration['default_tier_name']
+        java_opts.add_system_property('appdynamics.agent.tierName', "'#{name}'")
       end
     end
   end

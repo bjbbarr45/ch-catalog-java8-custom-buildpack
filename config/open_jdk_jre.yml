@@ -14,7 +14,7 @@
 # limitations under the License.
 
 # Configuration for JRE repositories keyed by vendor
-# To go back to Java 7, permgen should be used instead of metaspace.  Please see the documentation for more detail.
+# If Java 7 is required, permgen will be used instead of metaspace. Please see the documentation for more detail.
 ---
 repository_root: "{default.repository.root}/openjdk/{platform}/{architecture}"
 version: 1.7.0_+
