@@ -34,7 +34,8 @@ module JavaBuildpack
           @tomcat_version, @tomcat_uri   = JavaBuildpack::Repository::ConfiguredItem
           .find_item(@component_name, @configuration) { |candidate_version| candidate_version.check_size(3) }
         else
-          @tomcat_version, @tomcat_uri   = nil, nil
+          @tomcat_version = nil
+          @tomcat_uri = nil
         end
       end
 

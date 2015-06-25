@@ -52,7 +52,6 @@ describe JavaBuildpack::Container::TomcatInstance do
      app_fixture:   'container_tomcat',
      cache_fixture: 'stub-tomcat.tar.gz' do
 
-# rubocop:disable all
     component.compile
     expect((sandbox + 'conf/context.xml').read).to match(/<Context allowLinking='true'>/)
     expect((sandbox + 'conf/server.xml').read)
@@ -72,7 +71,6 @@ describe JavaBuildpack::Container::TomcatInstance do
         .not_to match(%r{<Listener className='org.apache.catalina.core.JasperListener'/>})
     end
   end
-# rubocop:enable all
 
   it 'links only the application files and directories to the ROOT webapp',
      app_fixture:   'container_tomcat_with_index',
