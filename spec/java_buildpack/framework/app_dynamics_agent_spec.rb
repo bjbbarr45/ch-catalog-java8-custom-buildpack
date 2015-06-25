@@ -90,7 +90,6 @@ describe JavaBuildpack::Framework::AppDynamicsAgent do
         expect(java_opts).to include('-javaagent:$PWD/.java-buildpack/app_dynamics_agent/app-dynamics-hack-post.jar')
         expect(java_opts).to include('-javaagent:$PWD/.java-buildpack/app_dynamics_agent/javaagent.jar')
         expect(java_opts).to include('-Dappdynamics.controller.hostName=test-host-name')
-
         expect(java_opts).to include("-Dappdynamics.agent.applicationName='Portfolio'")
         expect(java_opts).to include("-Dappdynamics.agent.tierName='Some CI - Development'")
         expect(java_opts).to include('-Dappdynamics.agent.nodeName=test-application-name' \

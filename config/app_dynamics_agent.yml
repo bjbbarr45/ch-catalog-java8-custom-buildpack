@@ -15,14 +15,13 @@
 
 # Configuration for the New Relic framework
 ---
-version: 4.0.+
-repository_root: "{default.repository.root}/app-dynamics"
+version: 4.0.7_0
+repository_root: ! '{default.repository.root}/app-dynamics'
 pre_agent:
   version: 1.0.+
-  repository_root: "{default.repository.root}/app-dynamics/pre"
+  repository_root: ! '{default.repository.root}/app-dynamics/pre'
 post_agent:
   version: 1.0.+
-  repository_root: "{default.repository.root}/app-dynamics/post"
-default_tier_name: cf
-default_node_name: "$(expr \"$VCAP_APPLICATION\" : \'.*instance_index[\": ]*\\([[:digit:]]*\\).*\')"
-default_tier_name: CloudFoundry
+  repository_root: ! '{default.repository.root}/app-dynamics/post'
+default_node_name: NotUsed
+default_tier_name: NotUsed

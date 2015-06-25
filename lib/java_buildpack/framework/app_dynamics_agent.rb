@@ -64,29 +64,19 @@ module JavaBuildpack
         sm_credentials = @application.services.find_service(SM_FILTER)
         sn_credentials = @application.services.find_service(SN_FILTER)
         java_opts   = @droplet.java_opts
+        java_opts.add_javaagent(@droplet.sandbox + 'app-dynamics-hack-pre.jar')
         java_opts.add_javaagent(@droplet.sandbox + 'javaagent.jar')
+        java_opts.add_javaagent(@droplet.sandbox + 'app-dynamics-hack-post.jar')
 
-        java_opts
-        .add_javaagent(@droplet.sandbox + 'app-dynamics-hack-pre.jar')
-        .add_javaagent(@droplet.sandbox + 'javaagent.jar')
-        .add_javaagent(@droplet.sandbox + 'app-dynamics-hack-post.jar')
-        if sm_credentials
-          java_opts.add_system_property('appdynamics.agent.applicationName', "'#{sm_credentials['credentials']['smData']['PortfolioName']}'")
-                   .add_system_property('appdynamics.agent.tierName', "'#{sm_credentials['credentials']['smData']['CIName']}'")
-        elsif sn_credentials
-          java_opts.add_system_property('appdynamics.agent.applicationName', "'#{sn_credentials['credentials']['PortfolioName']}'")
-                   .add_system_property('appdynamics.agent.tierName', "'#{sn_credentials['credentials']['ServiceOffering']}'")
-        end
-        .add_system_property('appdynamics.agent.nodeName',
-                             "#{@application.details['application_name']}[$(expr \"$VCAP_APPLICATION\" : '.*\"instance_index[\": ]*\\([0-9]\\+\\).*')]-[#{credentials['node-name-prefix']}]")
-
-        account_access_key(java_opts, credentials)
-        account_name(java_opts, credentials)
-        host_name(java_opts, credentials)
-        port(java_opts, credentials)
-        ssl_enabled(java_opts, credentials)
+        application_name java_opts, credentials
+        tier_name java_opts, credentials
+        node_name java_opts, credentials
+        account_access_key java_opts, credentials
+        account_name java_opts, credentials
+        host_name java_opts, credentials
+        port java_opts, credentials
+        ssl_enabled java_opts, credentials
       end
-# rubocop:enable all
 
       protected
 
@@ -106,10 +96,11 @@ module JavaBuildpack
       SN_FILTER = /ServiceNow/.freeze
 
       def application_name(java_opts, credentials)
-        name = credentials.key?('application-name') ? credentials['application-name'] :
-          @configuration['default_application_name']
-        name = name ? name : @application.details['application_name']
-        java_opts.add_system_property('appdynamics.agent.applicationName', "'#{name}'")
+        sm_credentials = @application.services.find_service(SM_FILTER)
+        sn_credentials = @application.services.find_service(SN_FILTER)
+
+        java_opts.add_system_property('appdynamics.agent.applicationName', "'#{sm_credentials['credentials']['smData']['PortfolioName']}'") if sm_credentials
+        java_opts.add_system_property('appdynamics.agent.applicationName', "'#{sn_credentials['credentials']['PortfolioName']}'") if sn_credentials
       end
 
       def account_access_key(java_opts, credentials)
@@ -129,8 +120,8 @@ module JavaBuildpack
       end
 
       def node_name(java_opts, credentials)
-        name = credentials.key?('node-name') ? credentials['node-name'] : @configuration['default_node_name']
-        java_opts.add_system_property('appdynamics.agent.nodeName', "#{name}")
+        java_opts.add_system_property('appdynamics.agent.nodeName',
+                             "#{@application.details['application_name']}[$(expr \"$VCAP_APPLICATION\" : '.*\"instance_index[\": ]*\\([0-9]\\+\\).*')]-[#{credentials['node-name-prefix']}]")
       end
 
       def port(java_opts, credentials)
@@ -144,9 +135,13 @@ module JavaBuildpack
       end
 
       def tier_name(java_opts, credentials)
-        name = credentials.key?('tier-name') ? credentials['tier-name'] : @configuration['default_tier_name']
-        java_opts.add_system_property('appdynamics.agent.tierName', "'#{name}'")
+        sm_credentials = @application.services.find_service(SM_FILTER)
+        sn_credentials = @application.services.find_service(SN_FILTER)
+
+        java_opts.add_system_property('appdynamics.agent.tierName', "'#{sm_credentials['credentials']['smData']['CIName']}'") if sm_credentials
+        java_opts.add_system_property('appdynamics.agent.tierName', "'#{sn_credentials['credentials']['ServiceOffering']}'") if sn_credentials
       end
     end
   end
+  # rubocop:enable all
 end
