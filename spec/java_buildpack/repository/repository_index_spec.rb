@@ -24,7 +24,7 @@ require 'java_buildpack/util/configuration_utils'
 require 'java_buildpack/util/cache/download_cache'
 require 'java_buildpack/util/tokenized_version'
 
-#describe JavaBuildpack::Repository::RepositoryIndex do
+# describe JavaBuildpack::Repository::RepositoryIndex do
 #  include_context 'application_helper'
 #  include_context 'logging_helper'
 #
@@ -129,4 +129,4 @@ require 'java_buildpack/util/tokenized_version'
 #      .to raise_error('Unable to determine platform')
 #  end
 #
-#end
+# end
