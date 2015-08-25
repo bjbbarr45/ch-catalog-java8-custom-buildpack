@@ -64,6 +64,7 @@ module JavaBuildpack
         sm_credentials = @application.services.find_service(SM_FILTER)
         sn_credentials = @application.services.find_service(SN_FILTER)
         java_opts   = @droplet.java_opts
+
         java_opts.add_javaagent(@droplet.sandbox + 'app-dynamics-hack-pre.jar')
         java_opts.add_javaagent(@droplet.sandbox + 'javaagent.jar')
         java_opts.add_javaagent(@droplet.sandbox + 'app-dynamics-hack-post.jar')
