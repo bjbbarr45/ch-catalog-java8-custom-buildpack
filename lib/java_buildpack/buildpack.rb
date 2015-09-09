@@ -19,6 +19,7 @@ require 'java_buildpack/buildpack_version'
 require 'java_buildpack/component/additional_libraries'
 require 'java_buildpack/component/application'
 require 'java_buildpack/component/droplet'
+require 'java_buildpack/component/environment_variables'
 require 'java_buildpack/component/immutable_java_home'
 require 'java_buildpack/component/java_opts'
 require 'java_buildpack/component/mutable_java_home'
@@ -57,7 +58,7 @@ module JavaBuildpack
       puts BUILDPACK_MESSAGE % @buildpack_version
 
       container = component_detection('container', @containers, true).first
-      fail 'No container can run this application' unless container
+      no_container unless container
 
       component_detection('JRE', @jres, true).first.compile
       component_detection('framework', @frameworks, false).each(&:compile)
@@ -70,7 +71,7 @@ module JavaBuildpack
     # @return [String] The payload required to run the application.
     def release
       container = component_detection('container', @containers, true).first
-      fail 'No container can run this application' unless container
+      no_container unless container
 
       commands = []
       commands << component_detection('JRE', @jres, true).first.release
@@ -104,24 +105,26 @@ module JavaBuildpack
 
       log_environment_variables
 
-      additional_libraries = Component::AdditionalLibraries.new app_dir
-      mutable_java_home    = Component::MutableJavaHome.new
-      immutable_java_home  = Component::ImmutableJavaHome.new mutable_java_home, app_dir
-      java_opts            = Component::JavaOpts.new app_dir
+      mutable_java_home   = Component::MutableJavaHome.new
+      immutable_java_home = Component::ImmutableJavaHome.new mutable_java_home, app_dir
 
-      instantiate_components(additional_libraries, app_dir, application, immutable_java_home, java_opts,
-                             mutable_java_home)
+      component_info = {
+        'additional_libraries' => Component::AdditionalLibraries.new(app_dir),
+        'application'          => application,
+        'env_vars'             => Component::EnvironmentVariables.new(app_dir),
+        'java_opts'            => Component::JavaOpts.new(app_dir),
+        'app_dir'              => app_dir
+      }
+
+      instantiate_components(mutable_java_home, immutable_java_home, component_info)
     end
 
-    def instantiate_components(additional_libraries, app_dir, application, immutable_java_home, java_opts,
-                               mutable_java_home)
-      components  = JavaBuildpack::Util::ConfigurationUtils.load 'components'
-      @jres       = instantiate(components['jres'], additional_libraries, application, mutable_java_home, java_opts,
-                                app_dir)
-      @frameworks = instantiate(components['frameworks'], additional_libraries, application, immutable_java_home,
-                                java_opts, app_dir)
-      @containers = instantiate(components['containers'], additional_libraries, application, immutable_java_home,
-                                java_opts, app_dir)
+    def instantiate_components(mutable_java_home, immutable_java_home, component_info)
+      components = JavaBuildpack::Util::ConfigurationUtils.load 'components'
+
+      @jres       = instantiate(components['jres'], mutable_java_home, component_info)
+      @frameworks = instantiate(components['frameworks'], immutable_java_home, component_info)
+      @containers = instantiate(components['containers'], immutable_java_home, component_info)
     end
 
     def component_detection(type, components, unique)
@@ -146,19 +149,21 @@ module JavaBuildpack
       [detected, tags]
     end
 
-    def instantiate(components, additional_libraries, application, java_home, java_opts, root)
+    def instantiate(components, java_home, component_info)
       components.map do |component|
         @logger.debug { "Instantiating #{component}" }
 
         require_component(component)
 
         component_id = component.split('::').last.snake_case
-        context      = {
-          application:   application,
-          configuration: Util::ConfigurationUtils.load(component_id),
-          droplet:       Component::Droplet.new(additional_libraries, component_id, java_home, java_opts, root)
-        }
 
+        context = {
+          application:   component_info['application'],
+          configuration: Util::ConfigurationUtils.load(component_id),
+          droplet:       Component::Droplet.new(component_info['additional_libraries'], component_id,
+                                                component_info['env_vars'], java_home,
+                                                component_info['java_opts'], component_info['app_dir'])
+        }
         component.constantize.new(context)
       end
     end
@@ -169,6 +174,12 @@ module JavaBuildpack
 
     def names(components)
       components.map { |component| component.class.to_s.space_case }.join(', ')
+    end
+
+    def no_container
+      fail 'No container can run this application. Please ensure that you’ve pushed a valid JVM artifact or ' \
+           'artifacts using the -p command line argument or path manifest entry. Information about valid JVM ' \
+           'artifacts can be found at https://github.com/cloudfoundry/java-buildpack#additional-documentation. '
     end
 
     def require_component(component)

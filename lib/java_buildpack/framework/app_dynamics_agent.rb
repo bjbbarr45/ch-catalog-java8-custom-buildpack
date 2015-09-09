@@ -50,7 +50,7 @@ module JavaBuildpack
 
       # (see JavaBuildpack::Component::BaseComponent#compile)
       def compile
-        download_zip(@version, @uri, false)
+        download_zip(false, @droplet.sandbox, 'AppDynamics Agent')
         download_jar(@pre_version, @pre_uri, 'app-dynamics-hack-pre.jar', @droplet.sandbox,
                      'App Dynamics Pre Hack')
         download_jar(@post_version, @post_uri, 'app-dynamics-hack-post.jar', @droplet.sandbox,
@@ -90,7 +90,7 @@ module JavaBuildpack
 
       private
 
-      FILTER = /app-dynamics/.freeze
+      FILTER = /app[-]?dynamics/.freeze
 
       SM_FILTER = /servicemanager-service/.freeze
 

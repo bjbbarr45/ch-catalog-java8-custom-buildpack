@@ -23,5 +23,6 @@ pre_agent:
 post_agent:
   version: 1.0.+
   repository_root: ! '{default.repository.root}/app-dynamics/post'
+default_application_name: NotUsed
 default_node_name: NotUsed
 default_tier_name: NotUsed
