@@ -22,7 +22,7 @@ jre:
 memory_calculator:
   version: 2.0.0_RELEASE
   repository_root: ! '{default.repository.root}/memory-calculator/{platform}/{architecture}'
-  stack_threads: 
+  stack_threads: 250
   memory_sizes:
     metaspace: 128m..
     permgen: 128m..
@@ -33,6 +33,6 @@ memory_calculator:
     permgen: 5
     stack: 5
   memory_initials:
-    heap: 100%
-    metaspace: 100%
-    permgen: 100%
+    heap: 5%
+    metaspace: 5%
+    permgen: 5%
