@@ -28,7 +28,7 @@ memory_calculator:
     permgen: 128m..
     stack: 228k..
   memory_heuristics:
-    heap: 75
+    heap: 80
     metaspace: 5
     native: 10
     permgen: 5
