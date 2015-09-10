@@ -26,6 +26,7 @@ memory_calculator:
   memory_sizes:
     metaspace: 128m..
     permgen: 128m..
+    stack: 256k..
   memory_heuristics:
     heap: 75
     metaspace: 5
