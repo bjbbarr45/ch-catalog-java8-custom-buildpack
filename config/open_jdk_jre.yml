@@ -24,13 +24,13 @@ memory_calculator:
   repository_root: ! '{default.repository.root}/memory-calculator/{platform}/{architecture}'
   stack_threads: 250
   memory_sizes:
-    metaspace: 128m..
-    permgen: 128m..
-    stack: 228k..
+    metaspace: 128m..384m
+    permgen: 128m..384m
+    stack: 228k..2m
   memory_heuristics:
-    heap: 80
+    heap: 75
     metaspace: 5
-    native: 10
+    native: 15
     permgen: 5
     stack: 5
   memory_initials:
