@@ -50,7 +50,7 @@ module JavaBuildpack
 
       # (see JavaBuildpack::Component::BaseComponent#compile)
       def compile
-        download_zip(false, @droplet.sandbox, 'AppDynamics Agent')
+        download_zip(@version, @uri, false)
         download_jar(@pre_version, @pre_uri, 'app-dynamics-hack-pre.jar', @droplet.sandbox,
                      'App Dynamics Pre Hack')
         download_jar(@post_version, @post_uri, 'app-dynamics-hack-post.jar', @droplet.sandbox,
