@@ -16,4 +16,4 @@
 # JAVA_OPTS configuration
 ---
 from_environment: true
-java_opts: -server -XX:+UseG1GC -XX:MinHeapFreeRatio=5 -XX:MaxHeapFreeRatio=25 -Djava.awt.headless=true
+java_opts: -server -XX:+UseG1GC -XX:MinHeapFreeRatio=5 -XX:MaxHeapFreeRatio=25 -Djava.awt.headless=true -Djava.net.preferIPv4Stack=true
