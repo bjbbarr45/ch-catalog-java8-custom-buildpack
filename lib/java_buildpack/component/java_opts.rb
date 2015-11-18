@@ -105,7 +105,7 @@ module JavaBuildpack
       #
       # @return [String] the contents as an environment variable
       def as_env_var
-        java_opts_joined = join(' ').sub! "SJ5b2m7d1$354","SJ5b2m7d1\$354" 
+        java_opts_joined = join(' ').sub! "SJ5b2m7d1$354","SJ5b2m7d1\\$354" 
         "JAVA_OPTS=\"#{java_opts_joined}\""
       end
 
