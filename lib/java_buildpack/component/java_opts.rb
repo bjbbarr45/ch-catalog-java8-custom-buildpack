@@ -107,7 +107,7 @@ module JavaBuildpack
       def as_env_var
         java_opts_joined = join(' ')
         if java_opts_joined.include? "appdynamics.agent.accountAccessKey"
-          return "JAVA_OPTS=\"#{java_opts_joined.sub! '$', '\\$'}\""
+          return "JAVA_OPTS=\"#{java_opts_joined.sub! '\$', '\\$'}\""
         end
         return "JAVA_OPTS=\"#{java_opts_joined}\""
       end
