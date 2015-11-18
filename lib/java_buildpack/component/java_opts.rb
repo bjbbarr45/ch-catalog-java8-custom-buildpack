@@ -105,7 +105,11 @@ module JavaBuildpack
       #
       # @return [String] the contents as an environment variable
       def as_env_var
-        "JAVA_OPTS=\"#{join(' ').sub! '$', '\\$'}\""
+        java_opts_joined = join(' ')
+        if java_opts_joined.include? "appdynamics.agent.accountAccessKey"
+          return "JAVA_OPTS=\"#{java_opts_joined.sub! '$', '\\$'}\""
+        end
+        return "JAVA_OPTS=\"#{java_opts_joined}\""
       end
 
       private
