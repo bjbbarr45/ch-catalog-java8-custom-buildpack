@@ -27,13 +27,21 @@ module JavaBuildpack
       # (see JavaBuildpack::Component::BaseComponent#compile)
       def compile
         download_zip(false, @droplet.sandbox, 'AppDynamics Agent')
+        @droplet.copy_resources
         pre_version, pre_uri   = JavaBuildpack::Repository::ConfiguredItem
           .find_item(@component_name, @configuration['pre_agent'])
-        download_jar(pre_version, pre_uri, 'app-dynamics-hack-pre.jar', @droplet.sandbox, 'App Dynamics Pre Hack')
+        download(pre_version, pre_uri, 'App Dynamics Pre Hack') do |file|
+          FileUtils.mkdir_p @droplet.sandbox
+          FileUtils.cp_r(file.path, @droplet.sandbox + 'app-dynamics-hack-pre.jar')
+        end
+        #download_jar(pre_version, pre_uri, 'app-dynamics-hack-pre.jar', @droplet.sandbox, 'App Dynamics Pre Hack')
         post_version, post_uri = JavaBuildpack::Repository::ConfiguredItem
           .find_item(@component_name, @configuration['post_agent'])
-        download_jar(post_version, post_uri, 'app-dynamics-hack-post.jar', @droplet.sandbox, 'App Dynamics Post Hack')
-        @droplet.copy_resources
+        download(post_version, post_uri, 'App Dynamics Post Hack') do |file|
+          FileUtils.mkdir_p @droplet.sandbox
+          FileUtils.cp_r(file.path, @droplet.sandbox + 'app-dynamics-hack-post.jar')
+        end
+        #download_jar(post_version, post_uri, 'app-dynamics-hack-post.jar', @droplet.sandbox, 'App Dynamics Post Hack')
       end
 
       # rubocop:disable all
