@@ -1,6 +1,6 @@
 # Encoding: utf-8
 # Cloud Foundry Java Buildpack
-# Copyright 2013-2015 the original author or authors.
+# Copyright 2013 the original author or authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,16 +17,17 @@
 require 'java_buildpack/component/base_component'
 require 'java_buildpack/framework'
 require 'java_buildpack/util/dash_case'
+require 'shellwords'
 
 module JavaBuildpack
   module Framework
 
-    # Encapsulates the functionality for contributing Java debug options to an application.
-    class Debug < JavaBuildpack::Component::BaseComponent
+    # Encapsulates the functionality for contributing custom Java options to an application.
+    class DebugDea < JavaBuildpack::Component::BaseComponent
 
       # (see JavaBuildpack::Component::BaseComponent#detect)
       def detect
-        enabled? ? Debug.to_s.dash_case : nil
+        DebugDea.to_s.dash_case
       end
 
       # (see JavaBuildpack::Component::BaseComponent#compile)
@@ -35,28 +36,22 @@ module JavaBuildpack
 
       # (see JavaBuildpack::Component::BaseComponent#release)
       def release
-        @droplet.java_opts.add_preformatted_options debug
+        @droplet.java_opts.concat ['$(eval \'if [ -n "$VCAP_DEBUG_MODE" ]; then ' \
+                                     'if [ "$VCAP_DEBUG_MODE" = "run" ]; then ' \
+                                     "echo \"#{debug_run_opts}\"; elif " \
+                                     '[ "$VCAP_DEBUG_MODE" = "suspend" ]; then ' \
+                                     "echo \"#{debug_suspend_opts}\"; fi fi')"]
       end
 
       private
 
-      def debug
-        "-agentlib:jdwp=transport=dt_socket,server=y,address=#{port},suspend=#{suspend}"
+      def debug_run_opts
+        '-Xdebug -Xrunjdwp:transport=dt_socket,address=$VCAP_DEBUG_PORT,server=y,suspend=n'
       end
 
-      def enabled?
-        @configuration['enabled']
+      def debug_suspend_opts
+        '-Xdebug -Xrunjdwp:transport=dt_socket,address=$VCAP_DEBUG_PORT,server=y,suspend=y'
       end
-
-      def port
-        @configuration['port'] || 8000
-      end
-
-      def suspend
-        @configuration['suspend'] ? 'y' : 'n'
-      end
-
     end
-
   end
 end

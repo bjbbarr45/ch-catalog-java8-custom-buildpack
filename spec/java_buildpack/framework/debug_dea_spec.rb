@@ -1,5 +1,6 @@
+# Encoding: utf-8
 # Cloud Foundry Java Buildpack
-# Copyright 2013-2015 the original author or authors.
+# Copyright 2013 the original author or authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,7 +14,23 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Configuration for the Postgresql JDBC framework
----
-version: 9.4.1204
-repository_root: ! '{default.repository.root}/postgresql-jdbc'
+require 'spec_helper'
+require 'component_helper'
+require 'java_buildpack/framework/debug_dea'
+
+describe JavaBuildpack::Framework::DebugDea do
+  include_context 'component_helper'
+
+  it 'detect always detect' do
+    expect(component.detect).to eq('debug-dea')
+  end
+
+  context do
+    it 'add split java_opts to context' do
+      component.release
+
+      # We only want to check the opt that we add
+      expect(java_opts.last).to include('$VCAP_DEBUG_PORT')
+    end
+  end
+end

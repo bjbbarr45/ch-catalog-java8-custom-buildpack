@@ -22,47 +22,24 @@ module JavaBuildpack
   module Framework
 
     # Encapsulates the functionality for enabling zero-touch AppDynamics support.
-    class AppDynamicsAgent < JavaBuildpack::Component::BaseComponent
-
-# rubocop:disable all
-      def initialize(context)
-        super(context)
-
-        if supports?
-          @version, @uri = JavaBuildpack::Repository::ConfiguredItem
-            .find_item(@component_name, @configuration)
-          @pre_version, @pre_uri   = JavaBuildpack::Repository::ConfiguredItem
-            .find_item(@component_name, @configuration['pre_agent'])
-          @post_version, @post_uri = JavaBuildpack::Repository::ConfiguredItem
-            .find_item(@component_name, @configuration['post_agent'])
-        else
-          @version = nil
-          @uri     = nil
-          @pre_version, @pre_uri = nil
-          @post_version, @post_uri = nil
-        end
-      end
-
-      # (see JavaBuildpack::Component::BaseComponent#detect)
-      def detect
-        @version ? "#{AppDynamicsAgent.to_s.dash_case}=#{@version}" : nil
-      end
+    class AppDynamicsAgent < JavaBuildpack::Component::VersionedDependencyComponent
 
       # (see JavaBuildpack::Component::BaseComponent#compile)
       def compile
         download_zip(@version, @uri, false)
-        download_jar(@pre_version, @pre_uri, 'app-dynamics-hack-pre.jar', @droplet.sandbox,
-                     'App Dynamics Pre Hack')
-        download_jar(@post_version, @post_uri, 'app-dynamics-hack-post.jar', @droplet.sandbox,
-                     'App Dynamics Post Hack')
+        pre_version, pre_uri   = JavaBuildpack::Repository::ConfiguredItem
+          .find_item(@component_name, @configuration['pre_agent'])
+        download_jar(pre_version, pre_uri, 'app-dynamics-hack-pre.jar', @droplet.sandbox, 'App Dynamics Pre Hack')
+        post_version, post_uri = JavaBuildpack::Repository::ConfiguredItem
+          .find_item(@component_name, @configuration['post_agent'])
+        download_jar(post_version, post_uri, 'app-dynamics-hack-post.jar', @droplet.sandbox, 'App Dynamics Post Hack')
         @droplet.copy_resources
       end
 
+      # rubocop:disable all
       # (see JavaBuildpack::Component::BaseComponent#release)
       def release
         credentials = @application.services.find_service(FILTER)['credentials']
-        sm_credentials = @application.services.find_service(SM_FILTER)
-        sn_credentials = @application.services.find_service(SN_FILTER)
         java_opts   = @droplet.java_opts
 
         java_opts.add_javaagent(@droplet.sandbox + 'app-dynamics-hack-pre.jar')
@@ -78,35 +55,30 @@ module JavaBuildpack
         port java_opts, credentials
         ssl_enabled java_opts, credentials
       end
+      # rubocop:enable all
 
       protected
 
-      # @macro versioned_dependency_component_supports
+      # (see JavaBuildpack::Component::VersionedDependencyComponent#supports?)
       def supports?
-        @application.services.one_service?(FILTER) &&
-          (@application.services.one_service?(SM_FILTER) ||
-            @application.services.one_service?(SN_FILTER))
+        @application.services.one_service? FILTER, 'host-name'
       end
 
       private
 
       FILTER = /app[-]?dynamics/.freeze
 
-      SM_FILTER = /servicemanager-service/.freeze
-
-      SN_FILTER = /ServiceNow/.freeze
+      private_constant :FILTER
 
       def application_name(java_opts, credentials)
-        sm_credentials = @application.services.find_service(SM_FILTER)
-        sn_credentials = @application.services.find_service(SN_FILTER)
-
-        java_opts.add_system_property('appdynamics.agent.applicationName', "'#{sm_credentials['credentials']['smData']['PortfolioName']}'") if sm_credentials
-        java_opts.add_system_property('appdynamics.agent.applicationName', "'#{sn_credentials['credentials']['PortfolioName']}'") if sn_credentials
+        name = credentials['application-name'] || @configuration['default_application_name'] ||
+          @application.details['application_name']
+        java_opts.add_system_property('appdynamics.agent.applicationName', "#{name}")
       end
 
       def account_access_key(java_opts, credentials)
         account_access_key = credentials['account-access-key']
-        java_opts.add_system_property 'appdynamics.agent.accountAccessKey', "'#{account_access_key}'" if account_access_key
+        java_opts.add_system_property 'appdynamics.agent.accountAccessKey', account_access_key if account_access_key
       end
 
       def account_name(java_opts, credentials)
@@ -121,8 +93,8 @@ module JavaBuildpack
       end
 
       def node_name(java_opts, credentials)
-        java_opts.add_system_property('appdynamics.agent.nodeName',
-                             "#{@application.details['application_name']}[$(expr \"$VCAP_APPLICATION\" : '.*\"instance_index[\": ]*\\([0-9]\\+\\).*')]-[#{credentials['node-name-prefix']}]")
+        name = credentials['node-name'] || @configuration['default_node_name']
+        java_opts.add_system_property('appdynamics.agent.nodeName', "#{name}")
       end
 
       def port(java_opts, credentials)
@@ -136,13 +108,10 @@ module JavaBuildpack
       end
 
       def tier_name(java_opts, credentials)
-        sm_credentials = @application.services.find_service(SM_FILTER)
-        sn_credentials = @application.services.find_service(SN_FILTER)
-
-        java_opts.add_system_property('appdynamics.agent.tierName', "'#{sm_credentials['credentials']['smData']['CIName']}'") if sm_credentials
-        java_opts.add_system_property('appdynamics.agent.tierName', "'#{sn_credentials['credentials']['ServiceOffering']}'") if sn_credentials
+        name = credentials['tier-name'] || @configuration['default_tier_name'] ||
+          @application.details['application_name']
+        java_opts.add_system_property('appdynamics.agent.tierName', "#{name}")
       end
     end
   end
-  # rubocop:enable all
 end

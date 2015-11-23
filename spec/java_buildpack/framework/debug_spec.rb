@@ -1,6 +1,6 @@
 # Encoding: utf-8
 # Cloud Foundry Java Buildpack
-# Copyright 2013 the original author or authors.
+# Copyright 2013-2015 the original author or authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -21,16 +21,44 @@ require 'java_buildpack/framework/debug'
 describe JavaBuildpack::Framework::Debug do
   include_context 'component_helper'
 
-  it 'detect always detect' do
-    expect(component.detect).to eq('debug')
+  it 'does not detect if not enabled' do
+    expect(component.detect).to be_nil
   end
 
   context do
-    it 'add split java_opts to context' do
-      component.release
+    let(:configuration) { { 'enabled' => true } }
 
-      # We only want to check the opt that we add
-      expect(java_opts.last).to include('$VCAP_DEBUG_PORT')
+    it 'detects when enabled' do
+      expect(component.detect).to eq('debug')
+    end
+
+    it 'uses 8000 as the default port' do
+      component.release
+      expect(java_opts).to include('-agentlib:jdwp=transport=dt_socket,server=y,address=8000,suspend=n')
+    end
+
+    it 'does not suspend by default' do
+      component.release
+      expect(java_opts).to include('-agentlib:jdwp=transport=dt_socket,server=y,address=8000,suspend=n')
     end
   end
+
+  context do
+    let(:configuration) { { 'enabled' => true, 'port' => 8001 } }
+
+    it 'uses configured port' do
+      component.release
+      expect(java_opts).to include('-agentlib:jdwp=transport=dt_socket,server=y,address=8001,suspend=n')
+    end
+  end
+
+  context do
+    let(:configuration) { { 'enabled' => true, 'suspend' => true } }
+
+    it 'uses configured suspend' do
+      component.release
+      expect(java_opts).to include('-agentlib:jdwp=transport=dt_socket,server=y,address=8000,suspend=y')
+    end
+  end
+
 end
