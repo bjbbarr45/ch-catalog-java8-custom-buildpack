@@ -26,7 +26,7 @@ module JavaBuildpack
 
       # (see JavaBuildpack::Component::BaseComponent#compile)
       def compile
-        download_zip(@version, @uri, false)
+        download_zip(false, @droplet.sandbox, 'AppDynamics Agent')
         pre_version, pre_uri   = JavaBuildpack::Repository::ConfiguredItem
           .find_item(@component_name, @configuration['pre_agent'])
         download_jar(pre_version, pre_uri, 'app-dynamics-hack-pre.jar', @droplet.sandbox, 'App Dynamics Pre Hack')
