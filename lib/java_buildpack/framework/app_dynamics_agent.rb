@@ -24,6 +24,7 @@ module JavaBuildpack
     # Encapsulates the functionality for enabling zero-touch AppDynamics support.
     class AppDynamicsAgent < JavaBuildpack::Component::VersionedDependencyComponent
 
+      # rubocop:disable all
       # (see JavaBuildpack::Component::BaseComponent#compile)
       def compile
         download_zip(false, @droplet.sandbox, 'AppDynamics Agent')
@@ -34,17 +35,14 @@ module JavaBuildpack
           FileUtils.mkdir_p @droplet.sandbox
           FileUtils.cp_r(file.path, @droplet.sandbox + 'app-dynamics-hack-pre.jar')
         end
-        #download_jar(pre_version, pre_uri, 'app-dynamics-hack-pre.jar', @droplet.sandbox, 'App Dynamics Pre Hack')
         post_version, post_uri = JavaBuildpack::Repository::ConfiguredItem
           .find_item(@component_name, @configuration['post_agent'])
         download(post_version, post_uri, 'App Dynamics Post Hack') do |file|
           FileUtils.mkdir_p @droplet.sandbox
           FileUtils.cp_r(file.path, @droplet.sandbox + 'app-dynamics-hack-post.jar')
         end
-        #download_jar(post_version, post_uri, 'app-dynamics-hack-post.jar', @droplet.sandbox, 'App Dynamics Post Hack')
       end
 
-      # rubocop:disable all
       # (see JavaBuildpack::Component::BaseComponent#release)
       def release
         credentials = @application.services.find_service(FILTER)['credentials']
