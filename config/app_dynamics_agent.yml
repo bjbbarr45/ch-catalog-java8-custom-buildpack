@@ -15,7 +15,7 @@
 
 # Configuration for the AppDynamics framework
 ---
-version: 4.1.6_0
+version: 4.1.7_1
 repository_root: ! '{default.repository.root}/app-dynamics'
 pre_agent:
   version: 1.0.+
