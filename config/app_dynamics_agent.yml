@@ -15,14 +15,8 @@
 
 # Configuration for the AppDynamics framework
 ---
-version: 4.1.7_1
+version: 4.1.8_5
 repository_root: ! '{default.repository.root}/app-dynamics'
-pre_agent:
-  version: 1.0.+
-  repository_root: ! '{default.repository.root}/app-dynamics/pre'
-post_agent:
-  version: 1.0.+
-  repository_root: ! '{default.repository.root}/app-dynamics/post'
 default_application_name: 
 default_node_name: ! '$(expr "$VCAP_APPLICATION" : ''.*instance_index[": ]*\([[:digit:]]*\).*'')'
 default_tier_name: 

@@ -24,33 +24,17 @@ module JavaBuildpack
     # Encapsulates the functionality for enabling zero-touch AppDynamics support.
     class AppDynamicsAgent < JavaBuildpack::Component::VersionedDependencyComponent
 
-      # rubocop:disable all
       # (see JavaBuildpack::Component::BaseComponent#compile)
       def compile
         download_zip(false, @droplet.sandbox, 'AppDynamics Agent')
         @droplet.copy_resources
-        pre_version, pre_uri   = JavaBuildpack::Repository::ConfiguredItem
-          .find_item(@component_name, @configuration['pre_agent'])
-        download(pre_version, pre_uri, 'App Dynamics Pre Hack') do |file|
-          FileUtils.mkdir_p @droplet.sandbox
-          FileUtils.cp_r(file.path, @droplet.sandbox + 'app-dynamics-hack-pre.jar')
-        end
-        post_version, post_uri = JavaBuildpack::Repository::ConfiguredItem
-          .find_item(@component_name, @configuration['post_agent'])
-        download(post_version, post_uri, 'App Dynamics Post Hack') do |file|
-          FileUtils.mkdir_p @droplet.sandbox
-          FileUtils.cp_r(file.path, @droplet.sandbox + 'app-dynamics-hack-post.jar')
-        end
       end
 
       # (see JavaBuildpack::Component::BaseComponent#release)
       def release
         credentials = @application.services.find_service(FILTER)['credentials']
         java_opts   = @droplet.java_opts
-
-        java_opts.add_javaagent(@droplet.sandbox + 'app-dynamics-hack-pre.jar')
         java_opts.add_javaagent(@droplet.sandbox + 'javaagent.jar')
-        java_opts.add_javaagent(@droplet.sandbox + 'app-dynamics-hack-post.jar')
 
         application_name java_opts, credentials
         tier_name java_opts, credentials
@@ -61,7 +45,6 @@ module JavaBuildpack
         port java_opts, credentials
         ssl_enabled java_opts, credentials
       end
-      # rubocop:enable all
 
       protected
 
@@ -118,6 +101,8 @@ module JavaBuildpack
           @application.details['application_name']
         java_opts.add_system_property('appdynamics.agent.tierName', "#{name}")
       end
+
     end
+
   end
 end

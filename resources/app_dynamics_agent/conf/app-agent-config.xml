@@ -285,5 +285,10 @@
         </agent-service>
         <!-- PLEASE ADD SERVICES BEFORE AgentProxyService -->
     </agent-services>
+	<sensitive-data-filters>
+	        <sensitive-data-filter applies-to="environment-variables,system-properties"
+	                               match-type="EQUALS"
+	                               match-pattern="VCAP_SERVICES"/>
+	</sensitive-data-filters>
 </app-agent-configuration>
 

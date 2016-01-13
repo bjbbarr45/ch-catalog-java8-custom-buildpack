@@ -44,6 +44,14 @@ describe JavaBuildpack::Framework::AppDynamicsAgent do
       expect(component.detect).to eq("app-dynamics-agent=#{version}")
     end
 
+    it 'expands AppDynamics agent zip',
+       cache_fixture: 'stub-app-dynamics-agent.zip' do
+
+      component.compile
+
+      expect(sandbox + 'javaagent.jar').to exist
+    end
+
     it 'raises error if host-name not specified' do
       expect { component.release }.to raise_error(/'host-name' credential must be set/)
     end
