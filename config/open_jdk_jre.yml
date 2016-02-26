@@ -21,7 +21,7 @@ jre:
   repository_root: ! '{default.repository.root}/openjdk/{platform}/{architecture}'
 memory_calculator:
   version: 2.0.1_RELEASE
-  repository_root: ! '{default.repository.root}/memory-calculator/{platform}/{architecture}'
+  repository_root: ! '{default.repository.root}/memory-calculator/trusty/{architecture}'
   stack_threads: 
   memory_sizes:
     metaspace: 128m..384m
