@@ -63,6 +63,10 @@ module JavaBuildpack
         @droplet.sandbox + 'Chrystoki.conf'
       end
 
+      def cklog(root)
+        Dir[root + 'cklog-*.x86_64.rpm'][0]
+      end
+
       def client_certificate
         @droplet.sandbox + 'usr/safenet/lunaclient/cert/client/client-certificate.pem'
       end
@@ -95,11 +99,19 @@ module JavaBuildpack
         Dir.chdir(@droplet.sandbox) do
           shell "#{rpm2cpio} < #{libcrpytoki root} | cpio -id ./usr/safenet/lunaclient/lib/libCryptoki2_64.so"
           shell "#{rpm2cpio} < #{lunajsp root} | cpio -id ./usr/safenet/lunaclient/jsp/lib/*"
+
+          if logging?
+            shell "#{rpm2cpio} < #{cklog root} | cpio -id ./usr/safenet/lunaclient/lib/libcklog2.so"
+          end
         end
       end
 
       def libcrpytoki(root)
         Dir[root + 'libcryptoki-*.x86_64.rpm'][0]
+      end
+
+      def logging?
+        @configuration['logging_enabled']
       end
 
       def lunajsp(root)
@@ -151,6 +163,12 @@ EOS
       def write_epilogue(f)
         f.write <<EOS
 }
+
+HAConfiguration = {
+  AutoReconnectInterval = 60;
+  HAOnly = 1;
+  ReconnAtt = 20;
+}
 EOS
       end
 
@@ -163,11 +181,43 @@ EOS
         f.write "\n"
       end
 
+      def write_lib(f)
+        f.write <<EOS
+
+Chrystoki2 = {
+EOS
+
+        if logging?
+          write_logging(f)
+        else
+          f.write <<EOS
+  LibUNIX64 = #{relative(@droplet.sandbox + 'usr/safenet/lunaclient/lib/libCryptoki2_64.so')};
+}
+EOS
+        end
+      end
+
+      def write_logging(f)
+        f.write <<EOS
+  LibUNIX64 = #{relative(@droplet.sandbox + 'usr/safenet/lunaclient/lib/libcklog2.so')};
+}
+
+CkLog2 = {
+  Enabled      = 1;
+  LibUNIX64    = #{relative(@droplet.sandbox + 'usr/safenet/lunaclient/lib/libCryptoki2_64.so')};
+  LoggingMask  = ALL_FUNC;
+  LogToStreams = 1;
+  NewFormat    = 1;
+}
+EOS
+      end
+
       def write_prologue(f)
+        write_lib(f)
+
         f.write <<EOS
 
 LunaSA Client = {
-  HAOnly    = 1;
   NetClient = 1;
 
   ClientCertFile    = #{relative(@droplet.sandbox + 'usr/safenet/lunaclient/cert/client/client-certificate.pem')};

@@ -29,7 +29,7 @@ describe JavaBuildpack::Framework::Debug do
     let(:configuration) { { 'enabled' => true } }
 
     it 'detects when enabled' do
-      expect(component.detect).to eq('debug')
+      expect(component.detect).to eq('debug=8000')
     end
 
     it 'uses 8000 as the default port' do

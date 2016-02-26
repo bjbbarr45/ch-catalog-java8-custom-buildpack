@@ -20,7 +20,7 @@ jre:
   version: 1.7.0_79
   repository_root: ! '{default.repository.root}/openjdk/{platform}/{architecture}'
 memory_calculator:
-  version: 2.0.0_RELEASE
+  version: 2.0.1_RELEASE
   repository_root: ! '{default.repository.root}/memory-calculator/{platform}/{architecture}'
   stack_threads: 
   memory_sizes:
