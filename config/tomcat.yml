@@ -17,21 +17,21 @@
 ---
 tomcat:
   version: 7.0.70
-  repository_root: ! '{default.repository.root}/tomcat'
+  repository_root: "{default.repository.root}/tomcat"
   context_path: 
 lifecycle_support:
   version: 2.5.0_RELEASE
-  repository_root: ! '{default.repository.root}/tomcat-lifecycle-support'
+  repository_root: "{default.repository.root}/tomcat-lifecycle-support"
 logging_support:
   version: 2.5.0_RELEASE
-  repository_root: ! '{default.repository.root}/tomcat-logging-support'
+  repository_root: "{default.repository.root}/tomcat-logging-support"
 access_logging_support:
   version: 2.5.0_RELEASE
-  repository_root: ! '{default.repository.root}/tomcat-access-logging-support'
+  repository_root: "{default.repository.root}/tomcat-access-logging-support"
   access_logging: disabled
 redis_store:
   version: 1.2.0_RELEASE
-  repository_root: ! '{default.repository.root}/redis-store'
+  repository_root: "{default.repository.root}/redis-store"
   database: 0
   timeout: 2000
   connection_pool_size: 2

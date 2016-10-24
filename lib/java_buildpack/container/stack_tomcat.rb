@@ -25,14 +25,16 @@ require 'java_buildpack/util/java_main_utils'
 module JavaBuildpack
   module Container
     # Encapsulates the detect, compile, and release functionality for Tomcat applications.
-    class StackTomcat < JavaBuildpack::Component::BaseComponent # rubocop:disable all
+    class StackTomcat < JavaBuildpack::Component::BaseComponent
 
       def initialize(context)
         super(context)
 
         if supports?
-          @tomcat_version, @tomcat_uri   = JavaBuildpack::Repository::ConfiguredItem
-          .find_item(@component_name, @configuration) { |candidate_version| candidate_version.check_size(3) }
+          @tomcat_version, @tomcat_uri = JavaBuildpack::Repository::ConfiguredItem
+                                         .find_item(@component_name, @configuration) do |candidate_version|
+                                           candidate_version.check_size(3)
+                                         end
         else
           @tomcat_version = nil
           @tomcat_uri = nil
@@ -230,7 +232,6 @@ module JavaBuildpack
         end
         args.values
       end
-# rubocop:enable all
 
       def deployable?
         env = @configuration[DEPLOYABLE_ENV]
