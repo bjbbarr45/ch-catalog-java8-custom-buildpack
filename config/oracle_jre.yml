@@ -20,7 +20,7 @@
 # e.g.  repository_root: "http://example.com/oracle-jre/{platform}/{architecture}"
 ---
 jre:
-  version: 1.8.0_10+
+  version: 1.8.0_11+
   repository_root: ""
 memory_calculator:
   version: 2.+

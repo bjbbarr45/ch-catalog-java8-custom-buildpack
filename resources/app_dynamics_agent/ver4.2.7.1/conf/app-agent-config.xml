@@ -247,6 +247,9 @@
                     <include filter-type="EQUALS" filter-value="org.jboss.netty.handler.execution.ChannelUpstreamEventRunnable"/>
                     <excludes filter-type="STARTSWITH" filter-value="com.yammer/"/>
 
+                    <!-- rx CORE-74268 -->
+                    <excludes filter-type="STARTSWITH" filter-value="rx.internal/,rx.schedulers/"/>
+
                     <!-- atlassian -->
                     <excludes filter-type="STARTSWITH" filter-value="com.atlassian.event.internal/,com.atlassian.jira.config.properties/,com.atlassian.jira.project.DefaultProjectManager$,com.atlassian.jira.issue.index.DefaultIssueIndexer$TaskCompleter"/>
                     <include filter-type="STARTSWITH" filter-value="org.apache.jsp"/>
@@ -278,7 +281,10 @@
                     <exclude filter-type="EQUALS" filter-value="liquibase.sdk.verifytest.VerifiedTestFactory$1"/>
 
                     <!-- Logback -->
-                    <exclude filter-type="STARTSWITH" filter-value="ch.qos.logback.core.AsyncAppenderBase"/>
+                    <exclude filter-type="STARTSWITH" filter-value="ch.qos.logback.core.AsyncAppenderBase/"/>
+
+                    <!-- Hazelcast -->
+                    <exclude filter-type="STARTSWITH" filter-value="com.hazelcast.impl/"/>
 
                     <!--
                     match-class
@@ -335,6 +341,15 @@
                         </match-method>
                         <name-config operation="" type="4"/>
                         <retention-config type="1" operation="1.getTaskSize()"/>
+                    </job>
+                    <job>
+                        <match-class type="inherits-from-class">
+                            <name filter-type="EQUALS" filter-value="java.util.concurrent.RecursiveTask"/>
+                        </match-class>
+                        <match-method>
+                            <name filter-type="EQUALS" filter-value="compute"/>
+                        </match-method>
+                        <name-config operation="" type="4"/>
                     </job>
                 </fork-config>
             </configuration>
@@ -452,6 +467,5 @@
     <service-configuration-properties agent-service="SnapshotService">
         <property name="enable-startup-snapshot-policy" value="true"/>
     </service-configuration-properties>
-    -->
+    -->  
 </app-agent-configuration>
-
