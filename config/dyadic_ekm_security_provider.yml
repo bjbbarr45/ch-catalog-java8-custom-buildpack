@@ -1,4 +1,3 @@
-# Encoding: utf-8
 # Cloud Foundry Java Buildpack
 # Copyright 2013-2016 the original author or authors.
 #
@@ -14,18 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# A mixin that adds the ability to turn a +String+ into space case
-class String
-
-  # Converts a string to space case.  For example, the String +SpaceCase+ would become +Space Case+.
-  #
-  # @return [String] The space case rendering of this +String+
-  def space_case
-    split('::')
-      .last
-      .gsub(/([A-Z]+)([A-Z][a-z])/, '\1 \2')
-      .gsub(/([a-z\d])([A-Z])/, '\1 \2')
-      .tr('-', ' ')
-  end
-
-end
+# Configuration for the Luna Security Provider framework
+---
+version: 1.2.0
+repository_root: https://repo.dyadicsec.com/cust/pcf
