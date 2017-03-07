@@ -1,6 +1,6 @@
 # Encoding: utf-8
 # Cloud Foundry Java Buildpack
-# Copyright 2013-2016 the original author or authors.
+# Copyright 2013-2017 the original author or authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -110,6 +110,10 @@ module JavaBuildpack
         @configuration['logging_enabled']
       end
 
+      def ha_logging?
+        @configuration['ha_logging_enabled']
+      end
+
       def padded_index(index)
         index.to_s.rjust(2, '0')
       end
@@ -144,20 +148,27 @@ module JavaBuildpack
 VirtualToken = {
 EOS
           groups.each_with_index { |group, index| write_group f, index, group }
-          write_epilogue f
+          write_epilogue f, groups
         end
       end
 
-      def write_epilogue(f)
+      def write_epilogue(f, groups)
         f.write <<EOS
 }
 
 HAConfiguration = {
   AutoReconnectInterval = 60;
   HAOnly = 1;
-  ReconnAtt = 20;
-}
+  reconnAtt = -1;
 EOS
+        write_ha_logging(f) if ha_logging?
+        f.write <<EOS
+}
+
+HASynchronize = {
+EOS
+        groups.each { |group| f.write "  #{group['label']} = 1;\n" }
+        f.write "}\n"
       end
 
       def write_group(f, index, group)
@@ -197,6 +208,13 @@ CkLog2 = {
   LogToStreams = 1;
   NewFormat    = 1;
 }
+EOS
+      end
+
+      def write_ha_logging(f)
+        f.write <<EOS
+  haLogStatus = enabled;
+  haLogToStdout = enabled;
 EOS
       end
 

@@ -1,6 +1,6 @@
 # Encoding: utf-8
 # Cloud Foundry Java Buildpack
-# Copyright 2013-2016 the original author or authors.
+# Copyright 2013-2017 the original author or authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -49,6 +49,11 @@ module JavaBuildpack
       def compile
         download_tar
         @droplet.copy_resources
+
+        unless @droplet.java_home.java_8_or_later?
+          $stderr.puts "\n       WARNING: You are using #{@droplet.java_home.version}. Oracle has ended public " \
+                       "updates of Java 1.7 as of April 2015, possibly rendering your application vulnerable.\n\n"
+        end
       end
 
       # (see JavaBuildpack::Component::BaseComponent#release)

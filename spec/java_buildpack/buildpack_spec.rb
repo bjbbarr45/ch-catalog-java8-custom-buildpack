@@ -1,6 +1,6 @@
 # Encoding: utf-8
 # Cloud Foundry Java Buildpack
-# Copyright 2013-2016 the original author or authors.
+# Copyright 2013-2017 the original author or authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -126,7 +126,10 @@ describe JavaBuildpack::Buildpack do
     expect(stub_jre2).not_to receive(:release)
 
     expect(buildpack.release)
-      .to eq({ 'addons' => [], 'config_vars' => {}, 'default_process_types' => { 'web' => 'test-command' } }.to_yaml)
+      .to eq({ 'addons'                => [],
+               'config_vars'           => {},
+               'default_process_types' => { 'web'  => 'test-command',
+                                            'task' => 'test-command' } }.to_yaml)
   end
 
   it 'loads configuration file matching JRE class name' do
