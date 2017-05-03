@@ -58,7 +58,5 @@ frameworks:
   - "JavaBuildpack::Framework::ProtectAppSecurityProvider"
   - "JavaBuildpack::Framework::SpringAutoReconfiguration"
   - "JavaBuildpack::Framework::SpringInsight"
-  - "JavaBuildpack::Framework::DebugDea"
-  - "JavaBuildpack::Framework::JMXMPAgent"
   - "JavaBuildpack::Framework::YourKitProfiler"
   - "JavaBuildpack::Framework::JavaOpts"
