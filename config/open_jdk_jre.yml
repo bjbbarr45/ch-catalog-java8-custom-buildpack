@@ -19,23 +19,10 @@
 jre:
   version: 1.7.0_79
   repository_root: "{default.repository.root}/openjdk/trusty/{architecture}"
+jvmkill_agent:
+  version: 1.6.0_RELEASE
+  repository_root: "{default.repository.root}/jvmkill/{platform}/{architecture}"
 memory_calculator:
-  version: 2.0.2_RELEASE
-  repository_root: "{default.repository.root}/memory-calculator/trusty/{architecture}"
+  version: 3.8.0_RELEASE
+  repository_root: "{default.repository.root}/memory-calculator/{platform}/{architecture}"
   stack_threads: 300
-  memory_sizes:
-    heap: 
-    metaspace: 128m..384m
-    permgen: 128m..384m
-    native: 192m..512m
-    stack: 228k..
-  memory_heuristics:
-    heap: 65
-    metaspace: 8
-    native: 22
-    permgen: 8
-    stack: 5
-  memory_initials:
-    heap: 5%
-    metaspace: 5%
-    permgen: 5%
