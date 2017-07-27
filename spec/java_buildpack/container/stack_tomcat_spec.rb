@@ -1,4 +1,5 @@
 # Encoding: utf-8
+
 # Cloud Foundry Java Buildpack
 # Copyright 2013 the original author or authors.
 #
@@ -69,6 +70,7 @@ describe JavaBuildpack::Container::StackTomcat do
 
   context do
     let(:env) { 'root' }
+
     it 'link the wars to the ROOT directory',
        app_fixture:   'container_stack_tomcat',
        cache_fixture: 'stub-tomcat.tar.gz' do
@@ -119,6 +121,7 @@ describe JavaBuildpack::Container::StackTomcat do
 
   context do
     let(:env) { 'invalidarg' }
+
     it 'fail because we have a jvm arg the supplies memory settings',
        app_fixture:   'container_stack_tomcat',
        cache_fixture: 'stub-tomcat.tar.gz' do
