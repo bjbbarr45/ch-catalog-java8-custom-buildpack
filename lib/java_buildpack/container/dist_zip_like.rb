@@ -1,4 +1,3 @@
-# Encoding: utf-8
 # Cloud Foundry Java Buildpack
 # Copyright 2013-2017 the original author or authors.
 #
@@ -40,10 +39,11 @@ module JavaBuildpack
 
       # (see JavaBuildpack::Component::BaseComponent#release)
       def release
+        @droplet.environment_variables.add_environment_variable 'JAVA_OPTS', '$JAVA_OPTS'
+
         [
           @droplet.environment_variables.as_env_vars,
           @droplet.java_home.as_env_var,
-          @droplet.java_opts.as_env_var,
           'exec',
           qualify_path(start_script(root), @droplet.root)
         ].flatten.compact.join(' ')

@@ -1,4 +1,3 @@
-# Encoding: utf-8
 # Cloud Foundry Java Buildpack
 # Copyright 2013-2017 the original author or authors.
 #
@@ -47,8 +46,10 @@ module JavaBuildpack
 
       # (see JavaBuildpack::Component::VersionedDependencyComponent#supports?)
       def supports?
-        jrebel_configured?(@application.root) || jrebel_configured?(@application.root + 'WEB-INF/classes') ||
-          jars_with_jrebel_configured?(@application.root)
+        enabled? && (
+            jrebel_configured?(@application.root) ||
+            jrebel_configured?(@application.root + 'WEB-INF/classes') ||
+            jars_with_jrebel_configured?(@application.root))
       end
 
       private
@@ -67,6 +68,10 @@ module JavaBuildpack
 
       def architecture
         `uname -m`.strip
+      end
+
+      def enabled?
+        @configuration['enabled'].nil? || @configuration['enabled']
       end
 
     end

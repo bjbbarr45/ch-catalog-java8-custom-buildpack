@@ -1,4 +1,3 @@
-# Encoding: utf-8
 # Cloud Foundry Java Buildpack
 # Copyright 2016 the original author or authors.
 #
@@ -41,6 +40,19 @@ describe JavaBuildpack::Jre::JvmkillAgent do
     component.release
 
     expect(java_opts).to include('-agentpath:$PWD/.java-buildpack/jvmkill_agent/bin/jvmkill-0.0.0=printHeapHistogram=1')
+  end
+
+  it 'adds heap dump parameter to JAVA_OPTS when volume service available' do
+    allow(services).to receive(:one_volume_service?).with(/heap-dump/).and_return(true)
+    allow(services).to receive(:find_service).and_return('volume_mounts' =>
+                                                           [{ 'container_dir' => 'test-container-dir' }])
+
+    component.release
+
+    expect(java_opts).to include('-agentpath:$PWD/.java-buildpack/jvmkill_agent/bin/jvmkill-0.0.0=' \
+                                 'printHeapHistogram=1,heapDumpPath=test-container-dir/test-space-name-test-spa/' \
+                                 'test-application-name-test-app/$CF_INSTANCE_INDEX-%FT%T%z-' \
+                                 '${CF_INSTANCE_GUID:0:8}.hprof')
   end
 
 end

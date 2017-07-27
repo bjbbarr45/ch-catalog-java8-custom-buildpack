@@ -1,4 +1,3 @@
-# Encoding: utf-8
 # Cloud Foundry Java Buildpack
 # Copyright 2013-2017 the original author or authors.
 #
@@ -245,6 +244,38 @@ describe JavaBuildpack::Util::Cache::DownloadCache do
 
       allow(Net::HTTP).to receive(:Proxy).and_call_original
       allow(Net::HTTP).to receive(:Proxy).with('proxy', 9000, nil, nil).and_call_original
+
+      download_cache.get(uri_secure) {}
+    end
+
+  end
+
+  context do
+    let(:environment) { { 'NO_PROXY' => '127.0.0.1,localhost,foo-uri,.foo-uri', 'HTTPS_PROXY' => 'http://proxy:9000' } }
+
+    it 'does not use proxy if host in NO_PROXY' do
+      stub_request(:get, uri_secure)
+        .to_return(status: 200, body: 'foo-cached', headers: { Etag:           'foo-etag',
+                                                               'Last-Modified' => 'foo-last-modified' })
+
+      allow(Net::HTTP).to receive(:Proxy).and_call_original
+      expect(Net::HTTP).not_to have_received(:Proxy).with('proxy', 9000, nil, nil)
+
+      download_cache.get(uri_secure) {}
+    end
+
+  end
+
+  context do
+    let(:environment) { { 'no_proxy' => '127.0.0.1,localhost,foo-uri,.foo-uri', 'https_proxy' => 'http://proxy:9000' } }
+
+    it 'does not use proxy if host in no_proxy' do
+      stub_request(:get, uri_secure)
+        .to_return(status: 200, body: 'foo-cached', headers: { Etag:           'foo-etag',
+                                                               'Last-Modified' => 'foo-last-modified' })
+
+      allow(Net::HTTP).to receive(:Proxy).and_call_original
+      expect(Net::HTTP).not_to have_received(:Proxy).with('proxy', 9000, nil, nil)
 
       download_cache.get(uri_secure) {}
     end

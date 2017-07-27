@@ -1,4 +1,3 @@
-# Encoding: utf-8
 # Cloud Foundry Java Buildpack
 # Copyright 2013-2017 the original author or authors.
 #
@@ -25,7 +24,7 @@ describe 'detect script', :integration do # rubocop:disable RSpec/DescribeClass
 
     run("bin/detect #{app_dir}") do |status|
       expect(status).to be_success
-      expect(stdout.string.rstrip.length).to be < 255
+      expect(stdout.string.rstrip.length).to be <= 255
     end
   end
 

@@ -1,4 +1,3 @@
-# Encoding: utf-8
 # Cloud Foundry Java Buildpack
 # Copyright 2013-2017 the original author or authors.
 #
@@ -38,6 +37,15 @@ describe JavaBuildpack::Framework::JrebelAgent do
   it 'detects when rebel-remote.xml is present inside an embedded JAR',
      app_fixture: 'framework_jrebel_app_war_with_jar' do
     expect(component.detect).to eq("jrebel-agent=#{version}")
+  end
+
+  context do
+    let(:configuration) { { 'enabled' => false } }
+
+    it 'does not detect when not enabled',
+       app_fixture: 'framework_jrebel_app_simple' do
+      expect(component.detect).to be_nil
+    end
   end
 
   it 'downloads the JRebel JAR and the native agent',

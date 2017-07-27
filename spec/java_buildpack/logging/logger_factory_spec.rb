@@ -1,4 +1,3 @@
-# Encoding: utf-8
 # Cloud Foundry Java Buildpack
 # Copyright 2013-2017 the original author or authors.
 #
@@ -184,7 +183,7 @@ describe JavaBuildpack::Logging::LoggerFactory do
 
     before do
       allow(JavaBuildpack::Util::ConfigurationUtils).to receive(:load).with('logging', true, false)
-        .and_return('default_log_level' => 'DEBUG')
+                                                                      .and_return('default_log_level' => 'DEBUG')
       described_class.instance.setup app_dir
     end
 

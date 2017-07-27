@@ -1,4 +1,3 @@
-# Encoding: utf-8
 # Cloud Foundry Java Buildpack
 # Copyright 2013-2017 the original author or authors.
 #
@@ -215,7 +214,7 @@ module JavaBuildpack
         end
 
         def compressed?(response)
-          %w(br compress deflate gzip x-gzip).include?(response['Content-Encoding'])
+          %w[br compress deflate gzip x-gzip].include?(response['Content-Encoding'])
         end
 
         def debug_ssl(http)
@@ -266,8 +265,15 @@ module JavaBuildpack
           http_options
         end
 
+        def no_proxy?(uri)
+          hosts = (ENV['no_proxy'] || ENV['NO_PROXY'] || '').split ','
+          hosts.any? { |host| uri.host.end_with? host }
+        end
+
         def proxy(uri)
-          proxy_uri = if secure?(uri)
+          proxy_uri = if no_proxy?(uri)
+                        URI.parse('')
+                      elsif secure?(uri)
                         URI.parse(ENV['https_proxy'] || ENV['HTTPS_PROXY'] || '')
                       else
                         URI.parse(ENV['http_proxy'] || ENV['HTTP_PROXY'] || '')

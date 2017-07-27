@@ -1,4 +1,3 @@
-# Encoding: utf-8
 # Cloud Foundry Java Buildpack
 # Copyright 2013-2017 the original author or authors.
 #
@@ -47,8 +46,11 @@ shared_context 'application_helper' do
   let(:services) { application.services }
 
   let(:vcap_application) do
-    { 'application_name'    => 'test-application-name',
-      'application_version' => 'test-application-version' }
+    { 'application_id'      => 'test-application-id',
+      'application_name'    => 'test-application-name',
+      'application_version' => 'test-application-version',
+      'space_id'            => 'test-space-id',
+      'space_name'          => 'test-space-name' }
   end
 
   let(:vcap_services) do

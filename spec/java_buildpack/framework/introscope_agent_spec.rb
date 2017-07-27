@@ -1,4 +1,3 @@
-# Encoding: utf-8
 # Cloud Foundry Java Buildpack
 # Copyright 2013-2017 the original author or authors.
 #
@@ -27,7 +26,7 @@ describe JavaBuildpack::Framework::IntroscopeAgent do
 
   let(:vcap_application) do
     { 'application_name' => 'test-application-name',
-      'application_uris' => %w(test-application-uri-0 test-application-uri-1) }
+      'application_uris' => %w[test-application-uri-0 test-application-uri-1] }
   end
 
   it 'does not detect without introscope-n/a service' do
@@ -55,10 +54,6 @@ describe JavaBuildpack::Framework::IntroscopeAgent do
       expect(sandbox + 'Agent.jar').to exist
     end
 
-    it 'raises error if host-name not specified' do
-      expect { component.release }.to raise_error(/'host-name' credential must be set/)
-    end
-
     context do
 
       let(:credentials) { { 'host-name' => 'test-host-name' } }
@@ -72,6 +67,7 @@ describe JavaBuildpack::Framework::IntroscopeAgent do
         expect(java_opts).to include('-Dintroscope.agent.defaultProcessName=test-application-name')
         expect(java_opts).to include('-Dintroscope.agent.hostName=test-application-uri-0')
         expect(java_opts).to include('-Dintroscope.agent.enterprisemanager.transport.tcp.host.DEFAULT=test-host-name')
+        expect(java_opts).to include('-DagentManager.url.1=http://test-host-name')
         expect(java_opts).to include('-Dcom.wily.introscope.agent.agentName=$(expr "$VCAP_APPLICATION" : ' \
                                      '\'.*application_name[": ]*\\([A-Za-z0-9_-]*\\).*\')')
       end
@@ -93,6 +89,7 @@ describe JavaBuildpack::Framework::IntroscopeAgent do
           component.release
 
           expect(java_opts).to include('-Dintroscope.agent.enterprisemanager.transport.tcp.port.DEFAULT=test-port')
+          expect(java_opts).to include('-DagentManager.url.1=http://test-host-name:test-port')
         end
       end
 
@@ -104,6 +101,7 @@ describe JavaBuildpack::Framework::IntroscopeAgent do
 
           expect(java_opts).to include('-Dintroscope.agent.enterprisemanager.transport.tcp.socketfactory.DEFAULT=' \
                                        'com.wily.isengard.postofficehub.link.net.SSLSocketFactory')
+          expect(java_opts).to include('-DagentManager.url.1=https://test-host-name')
         end
       end
     end

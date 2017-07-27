@@ -1,4 +1,3 @@
-# Encoding: utf-8
 # Cloud Foundry Java Buildpack
 # Copyright 2013-2017 the original author or authors.
 #
@@ -21,6 +20,7 @@ require 'java_buildpack/component/mutable_java_home'
 require 'java_buildpack/jre/open_jdk_like'
 require 'java_buildpack/jre/open_jdk_like_jre'
 require 'java_buildpack/jre/open_jdk_like_memory_calculator'
+require 'java_buildpack/jre/open_jdk_like_security_providers'
 
 describe JavaBuildpack::Jre::OpenJDKLike do
   include_context 'component_helper'
@@ -52,12 +52,14 @@ describe JavaBuildpack::Jre::OpenJDKLike do
   it 'creates submodules' do
     allow_any_instance_of(StubOpenJDKLike).to receive(:supports?).and_return false
 
+    allow(JavaBuildpack::Jre::JvmkillAgent)
+      .to receive(:new).with(sub_configuration_context(jvmkill_agent_configuration))
     allow(JavaBuildpack::Jre::OpenJDKLikeJre)
       .to receive(:new).with(sub_configuration_context(jre_configuration).merge(component_name: 'Stub Open JDK Like'))
     allow(JavaBuildpack::Jre::OpenJDKLikeMemoryCalculator)
       .to receive(:new).with(sub_configuration_context(memory_calculator_configuration))
-    allow(JavaBuildpack::Jre::JvmkillAgent)
-      .to receive(:new).with(sub_configuration_context(jvmkill_agent_configuration))
+    allow(JavaBuildpack::Jre::OpenJDKLikeSecurityProviders)
+      .to receive(:new).with(context)
 
     component.sub_components context
   end
@@ -66,8 +68,9 @@ describe JavaBuildpack::Jre::OpenJDKLike do
     java_home.version = version_7
     expect(component.command).to eq('CALCULATED_MEMORY=$($PWD/.java-buildpack/open_jdk_like/bin/' \
                                     'java-buildpack-memory-calculator-0.0.0 -totMemory=$MEMORY_LIMIT' \
-                                    ' -stackThreads=200 -loadedClasses=0 -poolType=permgen) && echo JVM Memory ' \
-                                    'Configuration: $CALCULATED_MEMORY')
+                                    ' -stackThreads=200 -loadedClasses=0 -poolType=permgen -vmOptions="$JAVA_OPTS")' \
+                                    ' && echo JVM Memory Configuration: $CALCULATED_MEMORY && ' \
+                                    'JAVA_OPTS="$JAVA_OPTS $CALCULATED_MEMORY"')
 
   end
 
@@ -75,8 +78,9 @@ describe JavaBuildpack::Jre::OpenJDKLike do
     java_home.version = version_8
     expect(component.command).to eq('CALCULATED_MEMORY=$($PWD/.java-buildpack/open_jdk_like/bin/' \
                                     'java-buildpack-memory-calculator-0.0.0 -totMemory=$MEMORY_LIMIT' \
-                                    ' -stackThreads=200 -loadedClasses=0 -poolType=metaspace) && echo JVM Memory ' \
-                                    'Configuration: $CALCULATED_MEMORY')
+                                    ' -stackThreads=200 -loadedClasses=0 -poolType=metaspace -vmOptions="$JAVA_OPTS")' \
+                                    ' && echo JVM Memory Configuration: $CALCULATED_MEMORY && ' \
+                                    'JAVA_OPTS="$JAVA_OPTS $CALCULATED_MEMORY"')
 
   end
 

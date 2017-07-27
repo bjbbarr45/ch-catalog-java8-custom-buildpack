@@ -1,4 +1,3 @@
-# Encoding: utf-8
 # Cloud Foundry Java Buildpack
 # Copyright 2013-2017 the original author or authors.
 #
@@ -55,7 +54,7 @@ shared_context 'component_helper' do
     cache_fixture = example.metadata[:cache_fixture]
     if cache_fixture
       allow(application_cache).to receive(:get).with(uri)
-        .and_yield(Pathname.new("spec/fixtures/#{cache_fixture}").open, false)
+                                               .and_yield(Pathname.new("spec/fixtures/#{cache_fixture}").open, false)
     end
   end
 
