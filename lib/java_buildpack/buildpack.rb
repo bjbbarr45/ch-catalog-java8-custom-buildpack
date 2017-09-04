@@ -25,6 +25,8 @@ require 'java_buildpack/component/java_opts'
 require 'java_buildpack/component/mutable_java_home'
 require 'java_buildpack/component/security_providers'
 require 'java_buildpack/logging/logger_factory'
+require 'java_buildpack/util/cache/application_cache'
+require 'java_buildpack/util/colorize'
 require 'java_buildpack/util/configuration_utils'
 require 'java_buildpack/util/constantize'
 require 'java_buildpack/util/snake_case'
@@ -65,6 +67,8 @@ module JavaBuildpack
       component_detection('framework', @frameworks, false).each(&:compile)
 
       container.compile
+
+      log_cache_contents
     end
 
     # Generates the payload required to run the application.  The payload format is defined by the
@@ -100,7 +104,7 @@ module JavaBuildpack
 
     private
 
-    BUILDPACK_MESSAGE = '-----> Java Buildpack Version: %s'.freeze
+    BUILDPACK_MESSAGE = "#{'----->'.red.bold} #{'Java Buildpack'.blue.bold} %s".freeze
 
     LOAD_ROOT = (Pathname.new(__FILE__).dirname + '..').freeze
 
@@ -110,8 +114,10 @@ module JavaBuildpack
       @logger            = Logging::LoggerFactory.instance.get_logger Buildpack
       @buildpack_version = BuildpackVersion.new
 
+      log_arguments
       log_environment_variables
       log_application_contents application
+      log_cache_contents
 
       @java_opts = Component::JavaOpts.new(app_dir)
 
@@ -186,7 +192,24 @@ module JavaBuildpack
         paths = []
         application.root.find { |f| paths << f.relative_path_from(application.root).to_s }
 
-        "Application Contents: #{paths}"
+        "Application Contents (#{application.root}): #{paths}"
+      end
+    end
+
+    def log_arguments
+      @logger.debug { "Arguments: #{$PROGRAM_NAME} #{ARGV}" }
+    end
+
+    def log_cache_contents
+      return unless JavaBuildpack::Util::Cache::ApplicationCache.available?
+
+      @logger.debug do
+        cache_root = Pathname.new JavaBuildpack::Util::Cache::ApplicationCache.application_cache_directory
+
+        paths = []
+        cache_root.find { |f| paths << f.relative_path_from(cache_root).to_s }
+
+        "Cache Contents (#{cache_root}): #{paths}"
       end
     end
 

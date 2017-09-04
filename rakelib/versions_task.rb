@@ -63,6 +63,7 @@ module Package
       'geode_store'                         => 'Apache Geode Tomcat Session Store',
       'google_stackdriver_debugger'         => 'Google Stackdriver Debugger',
       'groovy'                              => 'Groovy',
+      'introscope_agent'                    => 'CA Introscope APM Framework',
       'jre'                                 => 'OpenJDK JRE',
       'jrebel_agent'                        => 'JRebel Agent',
       'jvmkill_agent'                       => 'jvmkill Agent',
@@ -80,6 +81,7 @@ module Package
       'redis_store'                         => 'Redis Session Store',
       'spring_auto_reconfiguration'         => 'Spring Auto-reconfiguration',
       'spring_boot_cli'                     => 'Spring Boot CLI',
+      'takipi_agent'                        => 'Takipi Agent',
       'tomcat'                              => 'Tomcat',
       'your_kit_profiler'                   => 'YourKit Profiler'
     }.freeze

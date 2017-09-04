@@ -20,7 +20,7 @@ jre:
   version: 1.8.0_141
   repository_root: "{default.repository.root}/openjdk/{platform}/{architecture}"
 jvmkill_agent:
-  version: 1.9.0_RELEASE
+  version: 1.10.0_RELEASE
   repository_root: "{default.repository.root}/jvmkill/{platform}/{architecture}"
 memory_calculator:
   version: 3.9.0_RELEASE

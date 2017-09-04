@@ -16,16 +16,45 @@
         <!-- property name="rest-stats-tracking-frequency-in-seconds" value="60" / -->
     </configuration-properties>
 
+    <sensitive-url-filters>
+        <!--
+            This section specifies how the agent scrubs any sensitive information from the url.
+            This only applies to urls under snapshot details. Urls can be scrubbed based on the segment number
+            and delimiter.
+
+
+            There can only be one sensitive-url-filter. Each sensitive-url-filter element must have two attributes:
+
+                - delimiter: Characters used to split the url, usually a slash.
+                - segment: Numbers corresponding to index of the segments to be scrubbed, when split by delimiter.
+                           Segments start from 1.
+
+            For example, let's say we have url https://localhost:8080/foo/bar, and we have
+
+            <sensitive-url-filter delimiter="/"
+                                  segment="2,3"/>
+
+            In this case, url will be split into three segments,
+            1 - https://localhost:8080
+            2 - foo
+            3 - bar
+
+            Hence, the scrubbed url will be https://localhost:8080/*****/*****
+            Note: https:// or http:// will be ignored from segment count, and will never be scrubbed.
+        -->
+    </sensitive-url-filters>
+
     <sensitive-data-filters>
         <!--
              This section specifies how the agent scrubs any sensitive information from the data it
-             discovered, whether that data comes from a system property, an environment variable, or
+             discovered, whether that data comes from a system property, environment variable, jmx mbeans, or
              anything else.
 
              Each sensitive-data-filter element must have three attributes:
 
                  - applies-to: A comma-separated list of where this filter applies.  Right now, there
-                               are two possible values here: "system-properties" and "environment-variables".
+                               are three possible values here: "system-properties", "environment-variables",
+                               and "jmx-mbeans".
                  - match-type: One of EQUALS, CONTAINS, STARTSWITH, ENDSWITH
                  - match-pattern: The pattern to match against
 
@@ -34,12 +63,16 @@
              <sensitive-data-filter applies-to="system-properties"
                                     match-type="EQUALS"
                                     match-pattern="super.secret.password"/>
-             <sensitive-data-filter applies-to="environment-variables,system-properties"
+             <sensitive-data-filter applies-to="environment-variables,system-properties,jmx-mbeans"
                                     match-type="STARTSWITH"
                                     match-pattern="DB_"/>
         -->
 
-        <sensitive-data-filter applies-to="environment-variables,system-properties"
+        <sensitive-data-filter applies-to="jmx-mbeans"
+                               match-type="CONTAINS"
+                               match-pattern="username"/>
+
+        <sensitive-data-filter applies-to="environment-variables,system-properties,jmx-mbeans"
                                match-type="CONTAINS"
                                match-pattern="password"/>
 
@@ -68,6 +101,16 @@
 
         </agent-service>
 
+        <agent-service name="InstrumentationSdkPluginManager"
+                       implementation-class-name="com.singularity.ee.agent.appagent.kernel.InstrumentationSdkPluginManager"
+                       enabled="true">
+            <service-dependencies>BCIEngine,TransactionMonitoringService,SnapshotService</service-dependencies>
+
+            <configuration-properties>
+                <property name="sdk-plugin-directory" value="sdk-plugins"/>
+            </configuration-properties>
+        </agent-service>
+
         <agent-service name="BCIEngine" enabled="true">
             <optional-service-dependencies>Agent16Service</optional-service-dependencies>
             <configuration-properties>
@@ -89,10 +132,28 @@
                     <custom-exclude filter-type="CONTAINS" filter-value="$$FastClassByCGLIB"/>
                     <custom-exclude filter-type="STARTSWITH" filter-value="$Proxy"/>
                     <custom-exclude filter-type="STARTSWITH" filter-value="org/mozilla/javascript/gen/"/>
+                    <custom-exclude filter-type="STARTSWITH" filter-value="atg/dms/"/>
                     <custom-exclude filter-type="CONTAINS" filter-value="$$EnhancerByCGLIB$$"/>
                     <custom-exclude filter-type="EQUALS" filter-value="org.jboss.resource.adapter.jms.JmsMessageConsumer"/>
                     <custom-exclude filter-type="EQUALS" filter-value="com.ibm.ejs.jms.JMSMessageConsumerHandle"/>
+                    <custom-exclude filter-type="EQUALS" filter-value="io/netty/util/concurrent/DefaultThreadFactory$DefaultRunnableDecorator"/>
+                    <custom-exclude filter-type="STARTSWITH" filter-value="io/netty/util/concurrent/SingleThreadEventExecutor"/>
+                    <custom-exclude filter-type="STARTSWITH" filter-value="io/reactivex/netty/client/ConnectionPoolImpl"/>
                 </bci-processing-excludes>
+
+                <!-- definition for "overridable-exclude" which is just like "custom-exclude" but can be overridden
+                     by using "exclude-override".
+                     "exclude-override" is like "override-system-exclude" but is only applied on "overridable-exclude"
+                     -->
+                <overridable-exclude-definition>
+                    <!-- overriding for instrumenting kafka v9 consumers-->
+                    <exclude-override filter-type="EQUALS" filter-value="kafka.api.FetchResponse$$anonfun$dataGroupedByTopic$1"/>
+                    <!-- overriding for supporting spray applications-->
+                    <exclude-override filter-type="EQUALS" filter-value="spray.client.pipelining$$anonfun$sendReceive$1"/>
+                    <!-- excluding because of CORE-47544-->
+                    <overridable-exclude filter-type="CONTAINS" filter-value="$$anonfun"/>
+                </overridable-exclude-definition>
+
             </configuration>
         </agent-service>
         <agent-service name="SnapshotService" enabled="true">
@@ -283,8 +344,19 @@
                     <!-- Logback -->
                     <exclude filter-type="STARTSWITH" filter-value="ch.qos.logback.core.AsyncAppenderBase/"/>
 
-                    <!-- Hazelcast -->
-                    <exclude filter-type="STARTSWITH" filter-value="com.hazelcast.impl/"/>
+                    <!-- Hazelcast not required as we are excluding com.hazelcast itself
+                    <exclude filter-type="STARTSWITH" filter-value="com.hazelcast.impl/"/> -->
+
+                    <!-- Excluding as part of CORE-75838
+                    This might also have packages for framework that we support,
+                    but the classes which are required to support/instrument the framework would be baked in our java code.
+                    Rules baked in the java code will supercede those mentioned in the fork-config excludes.
+                    Thus exluding this packages will not effect the framework we already support. -->
+                    <excludes filter-type="STARTSWITH" filter-value="io.netty/"/>
+                    <excludes filter-type="STARTSWITH" filter-value="io.vertx/"/>
+                    <excludes filter-type="STARTSWITH" filter-value="javassist/"/>
+                    <excludes filter-type="STARTSWITH" filter-value="com.fasterxml/"/>
+                    <excludes filter-type="STARTSWITH" filter-value="com.hazelcast/"/>
 
                     <!--
                     match-class
@@ -341,15 +413,6 @@
                         </match-method>
                         <name-config operation="" type="4"/>
                         <retention-config type="1" operation="1.getTaskSize()"/>
-                    </job>
-                    <job>
-                        <match-class type="inherits-from-class">
-                            <name filter-type="EQUALS" filter-value="java.util.concurrent.RecursiveTask"/>
-                        </match-class>
-                        <match-method>
-                            <name filter-type="EQUALS" filter-value="compute"/>
-                        </match-method>
-                        <name-config operation="" type="4"/>
                     </job>
                 </fork-config>
             </configuration>
@@ -447,7 +510,11 @@
             <configuration-properties>
             </configuration-properties>
         </agent-service>
-        
+        <agent-service name="Agent17Service" enabled="true" minimum-java-version="1.7">
+        </agent-service>
+        <agent-service name="LogParserService" enabled="true" minimum-java-version="1.5">
+        </agent-service>
+
         <!-- Make sure this is the last service all the time in the config file -->
         <agent-service name="AgentProxyService" enabled="false">
             <service-dependencies>TransactionMonitoringService</service-dependencies>
