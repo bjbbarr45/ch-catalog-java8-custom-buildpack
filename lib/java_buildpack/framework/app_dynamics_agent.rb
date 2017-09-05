@@ -83,6 +83,7 @@ module JavaBuildpack
       def node_name(java_opts, credentials)
         name = credentials['node-name'] || @configuration['default_node_name']
         java_opts.add_system_property('appdynamics.agent.nodeName', name.to_s)
+        java_opts.add_system_property('LAME_EXPR_FIX', "'$(/bin/true) PAAS-3163'")
       end
 
       def port(java_opts, credentials)
