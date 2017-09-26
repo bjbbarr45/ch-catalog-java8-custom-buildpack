@@ -44,7 +44,7 @@ frameworks:
   - "JavaBuildpack::Framework::AspectjWeaverAgent"
   - "JavaBuildpack::Framework::ClientCertificateMapper"
   - "JavaBuildpack::Framework::ContainerCustomizer"
-#  - "JavaBuildpack::Framework::ContainerSecurityProvider"
+  - "JavaBuildpack::Framework::ContainerSecurityProvider"
   - "JavaBuildpack::Framework::ContrastSecurityAgent"
   - "JavaBuildpack::Framework::Debug"
   - "JavaBuildpack::Framework::DyadicEkmSecurityProvider"
