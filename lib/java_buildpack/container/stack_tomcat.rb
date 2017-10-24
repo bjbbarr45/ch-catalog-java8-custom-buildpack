@@ -179,12 +179,13 @@ module JavaBuildpack
           context_root = catalina_props["#{war_file_name}.contextRoot"] unless catalina_props["#{war_file_name}.contextRoot"].nil?
           context_root[0] = '' if context_root[0] == '/'
           context_root = 'ROOT' if context_root.empty?
-          context_root_war_name = "#{context_root.gsub(/\//, '#')}.war"
-          FileUtils.mkdir_p(webapps)
-          puts "Deploying #{war_file} to webapps with context root #{context_root}"
-
-          new_war = webapps + context_root_war_name
-          FileUtils.ln_sf(war_file.relative_path_from(webapps),  new_war)
+          unzip_dir_name = context_root.gsub(/\//, '#')
+          unzip_dir = webapps+unzip_dir_name
+          FileUtils.mkdir_p(unzip_dir)
+#          raise "unzip -o #{war_file} -d #{unzip_dir} 2>&1"
+          with_timing "Deploying #{war_file} to webapps with context root #{context_root}" do
+            shell "unzip -o #{war_file} -d #{unzip_dir} 2>&1"
+          end
         end
       end
 

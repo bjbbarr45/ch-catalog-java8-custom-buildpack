@@ -63,9 +63,9 @@ describe JavaBuildpack::Container::StackTomcat do
 
     component.compile
 
-    war = app_dir + '.java-buildpack/stack_tomcat/webapps/dude.war'
+    file_in_war = app_dir + '.java-buildpack/stack_tomcat/webapps/dude/file.txt'
 
-    expect(war).to exist
+    expect(file_in_war).to exist
   end
 
   context do
@@ -77,9 +77,24 @@ describe JavaBuildpack::Container::StackTomcat do
 
       component.compile
 
-      war = app_dir + '.java-buildpack/stack_tomcat/webapps/ROOT.war'
+      file_in_war = app_dir + '.java-buildpack/stack_tomcat/webapps/ROOT/file.txt'
 
-      expect(war).to exist
+      expect(file_in_war).to exist
+    end
+  end
+
+  context do
+    let(:env) { 'subdir' }
+
+    it 'link the wars to the ROOT directory',
+       app_fixture:   'container_stack_tomcat',
+       cache_fixture: 'stub-tomcat.tar.gz' do
+
+      component.compile
+
+      file_in_war = app_dir + '.java-buildpack/stack_tomcat/webapps/sub#dir/file.txt'
+
+      expect(file_in_war).to exist
     end
   end
 
