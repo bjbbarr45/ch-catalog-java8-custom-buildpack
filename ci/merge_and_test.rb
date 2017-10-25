@@ -4,7 +4,7 @@ system("git checkout -b #{ARGV[0]} origin/#{ARGV[0]} 2>&1")
 exit $?.exitstatus unless $?.exitstatus == 0
 
 puts "Merge branch #{ARGV[0]} with Master"
-system("git merge origin/master --no-edit 2>&1")
+system("git merge origin/4.x --no-edit 2>&1")
 exit $?.exitstatus unless $?.exitstatus == 0
 
 puts "Execute tests on branch #{ARGV[0]} after merge"
