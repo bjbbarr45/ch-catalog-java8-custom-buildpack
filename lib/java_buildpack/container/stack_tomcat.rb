@@ -184,8 +184,7 @@ module JavaBuildpack
           unzip_dir_name = context_root.gsub(/\//, '#')
           unzip_dir = webapps+unzip_dir_name
           FileUtils.mkdir_p(unzip_dir)
-#          raise "unzip -o #{war_file} -d #{unzip_dir} 2>&1"
-          with_timing "Deploying #{war_file} to webapps with context root #{unzip_dir}" do
+          with_timing "Unzipping '#{war_file}' to into '#{unzip_dir}'" do
             shell "unzip -o #{war_file} -d #{unzip_dir}"
             FileUtils.rm_rf war_file
           end
