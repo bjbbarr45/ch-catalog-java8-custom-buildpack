@@ -184,6 +184,7 @@ module JavaBuildpack
           context_root = 'ROOT' if context_root.empty?
           unzip_dir_name = context_root.gsub(/\//, '#')
           unzip_dir = webapps+unzip_dir_name
+          puts "Creating dir #{unzip_dir}"
           FileUtils.mkdir_p(unzip_dir)
 #          raise "unzip -o #{war_file} -d #{unzip_dir} 2>&1"
           with_timing "Deploying #{war_file} to webapps with context root #{unzip_dir}" do
