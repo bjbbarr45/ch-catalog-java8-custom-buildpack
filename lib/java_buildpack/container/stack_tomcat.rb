@@ -174,7 +174,9 @@ module JavaBuildpack
         @application.root.each_child do |war_file|
           puts "Processing war file #{war_file}"
           next unless war_file.file?
+          puts "Is a file #{war_file}"
           next unless war_file.basename.to_s.end_with?('.war')
+          puts "Ends with .war #{war_file}"
           context_root = 'ROOT'
           war_file_name = war_file.basename.to_s.gsub(/.war/, '')
           context_root = catalina_props["#{war_file_name}.contextRoot"] unless catalina_props["#{war_file_name}.contextRoot"].nil?
