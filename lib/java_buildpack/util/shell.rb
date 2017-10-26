@@ -28,13 +28,13 @@ module JavaBuildpack
       # @return [Void]
       def shell(*args)
         Open3.popen3(*args) do |_stdin, stdout, stderr, wait_thr|
-          unless wait_thr.value.success?
+#          unless wait_thr.value.success?
             puts "\nCommand '#{args.join ' '}' has failed"
             puts "STDOUT: #{stdout.gets nil}"
             puts "STDERR: #{stderr.gets nil}"
 
-            raise
-          end
+ #           raise
+ #         end
         end
       end
 
