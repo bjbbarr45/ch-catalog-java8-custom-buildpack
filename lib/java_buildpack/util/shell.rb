@@ -36,7 +36,7 @@ module JavaBuildpack
             puts "STDERR: #{stderr}"
 
             raise
-         end
+          end
         end
       end
 
