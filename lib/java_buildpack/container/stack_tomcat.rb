@@ -172,6 +172,7 @@ module JavaBuildpack
         FileUtils.rm_rf webapps
         FileUtils.mkdir_p webapps
         @application.root.each_child do |war_file|
+          puts "Processing war file #{war_file}"
           next unless war_file.file?
           next unless war_file.basename.to_s.end_with?('.war')
           context_root = 'ROOT'
@@ -186,6 +187,7 @@ module JavaBuildpack
           with_timing "Deploying #{war_file} to webapps with context root #{unzip_dir}" do
             shell "unzip -o #{war_file} -d #{unzip_dir}"
           end
+          puts "Done processing war file #{war_file}"
         end
       end
 
