@@ -193,7 +193,7 @@ module JavaBuildpack
       end
 
       def find_deployable_file(filename, env)
-        fail "#{filename} is not an environment paramiterizable file." unless CONFIG_FILES.include?(filename)
+        fail "#{filename} is not an environment parameterizable file." unless CONFIG_FILES.include?(filename)
         file_found = nil
         @application.root.children.each do |file|
           next unless file.file?
