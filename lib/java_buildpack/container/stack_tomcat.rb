@@ -190,7 +190,7 @@ module JavaBuildpack
             FileUtils.rm_rf war_file
           end
         end
-        unless war_found STDERR.puts "Warning no .war files found in deployable."
+        STDERR.puts "Warning no .war files found in deployable." unless war_found
       end
 
       def find_deployable_file(filename, env)
