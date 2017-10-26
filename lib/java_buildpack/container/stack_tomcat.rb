@@ -184,7 +184,7 @@ module JavaBuildpack
           FileUtils.mkdir_p(unzip_dir)
 #          raise "unzip -o #{war_file} -d #{unzip_dir} 2>&1"
           with_timing "Deploying #{war_file} to webapps with context root #{unzip_dir}" do
-            shell "unzip -o #{war_file} -d #{unzip_dir} 2>&1"
+            shell "unzip -o #{war_file} -d #{unzip_dir}"
           end
         end
       end
