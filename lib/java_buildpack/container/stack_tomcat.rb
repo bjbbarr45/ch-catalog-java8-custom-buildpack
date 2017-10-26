@@ -190,6 +190,7 @@ module JavaBuildpack
 #          raise "unzip -o #{war_file} -d #{unzip_dir} 2>&1"
           with_timing "Deploying #{war_file} to webapps with context root #{unzip_dir}" do
             shell "unzip -o #{war_file} -d #{unzip_dir}"
+            FileUtils.rm_rf war_file
           end
           puts "Done processing war file #{war_file}"
         end
