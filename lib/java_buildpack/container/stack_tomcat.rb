@@ -171,12 +171,11 @@ module JavaBuildpack
       def copy_wars_to_tomcat(catalina_props)
         FileUtils.rm_rf webapps
         FileUtils.mkdir_p webapps
+        war_found = false
         @application.root.each_child do |war_file|
-          puts "Processing war file #{war_file}"
           next unless war_file.file?
-          puts "Is a file #{war_file}"
           next unless war_file.basename.to_s.end_with?('.war')
-          puts "Ends with .war #{war_file}"
+          war_found = true
           context_root = 'ROOT'
           war_file_name = war_file.basename.to_s.gsub(/.war/, '')
           context_root = catalina_props["#{war_file_name}.contextRoot"] unless catalina_props["#{war_file_name}.contextRoot"].nil?
@@ -184,16 +183,14 @@ module JavaBuildpack
           context_root = 'ROOT' if context_root.empty?
           unzip_dir_name = context_root.gsub(/\//, '#')
           unzip_dir = webapps+unzip_dir_name
-          puts "Creating dir #{unzip_dir}"
           FileUtils.mkdir_p(unzip_dir)
-          puts "Created dir #{unzip_dir}"
 #          raise "unzip -o #{war_file} -d #{unzip_dir} 2>&1"
           with_timing "Deploying #{war_file} to webapps with context root #{unzip_dir}" do
             shell "unzip -o #{war_file} -d #{unzip_dir}"
             FileUtils.rm_rf war_file
           end
-          puts "Done processing war file #{war_file}"
         end
+        unless war_found STDERR.puts "Warning no .war files found in deployable."
       end
 
       def find_deployable_file(filename, env)
@@ -244,13 +241,10 @@ module JavaBuildpack
 
       def deployable?
         env = @configuration[DEPLOYABLE_ENV]
-#        war_exists = false
         catalina_properties_exists = false
 
         @application.root.each_child do |file|
           next unless file.file?
-
-#          war_exists = true if file.to_s.end_with?('.war')
 
           next unless file.basename.to_s == 'catalina.properties' || file.basename.to_s == "#{env}.catalina.properties"
           catalina_properties_exists = true
