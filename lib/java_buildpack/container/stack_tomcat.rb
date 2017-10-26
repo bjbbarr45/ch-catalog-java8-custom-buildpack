@@ -250,7 +250,7 @@ module JavaBuildpack
         @application.root.each_child do |file|
           next unless file.file?
 
-          war_exists = true if file.to_s.end_with?('.war')
+#          war_exists = true if file.to_s.end_with?('.war')
 
           next unless file.basename.to_s == 'catalina.properties' || file.basename.to_s == "#{env}.catalina.properties"
           catalina_properties_exists = true
