@@ -244,7 +244,7 @@ module JavaBuildpack
 
       def deployable?
         env = @configuration[DEPLOYABLE_ENV]
-        war_exists = false
+#        war_exists = false
         catalina_properties_exists = false
 
         @application.root.each_child do |file|
@@ -255,7 +255,7 @@ module JavaBuildpack
           next unless file.basename.to_s == 'catalina.properties' || file.basename.to_s == "#{env}.catalina.properties"
           catalina_properties_exists = true
         end
-        war_exists && catalina_properties_exists
+        catalina_properties_exists
       end
 
     end
