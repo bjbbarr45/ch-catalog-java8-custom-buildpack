@@ -134,16 +134,6 @@ describe JavaBuildpack::Container::StackTomcat do
 
   end
 
-  context do
-    let(:env) { 'invalidarg' }
-
-    it 'fail because we have a jvm arg the supplies memory settings',
-       app_fixture:   'container_stack_tomcat',
-       cache_fixture: 'stub-tomcat.tar.gz' do
-      expect { component.compile }.to raise_error(RuntimeError)
-    end
-  end
-
   it 'return command',
      app_fixture: 'container_stack_tomcat',
      cache_fixture: 'stub-tomcat.tar.gz' do

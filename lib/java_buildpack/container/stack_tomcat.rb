@@ -58,11 +58,6 @@ module JavaBuildpack
           puts "Warning: #{catalina.basename} doesn't appear to specify a 'org.apache.tomcat.util.digester.PROPERTY_SOURCE'.  Resolving environment variables may not work."
         end
         jvm_args = java_opts(env)
-        jvm_args.each do |arg|
-          ['-Xms', '-Xmx', '-XX:PermSize', '-XX:MaxMetaspaceSize', '-XX:MetaspaceSize', '-XX:MaxPermSize', '-Xss', '-XX:-UseConcMarkSweepGC', '-XX:-UseParallelGC', '-XX:-UseParallelOldGC', '-XX:-UseSerialGC', '-XX:+UseG1GC'].each do |param|
-            fail "jvmargs.properties value '#{arg}' uses the argument '#{param}'.  Memory and GC customization should be done using the java-buildpack mechanisms instead." if arg.include? param
-          end
-        end
         puts "Adding these jvmargs: #{jvm_args}"
         copy_wars_to_tomcat(catalina_props)
         copy_applib_dir
