@@ -60,7 +60,7 @@ module JavaBuildpack
         jvm_args = java_opts(env)
         jvm_args.each do |arg|
           ['-Xms', '-Xmx', '-XX:PermSize', '-XX:MaxMetaspaceSize', '-XX:MetaspaceSize', '-XX:MaxPermSize', '-Xss', '-XX:-UseConcMarkSweepGC', '-XX:-UseParallelGC', '-XX:-UseParallelOldGC', '-XX:-UseSerialGC', '-XX:+UseG1GC'].each do |param|
-            fail "jvmargs.properties value '#{arg}' uses the argument '#{param}'.  Memory and GC customization should be done using the java-buildpack instead. (https://github.com/cloudfoundry/java-buildpack/blob/master/docs/jre-openjdk.md)" if arg.include? param
+            fail "jvmargs.properties value '#{arg}' uses the argument '#{param}'.  Memory and GC customization should be done using the java-buildpack mechanisms instead." if arg.include? param
           end
         end
         puts "Adding these jvmargs: #{jvm_args}"
@@ -73,16 +73,40 @@ module JavaBuildpack
 
       # (see JavaBuildpack::Component::BaseComponent#release)
       def release
+#        @droplet.environment_variables.add_environment_variable 'JAVA_OPTS', '$JAVA_OPTS'
+#        @droplet.java_opts.add_system_property 'http.port', '$PORT'
+#
+#        [
+#          @droplet.environment_variables.as_env_vars,
+#          @droplet.java_home.as_env_var,
+#          'exec',
+#          "$PWD/#{(@droplet.sandbox + 'bin/catalina.sh').relative_path_from(@droplet.root)}",
+#          'run'
+#        ].flatten.compact.join(' ')
+
         @droplet.java_opts.concat parsed_java_opts(java_opts(@configuration[DEPLOYABLE_ENV]).join(' '))
         @droplet.java_opts.add_system_property 'http.port', '$PORT'
         @droplet.java_opts.add_system_property 'user.timezone', 'America/Denver'
+        @droplet.environment_variables.add_environment_variable 'JAVA_OPTS', '$JAVA_OPTS'
 
         [
+          @droplet.environment_variables.as_env_vars,
           @droplet.java_home.as_env_var,
-          @droplet.java_opts.as_env_var,
+          'exec',
           "$PWD/#{(@droplet.sandbox + 'bin/catalina.sh').relative_path_from(@droplet.root)}",
           'run'
-        ].compact.join(' ')
+        ].flatten.compact.join(' ')
+        
+#  @droplet.java_opts.concat parsed_java_opts(java_opts(@configuration[DEPLOYABLE_ENV]).join(' '))
+#  @droplet.java_opts.add_system_property 'http.port', '$PORT'
+#  @droplet.java_opts.add_system_property 'user.timezone', 'America/Denver'
+#
+#  [
+#    @droplet.java_home.as_env_var,
+#    @droplet.java_opts.as_env_var,
+#    "$PWD/#{(@droplet.sandbox + 'bin/catalina.sh').relative_path_from(@droplet.root)}",
+#    'run'
+#  ].compact.join(' ')
       end
 
       private
