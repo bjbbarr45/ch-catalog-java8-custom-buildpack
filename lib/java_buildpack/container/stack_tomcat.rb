@@ -75,8 +75,8 @@ module JavaBuildpack
       def release
         @droplet.environment_variables.add_environment_variable 'JAVA_OPTS', '$JAVA_OPTS'
         @droplet.java_opts.unshift *parsed_java_opts(java_opts(@configuration[DEPLOYABLE_ENV]).join(' '))
-        @droplet.java_opts.add_system_property 'http.port', '$PORT'
-        @droplet.java_opts.add_system_property 'user.timezone', 'America/Denver'
+        @droplet.java_opts.unshift "-Dhttp.port=$PORT"
+        @droplet.java_opts.unshift "-Duser.timezone=America/Denver"
 
         [
           @droplet.environment_variables.as_env_vars,
