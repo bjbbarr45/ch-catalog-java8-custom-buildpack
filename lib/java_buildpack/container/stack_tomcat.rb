@@ -73,17 +73,6 @@ module JavaBuildpack
 
       # (see JavaBuildpack::Component::BaseComponent#release)
       def release
-#        @droplet.environment_variables.add_environment_variable 'JAVA_OPTS', '$JAVA_OPTS'
-#        @droplet.java_opts.add_system_property 'http.port', '$PORT'
-#
-#        [
-#          @droplet.environment_variables.as_env_vars,
-#          @droplet.java_home.as_env_var,
-#          'exec',
-#          "$PWD/#{(@droplet.sandbox + 'bin/catalina.sh').relative_path_from(@droplet.root)}",
-#          'run'
-#        ].flatten.compact.join(' ')
-
         @droplet.java_opts.concat parsed_java_opts(java_opts(@configuration[DEPLOYABLE_ENV]).join(' '))
         @droplet.java_opts.add_system_property 'http.port', '$PORT'
         @droplet.java_opts.add_system_property 'user.timezone', 'America/Denver'
@@ -96,17 +85,6 @@ module JavaBuildpack
           "$PWD/#{(@droplet.sandbox + 'bin/catalina.sh').relative_path_from(@droplet.root)}",
           'run'
         ].flatten.compact.join(' ')
-        
-#  @droplet.java_opts.concat parsed_java_opts(java_opts(@configuration[DEPLOYABLE_ENV]).join(' '))
-#  @droplet.java_opts.add_system_property 'http.port', '$PORT'
-#  @droplet.java_opts.add_system_property 'user.timezone', 'America/Denver'
-#
-#  [
-#    @droplet.java_home.as_env_var,
-#    @droplet.java_opts.as_env_var,
-#    "$PWD/#{(@droplet.sandbox + 'bin/catalina.sh').relative_path_from(@droplet.root)}",
-#    'run'
-#  ].compact.join(' ')
       end
 
       private

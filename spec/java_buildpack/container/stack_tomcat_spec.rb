@@ -151,7 +151,7 @@ describe JavaBuildpack::Container::StackTomcat do
     component.release
 
 # rubocop:disable all
-    expect(component.release).to eq("#{java_home.as_env_var} JAVA_OPTS=\"test-opt-2 test-opt-1 -Dsomevalue=10 -Dhttp.port=$PORT -Duser.timezone=America/Denver -Dsomevalue=10 -Dhttp.port=$PORT -Duser.timezone=America/Denver\" $PWD/.java-buildpack/stack_tomcat/bin/catalina.sh run")
+    expect(component.release).to eq("test-var-2 test-var-1 JAVA_OPTS=$JAVA_OPTS JAVA_OPTS=$JAVA_OPTS #{java_home.as_env_var} exec $PWD/.java-buildpack/stack_tomcat/bin/catalina.sh run")
 # rubocop:enable all
     expect(java_opts).to include('-Duser.timezone=America/Denver')
   end
