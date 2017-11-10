@@ -73,10 +73,10 @@ module JavaBuildpack
 
       # (see JavaBuildpack::Component::BaseComponent#release)
       def release
+        @droplet.environment_variables.add_environment_variable 'JAVA_OPTS', '$JAVA_OPTS'
         @droplet.java_opts.concat parsed_java_opts(java_opts(@configuration[DEPLOYABLE_ENV]).join(' '))
         @droplet.java_opts.add_system_property 'http.port', '$PORT'
         @droplet.java_opts.add_system_property 'user.timezone', 'America/Denver'
-        @droplet.environment_variables.add_environment_variable 'JAVA_OPTS', '$JAVA_OPTS'
 
         [
           @droplet.environment_variables.as_env_vars,
