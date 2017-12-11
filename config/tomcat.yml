@@ -16,7 +16,7 @@
 # Configuration for the Tomcat container
 ---
 tomcat:
-  version: 8.5.23
+  version: 8.5.24
   repository_root: "{default.repository.root}/tomcat"
   context_path: 
 lifecycle_support:
@@ -37,4 +37,4 @@ redis_store:
   connection_pool_size: 2
 geode_store:
   version: 0.0.2
-  repository_root: "{default.repository.root}/geode-store"
+  repository_root: https://repo.spring.io/ext-release-local/geode-store
