@@ -20,13 +20,13 @@ tomcat:
   repository_root: "{default.repository.root}/tomcat"
   context_path: 
 lifecycle_support:
-  version: 3.1.0_RELEASE
+  version: 3.2.0_RELEASE
   repository_root: "{default.repository.root}/tomcat-lifecycle-support"
 logging_support:
-  version: 3.1.0_RELEASE
+  version: 3.2.0_RELEASE
   repository_root: "{default.repository.root}/tomcat-logging-support"
 access_logging_support:
-  version: 3.1.0_RELEASE
+  version: 3.2.0_RELEASE
   repository_root: "{default.repository.root}/tomcat-access-logging-support"
   access_logging: disabled
 redis_store:
