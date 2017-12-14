@@ -40,7 +40,10 @@ module JavaBuildpack
           .each { |java_opt| @droplet.java_opts << java_opt }
 
         @droplet.java_opts << '$JAVA_OPTS' if from_environment?
+        
+        #$(if [ 240 -ge  $( expr $(echo $MEMORY_LIMIT|sed -e 's/[^0-9]//') / 9) ] ; then echo 240 ; else echo  $( expr $(echo $MEMORY_LIMIT|sed -e 's/[^0-9]//') / 9) ; fi);
 
+        @droplet.java_opts << "-XX:ReservedCodeCacheSize=#{$(if [ 240 -ge  $( expr $(echo $MEMORY_LIMIT|sed -e 's/[^0-9]//') / 9) ] ; then echo 240 ; else echo  $( expr $(echo $MEMORY_LIMIT|sed -e 's/[^0-9]//') / 9) ; fi);}m"
         @droplet.java_opts.as_env_var
       end
 
