@@ -42,7 +42,7 @@ module JavaBuildpack
         @droplet.java_opts << '$JAVA_OPTS' if from_environment?
 
         # rubocop:disable all
-        @droplet.java_opts << "-XX:ReservedCodeCacheSize=$(if [ 240 -ge  $( expr $(echo $MEMORY_LIMIT|sed -e 's/[^0-9]//') / 9) ] ; then echo 240m ; else echo  $( expr $(echo $MEMORY_LIMIT|sed -e 's/[^0-9]//') / 9)m ; fi)"
+        @droplet.java_opts << "-XX:ReservedCodeCacheSize=$(if [ 240 -ge  $( expr $(echo $MEMORY_LIMIT|sed -e 's/[^0-9]//') / 9) ] ; then echo 240m ; else echo  $( expr $(echo $MEMORY_LIMIT|sed -e 's/[^0-9]//') / 7)m ; fi)"
         # rubocop:enable all
         @droplet.java_opts.as_env_var
       end
