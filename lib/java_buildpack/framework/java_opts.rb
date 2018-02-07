@@ -42,7 +42,7 @@ module JavaBuildpack
         @droplet.java_opts << '$JAVA_OPTS' if from_environment?
 
         # rubocop:disable all
-        @droplet.java_opts.unshift "-XX:ReservedCodeCacheSize=$(ruby -e \"crccs = (ENV['MEMORY_LIMIT'].gsub(/[^0-9]/i, '').to_i*0.11).to_i; puts crccs <= 240 ? '240' : crccs >= 2048 ? '2048' : crccs\")"
+        @droplet.java_opts.unshift "-XX:ReservedCodeCacheSize=$(ruby -e \"crccs = (ENV['MEMORY_LIMIT'].gsub(/[^0-9]/i, '').to_i*0.11).to_i; puts crccs <= 240 ? '240' : crccs >= 2048 ? '2048' : crccs\")m"
         # rubocop:enable all
         @droplet.java_opts.as_env_var
       end
