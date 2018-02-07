@@ -1,5 +1,3 @@
-# Encoding: utf-8
-
 # Cloud Foundry Java Buildpack
 # Copyright 2013 the original author or authors.
 #
@@ -23,7 +21,7 @@ require 'java_buildpack/repository/configured_item'
 require 'java_buildpack/util/tokenized_version'
 
 describe JavaBuildpack::Container::StackTomcat do
-  include_context 'component_helper'
+  include_context 'with component help'
 
   let(:configuration) { { 'env' => env } }
   let(:env) { 'cf' }

@@ -19,7 +19,7 @@ require 'java_buildpack/framework/dynatrace_one_agent'
 require 'java_buildpack/util/tokenized_version'
 
 describe JavaBuildpack::Framework::DynatraceOneAgent do
-  include_context 'component_helper'
+  include_context 'with component help'
 
   it 'does not detect without dynatrace-n/a service' do
     expect(component.detect).to be_nil
@@ -88,6 +88,54 @@ describe JavaBuildpack::Framework::DynatraceOneAgent do
 
         expect(environment_variables).not_to include(/DT_APPLICATIONID/)
         expect(environment_variables).not_to include(/DT_HOST_ID/)
+      end
+
+    end
+
+    context do
+
+      before do
+        allow(services).to receive(:one_service?).with(/dynatrace/, 'apitoken', 'environmentid').and_return(true)
+        allow(services).to receive(:find_service).and_return('credentials' => { 'environmentid' => 'test-environmentid',
+                                                                                'apiurl'        => 'test-apiurl',
+                                                                                'apitoken'      => 'test-apitoken' })
+        allow(application_cache).to receive(:get)
+          .with('test-apiurl/v1/deployment/installer/agent/unix/paas/latest?include=java&bitness=64' \
+            '&Api-Token=test-apitoken')
+          .and_raise(RuntimeError.new('service interrupt'))
+      end
+
+      it 'fails on download error on default' do
+        expect { component.compile }.to raise_error(RuntimeError)
+      end
+
+    end
+
+    context do
+
+      before do
+        allow(services).to receive(:one_service?).with(/dynatrace/, 'apitoken', 'environmentid').and_return(true)
+        allow(services).to receive(:find_service).and_return('credentials' => { 'environmentid' => 'test-environmentid',
+                                                                                'apiurl'        => 'test-apiurl',
+                                                                                'apitoken'      => 'test-apitoken',
+                                                                                'skiperrors'    => 'true' })
+        allow(application_cache).to receive(:get)
+          .with('test-apiurl/v1/deployment/installer/agent/unix/paas/latest?include=java&bitness=64' \
+            '&Api-Token=test-apitoken')
+          .and_raise(RuntimeError.new('service interrupt'))
+      end
+
+      it 'skips errors during compile and writes error file' do
+        component.compile
+        expect(sandbox + 'dynatrace_download_error').to exist
+      end
+
+      it 'does not do anything during release' do
+        component.compile
+        component.release
+
+        expect(java_opts).not_to include('-agentpath:$PWD/.java-buildpack/dynatrace_one_agent/agent/lib64/' \
+          'liboneagentloader.so')
       end
 
     end
