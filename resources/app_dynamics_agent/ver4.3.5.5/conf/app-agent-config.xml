@@ -23,7 +23,7 @@
             and delimiter.
 
 
-            There can only be one sensitive-url-filter. A sensitive-url-filter element must have two attributes:
+            There can only be one sensitive-url-filter. Each sensitive-url-filter element must have two attributes:
 
                 - delimiter: Characters used to split the url, usually a slash.
                 - segment: Numbers corresponding to index of the segments to be scrubbed, when split by delimiter.
@@ -32,16 +32,12 @@
             For example, let's say we have url https://localhost:8080/foo/bar, and we have
 
             <sensitive-url-filter delimiter="/"
-                                  segment="2,3"
-                                  match-filter="EQUALS|INLIST|STARTSWITH|ENDSWITH|CONTAINS|REGEX|NOT_EMPTY"
-                                  match-pattern="pattern" />
+                                  segment="2,3"/>
 
             In this case, url will be split into three segments,
             1 - https://localhost:8080
             2 - foo
             3 - bar
-
-            match-filter - defaulted to NOT_EMPTY if not specified
 
             Hence, the scrubbed url will be https://localhost:8080/*****/*****
             Note: https:// or http:// will be ignored from segment count, and will never be scrubbed.
@@ -115,10 +111,6 @@
             </configuration-properties>
         </agent-service>
 
-        <agent-service name="BCIFixer" enabled="true">
-            <service-dependencies>BCIEngine</service-dependencies>
-        </agent-service>
-
         <agent-service name="BCIEngine" enabled="true">
             <optional-service-dependencies>Agent16Service</optional-service-dependencies>
             <configuration-properties>
@@ -147,9 +139,6 @@
                     <custom-exclude filter-type="EQUALS" filter-value="io/netty/util/concurrent/DefaultThreadFactory$DefaultRunnableDecorator"/>
                     <custom-exclude filter-type="STARTSWITH" filter-value="io/netty/util/concurrent/SingleThreadEventExecutor"/>
                     <custom-exclude filter-type="STARTSWITH" filter-value="io/reactivex/netty/client/ConnectionPoolImpl"/>
-                    <!--- to disable lambda classes instrumentation, use the following line
-                        <custom-exclude filter-type="CONTAINS" filter-value="$$Lambda$"/>
-                    -->
                 </bci-processing-excludes>
 
                 <!-- definition for "overridable-exclude" which is just like "custom-exclude" but can be overridden
@@ -161,10 +150,6 @@
                     <exclude-override filter-type="EQUALS" filter-value="kafka.api.FetchResponse$$anonfun$dataGroupedByTopic$1"/>
                     <!-- overriding for supporting spray applications-->
                     <exclude-override filter-type="EQUALS" filter-value="spray.client.pipelining$$anonfun$sendReceive$1"/>
-                    <!-- overriding for supporting akka-http microservice-->
-                    <exclude-override filter-type="EQUALS" filter-value="akka.http.scaladsl.server.StandardRoute$$anon$1"/>
-                    <exclude-override filter-type="STARTSWITH"
-                                      filter-value="akka.http.impl.engine.client.PoolSlot$SlotProcessor$$anon$1$$anon$"/>
                     <!-- excluding because of CORE-47544-->
                     <overridable-exclude filter-type="CONTAINS" filter-value="$$anonfun"/>
                 </overridable-exclude-definition>
@@ -300,7 +285,6 @@
                     <excludes filter-type="STARTSWITH" filter-value="com.singularity"/>
 
                     <excludes filter-type="EQUALS" filter-value="com.tibco.pe.core.JobDispatcher$JobCourier"/>
-                    <excludes filter-type="EQUALS" filter-value="com.tibco.plugin.share.jms.impl.JMSReceiver$SessionController"/>
                     <excludes filter-type="STARTSWITH" filter-value="com.googlecode/"/>
                     <excludes filter-type="STARTSWITH" filter-value="com.google/"/>
                     <excludes filter-type="STARTSWITH" filter-value="com.opensymphony/"/>
@@ -419,6 +403,7 @@
                         <match-method><name filter-type="EQUALS" filter-value="doRun"/></match-method>
                         <name-config operation="" type="4"/>
                     </job>
+
                     <job>
                         <match-class type="matches-class">
                             <name filter-type="EQUALS" filter-value="com.tibco.pe.core.Job"/>
@@ -429,7 +414,6 @@
                         <name-config operation="" type="4"/>
                         <retention-config type="1" operation="1.getTaskSize()"/>
                     </job>
-
                 </fork-config>
             </configuration>
         </agent-service>
