@@ -34,7 +34,7 @@ module JavaBuildpack
 
       # (see JavaBuildpack::Component::BaseComponent#release)
       def release
-        credentials = @application.services.find_service(FILTER, 'url')['credentials']
+        credentials = @application.services.find_service(FILTER, %w[agent_manager_url url])['credentials']
         java_opts   = @droplet.java_opts
 
         java_opts
@@ -44,6 +44,10 @@ module JavaBuildpack
           .add_system_property('com.wily.introscope.agent.agentName', agent_name(credentials))
           .add_system_property('introscope.agent.defaultProcessName', default_process_name)
 
+        if agent_manager_credential(credentials)
+          java_opts.add_system_property('agentManager.credential', agent_manager_credential(credentials))
+        end
+
         add_url(credentials, java_opts)
       end
 
@@ -51,7 +55,7 @@ module JavaBuildpack
 
       # (see JavaBuildpack::Component::VersionedDependencyComponent#supports?)
       def supports?
-        @application.services.one_service? FILTER, 'url'
+        @application.services.one_service? FILTER, %w[agent_manager_url url]
       end
 
       private
@@ -69,7 +73,7 @@ module JavaBuildpack
       end
 
       def add_url(credentials, java_opts)
-        agent_manager = url(credentials)
+        agent_manager = agent_manager_url(credentials)
 
         host, port, socket_factory = parse_url(agent_manager)
         java_opts.add_system_property('agentManager.url.1', agent_manager)
@@ -92,7 +96,7 @@ module JavaBuildpack
       end
 
       def agent_name(credentials)
-        credentials['agent-name'] || @configuration['default_agent_name']
+        credentials['agent_name'] || @configuration['default_agent_name']
       end
 
       def agent_profile
@@ -116,8 +120,12 @@ module JavaBuildpack
         protocol_socket_factory[protocol] || protocol
       end
 
-      def url(credentials)
-        credentials['url']
+      def agent_manager_url(credentials)
+        credentials['agent_manager_url'] || credentials['url']
+      end
+
+      def agent_manager_credential(credentials)
+        credentials['agent_manager_credential'] || credentials['credential']
       end
     end
   end
