@@ -27,4 +27,4 @@ memory_calculator:
   repository_root: "{default.repository.root}/memory-calculator/{platform}/{architecture}"
   class_count: 
   headroom: 10
-  stack_threads: 250
+  stack_threads: 200
