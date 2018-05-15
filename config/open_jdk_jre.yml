@@ -26,5 +26,5 @@ memory_calculator:
   version: 3.13.0_RELEASE
   repository_root: "{default.repository.root}/memory-calculator/{platform}/{architecture}"
   class_count: 
-  headroom: 11
+  headroom: 10
   stack_threads: 250
