@@ -23,7 +23,7 @@
             and delimiter.
 
 
-            There can only be one sensitive-url-filter. Each sensitive-url-filter element must have two attributes:
+            There can only be one sensitive-url-filter. A sensitive-url-filter element must have two attributes:
 
                 - delimiter: Characters used to split the url, usually a slash.
                 - segment: Numbers corresponding to index of the segments to be scrubbed, when split by delimiter.
@@ -32,12 +32,18 @@
             For example, let's say we have url https://localhost:8080/foo/bar, and we have
 
             <sensitive-url-filter delimiter="/"
-                                  segment="2,3"/>
+                                  segment="2,3"
+                                  match-filter="EQUALS|INLIST|STARTSWITH|ENDSWITH|CONTAINS|REGEX|NOT_EMPTY"
+                                  match-pattern="pattern"
+                                  query-parameter=""/>
 
             In this case, url will be split into three segments,
             1 - https://localhost:8080
             2 - foo
             3 - bar
+
+            match-filter - defaulted to NOT_EMPTY if not specified
+            query-parameter - optional list of comma separated query parameters to filter
 
             Hence, the scrubbed url will be https://localhost:8080/*****/*****
             Note: https:// or http:// will be ignored from segment count, and will never be scrubbed.
@@ -50,22 +56,27 @@
              discovered, whether that data comes from a system property, environment variable, jmx mbeans, or
              anything else.
 
-             Each sensitive-data-filter element must have three attributes:
+             Each sensitive-data-filter element has three required attributes and one optional attribute:
 
                  - applies-to: A comma-separated list of where this filter applies.  Right now, there
                                are three possible values here: "system-properties", "environment-variables",
-                               and "jmx-mbeans".
+                               "data-collectors", and "jmx-mbeans".
                  - match-type: One of EQUALS, CONTAINS, STARTSWITH, ENDSWITH
                  - match-pattern: The pattern to match against
+                 - redaction-regex: (Optional) The pattern group to redact
 
              Here are two examples:
 
              <sensitive-data-filter applies-to="system-properties"
                                     match-type="EQUALS"
                                     match-pattern="super.secret.password"/>
-             <sensitive-data-filter applies-to="environment-variables,system-properties,jmx-mbeans"
+             <sensitive-data-filter applies-to="environment-variables,system-properties, jmx-mbeans"
                                     match-type="STARTSWITH"
                                     match-pattern="DB_"/>
+             <sensitive-data-filter applies-to="data-collectors"
+                                    match-type="STARTSWITH"
+                                    match-pattern=""
+                                    redaction-regex="\$[^$]*\$"/>
         -->
 
         <sensitive-data-filter applies-to="jmx-mbeans"
@@ -85,6 +96,15 @@
                                match-pattern="VCAP_SERVICES"/>
 
     </sensitive-data-filters>
+
+     <sensitive-message-filters>
+         <!--
+        <sensitive-message-filter message-type="throwable,logger-message,all"
+                                  match-type="EQUALS|CONTAINS|STARTSWITH|ENDSWITH|REGEX"
+                                  match-pattern="CASESENSITIVE_PATTERN"
+                                  redaction-regex="SENSITIVE_INFO_REGEX_GROUP"/>
+        -->
+     </sensitive-message-filters>
 
     <agent-services>
         <agent-service name="DynamicServiceManager"
@@ -111,8 +131,11 @@
             </configuration-properties>
         </agent-service>
 
+        <agent-service name="BCIFixer" enabled="true">
+            <service-dependencies>BCIEngine</service-dependencies>
+        </agent-service>
+
         <agent-service name="BCIEngine" enabled="true">
-            <optional-service-dependencies>Agent16Service</optional-service-dependencies>
             <configuration-properties>
                 <!-- uncomment this and to enable timing stats for interceptors. does not need a restart -->
                 <!-- property name="interceptor-stats-tracking-enabled" value="true"/ -->
@@ -139,6 +162,9 @@
                     <custom-exclude filter-type="EQUALS" filter-value="io/netty/util/concurrent/DefaultThreadFactory$DefaultRunnableDecorator"/>
                     <custom-exclude filter-type="STARTSWITH" filter-value="io/netty/util/concurrent/SingleThreadEventExecutor"/>
                     <custom-exclude filter-type="STARTSWITH" filter-value="io/reactivex/netty/client/ConnectionPoolImpl"/>
+                    <!--- to disable lambda classes instrumentation, use the following line
+                        <custom-exclude filter-type="CONTAINS" filter-value="$$Lambda$"/>
+                    -->
                 </bci-processing-excludes>
 
                 <!-- definition for "overridable-exclude" which is just like "custom-exclude" but can be overridden
@@ -150,6 +176,13 @@
                     <exclude-override filter-type="EQUALS" filter-value="kafka.api.FetchResponse$$anonfun$dataGroupedByTopic$1"/>
                     <!-- overriding for supporting spray applications-->
                     <exclude-override filter-type="EQUALS" filter-value="spray.client.pipelining$$anonfun$sendReceive$1"/>
+                    <!-- overriding for supporting akka applications-->
+                    <exclude-override filter-type="EQUALS" filter-value="akka.http.scaladsl.server.Route$$anonfun$asyncHandler$1"/>
+                    <!-- overriding for supporting akka-http microservice-->
+                    <exclude-override filter-type="EQUALS" filter-value="akka.http.scaladsl.server.StandardRoute$$anon$1"/>
+                    <exclude-override filter-type="STARTSWITH"
+                                      filter-value="akka.http.impl.engine.client.PoolSlot$SlotProcessor$$anon$1$$anon$"/>
+                    <exclude-override filter-type="EQUALS" filter-value="play.core.j.JavaAction$$anon$1"/>
                     <!-- excluding because of CORE-47544-->
                     <overridable-exclude filter-type="CONTAINS" filter-value="$$anonfun"/>
                 </overridable-exclude-definition>
@@ -285,6 +318,8 @@
                     <excludes filter-type="STARTSWITH" filter-value="com.singularity"/>
 
                     <excludes filter-type="EQUALS" filter-value="com.tibco.pe.core.JobDispatcher$JobCourier"/>
+                    <excludes filter-type="EQUALS" filter-value="com.tibco.plugin.share.jms.impl.JMSReceiver$SessionController"/>
+                    <excludes filter-type="EQUALS" filter-value="com.tibco.tibjms.TibjmsxSessionImp$Dispatcher"/>
                     <excludes filter-type="STARTSWITH" filter-value="com.googlecode/"/>
                     <excludes filter-type="STARTSWITH" filter-value="com.google/"/>
                     <excludes filter-type="STARTSWITH" filter-value="com.opensymphony/"/>
@@ -342,7 +377,7 @@
                     <exclude filter-type="EQUALS" filter-value="liquibase.sdk.verifytest.VerifiedTestFactory$1"/>
 
                     <!-- Logback -->
-                    <exclude filter-type="STARTSWITH" filter-value="ch.qos.logback.core.AsyncAppenderBase/"/>
+                    <exclude filter-type="STARTSWITH" filter-value="ch.qos.logback.core.AsyncAppenderBase"/>
 
                     <!-- Hazelcast not required as we are excluding com.hazelcast itself
                     <exclude filter-type="STARTSWITH" filter-value="com.hazelcast.impl/"/> -->
@@ -357,6 +392,13 @@
                     <excludes filter-type="STARTSWITH" filter-value="javassist/"/>
                     <excludes filter-type="STARTSWITH" filter-value="com.fasterxml/"/>
                     <excludes filter-type="STARTSWITH" filter-value="com.hazelcast/"/>
+
+                    <!-- IBM Websphere BPM (JAVA-2288) -->
+                    <include filter-type="STARTSWITH" filter-value="com.ibm.bpe"/>
+                    <include filter-type="STARTSWITH" filter-value="com.ibm.bpm"/>
+                    <include filter-type="STARTSWITH" filter-value="com.ibm.ws"/>
+                    <include filter-type="STARTSWITH" filter-value="com.ibm.wsspi"/>
+                    <include filter-type="STARTSWITH" filter-value="com.ibm.io.async"/>
 
                     <!--
                     match-class
@@ -403,7 +445,6 @@
                         <match-method><name filter-type="EQUALS" filter-value="doRun"/></match-method>
                         <name-config operation="" type="4"/>
                     </job>
-
                     <job>
                         <match-class type="matches-class">
                             <name filter-type="EQUALS" filter-value="com.tibco.pe.core.Job"/>
@@ -414,6 +455,7 @@
                         <name-config operation="" type="4"/>
                         <retention-config type="1" operation="1.getTaskSize()"/>
                     </job>
+
                 </fork-config>
             </configuration>
         </agent-service>
@@ -450,6 +492,9 @@
                 </jmx-forever-increasing-counters>
 
             </configuration>
+        </agent-service>
+        <agent-service name="AgentResourceMonitor" enabled="true">
+            <service-dependencies>JMXService</service-dependencies>
         </agent-service>
         <agent-service name="ObjectMonitoringService" enabled="true">
             <service-dependencies>BCIEngine</service-dependencies>
@@ -506,13 +551,9 @@
                 <property name="enable-shutdown-hook" value="false"/>
             </configuration-properties>
         </agent-service>
-        <agent-service name="Agent16Service" enabled="true" minimum-java-version="1.6">
-            <configuration-properties>
-            </configuration-properties>
-        </agent-service>
         <agent-service name="Agent17Service" enabled="true" minimum-java-version="1.7">
         </agent-service>
-        <agent-service name="LogParserService" enabled="true" minimum-java-version="1.5">
+        <agent-service name="LogParserService" enabled="true">
         </agent-service>
 
         <!-- Make sure this is the last service all the time in the config file -->
