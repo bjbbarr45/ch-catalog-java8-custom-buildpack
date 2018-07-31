@@ -13,10 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Configuration for the Spring Auto Reconfiguration framework.
-# Note that the repository is shared with the Play Auto Reconfiguration framework and should be kept in step to
-# avoid conflicts.
+# Configuration for the riverbed appinternals agent framework
 ---
-version: 3.2.6
-repository_root: https://java-buildpack.cloudfoundry.org/sky-walking
-default_application_name: $(jq -r -n "$VCAP_APPLICATION | .space_name + \":\" + .application_name")
+version: 10.14.1_BL566
+repository_root: https://pcf-instrumentation-download.steelcentral.net/
+rvbd_moniker: $(jq -r -n "$VCAP_APPLICATION | .application_name")
