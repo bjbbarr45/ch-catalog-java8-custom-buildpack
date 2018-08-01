@@ -13,10 +13,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# JMX configuration
+# Configuration for the Groovy container
 ---
-version: 2018.4.81
-repository_root: https://download.run.pivotal.io/your-kit/{platform}/{architecture}
-enabled: false
-port: 10001
-default_session_name: $(jq -r -n "$VCAP_APPLICATION | .application_name + \":$CF_INSTANCE_INDEX\"")
+version: 0.1.0
+repository_root: "{default.repository.root}/google-stackdriver-profiler/{platform}/{architecture}"
+application_name: 
+application_version: 
