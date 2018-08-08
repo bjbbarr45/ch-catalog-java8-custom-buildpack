@@ -23,7 +23,7 @@
         <Engine defaultHost='localhost' name='Catalina'>
             <Valve className='org.apache.catalina.valves.RemoteIpValve' protocolHeader='X-Forwarded-Scheme'/>
             <Valve className='org.cloudfoundry.tomcat.logging.access.CloudFoundryAccessLoggingValve'
-                   pattern='[ACCESS] %{org.apache.catalina.AccessLog.RemoteAddr}r %l %t %r %D %F %B %S vcap_request_id:%{X-Vcap-Request-Id}i'
+                   pattern='[ACCESS] %{org.apache.catalina.AccessLog.RemoteAddr}r %l %t %r %s %D %F %B %S vcap_request_id:%{X-Vcap-Request-Id}i'
                    enabled='${access.logging.enabled}'/>
             <Host name='localhost'
                   failCtxIfServletStartFails='true'>
