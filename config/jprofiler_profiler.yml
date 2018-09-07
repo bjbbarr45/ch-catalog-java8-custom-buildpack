@@ -13,7 +13,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Configuration for the New Relic framework
+# JMX configuration
 ---
-version: 4.4.0
-repository_root: https://download.run.pivotal.io/new-relic
+version: 10.1.2
+repository_root: https://download.run.pivotal.io/jprofiler
+enabled: false
+nowait: true
+port: 8849
