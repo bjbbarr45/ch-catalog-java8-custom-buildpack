@@ -15,7 +15,6 @@
 
 # Configuration for the Stack Tomcat container
 ---
-# Stick with 7.0.69 for now since new versions are causing problems with jdbc jndi resolution
-version: 7.0.90
+version: 7.0.91
 repository_root: "{default.repository.root}/tomcat"
 env: cf

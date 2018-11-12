@@ -34,7 +34,8 @@
             <sensitive-url-filter delimiter="/"
                                   segment="2,3"
                                   match-filter="EQUALS|INLIST|STARTSWITH|ENDSWITH|CONTAINS|REGEX|NOT_EMPTY"
-                                  match-pattern="pattern"/>
+                                  match-pattern="pattern"
+                                  query-parameter=""/>
 
             In this case, url will be split into three segments,
             1 - https://localhost:8080
@@ -42,6 +43,7 @@
             3 - bar
 
             match-filter - defaulted to NOT_EMPTY if not specified
+            query-parameter - optional list of comma separated query parameters to filter
 
             Hence, the scrubbed url will be https://localhost:8080/*****/*****
             Note: https:// or http:// will be ignored from segment count, and will never be scrubbed.
@@ -54,22 +56,27 @@
              discovered, whether that data comes from a system property, environment variable, jmx mbeans, or
              anything else.
 
-             Each sensitive-data-filter element must have three attributes:
+             Each sensitive-data-filter element has three required attributes and one optional attribute:
 
                  - applies-to: A comma-separated list of where this filter applies.  Right now, there
                                are three possible values here: "system-properties", "environment-variables",
-                               and "jmx-mbeans".
+                               "data-collectors", and "jmx-mbeans".
                  - match-type: One of EQUALS, CONTAINS, STARTSWITH, ENDSWITH
                  - match-pattern: The pattern to match against
+                 - redaction-regex: (Optional) The pattern group to redact
 
              Here are two examples:
 
              <sensitive-data-filter applies-to="system-properties"
                                     match-type="EQUALS"
                                     match-pattern="super.secret.password"/>
-             <sensitive-data-filter applies-to="environment-variables,system-properties,jmx-mbeans"
+             <sensitive-data-filter applies-to="environment-variables,system-properties, jmx-mbeans"
                                     match-type="STARTSWITH"
                                     match-pattern="DB_"/>
+             <sensitive-data-filter applies-to="data-collectors"
+                                    match-type="STARTSWITH"
+                                    match-pattern=""
+                                    redaction-regex="\$[^$]*\$"/>
         -->
 
         <sensitive-data-filter applies-to="jmx-mbeans"
@@ -129,7 +136,6 @@
         </agent-service>
 
         <agent-service name="BCIEngine" enabled="true">
-            <optional-service-dependencies>Agent16Service</optional-service-dependencies>
             <configuration-properties>
                 <!-- uncomment this and to enable timing stats for interceptors. does not need a restart -->
                 <!-- property name="interceptor-stats-tracking-enabled" value="true"/ -->
@@ -371,7 +377,7 @@
                     <exclude filter-type="EQUALS" filter-value="liquibase.sdk.verifytest.VerifiedTestFactory$1"/>
 
                     <!-- Logback -->
-                    <exclude filter-type="STARTSWITH" filter-value="ch.qos.logback.core.AsyncAppenderBase/"/>
+                    <exclude filter-type="STARTSWITH" filter-value="ch.qos.logback.core.AsyncAppenderBase"/>
 
                     <!-- Hazelcast not required as we are excluding com.hazelcast itself
                     <exclude filter-type="STARTSWITH" filter-value="com.hazelcast.impl/"/> -->
@@ -545,13 +551,9 @@
                 <property name="enable-shutdown-hook" value="false"/>
             </configuration-properties>
         </agent-service>
-        <agent-service name="Agent16Service" enabled="true" minimum-java-version="1.6">
-            <configuration-properties>
-            </configuration-properties>
-        </agent-service>
         <agent-service name="Agent17Service" enabled="true" minimum-java-version="1.7">
         </agent-service>
-        <agent-service name="LogParserService" enabled="true" minimum-java-version="1.5">
+        <agent-service name="LogParserService" enabled="true">
         </agent-service>
 
         <!-- Make sure this is the last service all the time in the config file -->
