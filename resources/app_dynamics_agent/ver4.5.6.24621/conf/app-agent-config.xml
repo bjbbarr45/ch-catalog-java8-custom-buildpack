@@ -20,14 +20,14 @@
         <!--
             This section specifies how the agent scrubs any sensitive information from the url.
             This only applies to urls under snapshot details. Urls can be scrubbed based on the segment number
-            and delimiter.
+            and delimiter, or by defining a query parameter pattern.
 
 
-            There can only be one sensitive-url-filter. A sensitive-url-filter element must have two attributes:
+            A sensitive-url-filter element must have one of the following two attributes:
 
-                - delimiter: Characters used to split the url, usually a slash.
                 - segment: Numbers corresponding to index of the segments to be scrubbed, when split by delimiter.
                            Segments start from 1.
+                - param-pattern: regex filter for redacting query parameters from the url string
 
             For example, let's say we have url https://localhost:8080/foo/bar, and we have
 
@@ -35,15 +35,16 @@
                                   segment="2,3"
                                   match-filter="EQUALS|INLIST|STARTSWITH|ENDSWITH|CONTAINS|REGEX|NOT_EMPTY"
                                   match-pattern="pattern"
-                                  query-parameter=""/>
+                                  param-pattern=""/>
 
             In this case, url will be split into three segments,
             1 - https://localhost:8080
             2 - foo
             3 - bar
 
-            match-filter - defaulted to NOT_EMPTY if not specified
-            query-parameter - optional list of comma separated query parameters to filter
+            delimiter - characters used to split the url, default is "/"
+            match-filter - the type of filtering to be used to match the url, default is NOT_EMPTY
+            match-pattern - the string pattern corresponding to the match-filter, if needed
 
             Hence, the scrubbed url will be https://localhost:8080/*****/*****
             Note: https:// or http:// will be ignored from segment count, and will never be scrubbed.
@@ -59,13 +60,13 @@
              Each sensitive-data-filter element has three required attributes and one optional attribute:
 
                  - applies-to: A comma-separated list of where this filter applies.  Right now, there
-                               are three possible values here: "system-properties", "environment-variables",
-                               "data-collectors", and "jmx-mbeans".
+                               are five possible values here: "system-properties", "environment-variables",
+                               "http-headers", "http-cookies", and "jmx-mbeans".
                  - match-type: One of EQUALS, CONTAINS, STARTSWITH, ENDSWITH
                  - match-pattern: The pattern to match against
                  - redaction-regex: (Optional) The pattern group to redact
 
-             Here are two examples:
+             Here are some examples:
 
              <sensitive-data-filter applies-to="system-properties"
                                     match-type="EQUALS"
@@ -73,7 +74,7 @@
              <sensitive-data-filter applies-to="environment-variables,system-properties, jmx-mbeans"
                                     match-type="STARTSWITH"
                                     match-pattern="DB_"/>
-             <sensitive-data-filter applies-to="data-collectors"
+             <sensitive-data-filter applies-to="http-headers"
                                     match-type="STARTSWITH"
                                     match-pattern=""
                                     redaction-regex="\$[^$]*\$"/>
@@ -176,9 +177,10 @@
                     <exclude-override filter-type="EQUALS" filter-value="kafka.api.FetchResponse$$anonfun$dataGroupedByTopic$1"/>
                     <!-- overriding for supporting spray applications-->
                     <exclude-override filter-type="EQUALS" filter-value="spray.client.pipelining$$anonfun$sendReceive$1"/>
-                    <!-- overriding for supporting akka applications-->
-                    <exclude-override filter-type="EQUALS" filter-value="akka.http.scaladsl.server.Route$$anonfun$asyncHandler$1"/>
                     <!-- overriding for supporting akka-http microservice-->
+                    <exclude-override filter-type="EQUALS" filter-value="akka.http.scaladsl.server.Route$$anonfun$asyncHandler$1"/>
+                    <exclude-override filter-type="EQUALS" filter-value="akka.http.scaladsl.server.Route$$anonfun$asyncHandler$1$$anonfun$apply$1"/>
+                    <exclude-override filter-type="EQUALS" filter-value="akka.http.scaladsl.server.Route$$anonfun$asyncHandler$1$$anonfun$apply$2"/>
                     <exclude-override filter-type="EQUALS" filter-value="akka.http.scaladsl.server.StandardRoute$$anon$1"/>
                     <exclude-override filter-type="STARTSWITH"
                                       filter-value="akka.http.impl.engine.client.PoolSlot$SlotProcessor$$anon$1$$anon$"/>
@@ -290,9 +292,158 @@
                 with cluster name.  In any case the IP/port info goes into snapshot details. 
                  -->
                  <!--  property name="enable-cassandra-backend-ip-naming" value="true" -->
+
+                <property name="async-instrumentation-strategy" value="constructor"/>
             </configuration-properties>
             <configuration>
+                <!-- Instrumentation strategy "constructor" (default) uses the <fork-config>
+                     section, while the experimental "executor" uses <async-config>.
+                -->
+                <async-config>
+                  <!-- This is the configuration for the "executor" strategy -->
+                    <exclude filter-type="STARTSWITH" filter-value="com.singularity.ee.agent/"/>
+                    <!--
+                    match-class
+                        type: inherits-from-class, implements-interface, matches-class, has-class-annotation
+                        name:
+                            filter-type: STARTSWITH, EQUALS, ENDSWITH, CONTAINS
+
+                    name-config
+                        type:
+                            0:none,             1:param,        2:instance,     3:classname,
+                            4:simple classname  5:thread id     6:thread name
+                        operation:
+                            param:      <paramIndex>.getter-chain   eg. 0.getName().toString()
+                            instance:   getter-chain                eg. getName().toString()
+
+                    action
+                        type: announcement, execution, suppression, cancellation, shutdown
+                        token:
+                            announcement:
+                                this         - invoked object
+                                <paramIndex> - argument (first argument is 0)
+                            execution:
+                                this         - invoked object
+                                <paramIndex> - argument (first argument is 0)
+                            cancellation:
+                                this         - invoked object
+                                <paramIndex> - argument (first argument is 0)
+                            shutdown:
+                                return       - returned object
+                    -->
+                    <!-- Announcement jobs -->
+                    <job>
+                        <match-class type="implements-interface"><name filter-type="EQUALS" filter-value="java.util.concurrent.Executor"/></match-class>
+                        <match-method><name filter-type="EQUALS" filter-value="execute"/></match-method>
+                        <action type="announcement" token="0"/>
+                        <name-config operation="0.getClass().getSimpleName()" type="1"/>
+                    </job>
+                    <job>
+                        <match-class type="matches-class"><name filter-type="EQUALS" filter-value="java.util.concurrent.ScheduledThreadPoolExecutor"/></match-class>
+                        <match-method><name filter-type="EQUALS" filter-value="delayedExecute"/></match-method>
+                        <action type="announcement" token="0"/>
+                        <name-config operation="0.getClass().getSimpleName()" type="1"/>
+                    </job>
+                    <job>
+                        <match-class type="matches-class"><name filter-type="EQUALS" filter-value="java.lang.Thread"/></match-class>
+                        <match-method><name filter-type="EQUALS" filter-value="start"/></match-method>
+                        <action type="announcement" token="this"/>
+                        <name-config operation="" type="4"/>
+                    </job>
+                    <!-- Cancellation and Shutdown jobs -->
+                    <job>
+                        <match-class type="matches-class"><name filter-type="EQUALS" filter-value="java.util.concurrent.FutureTask"/></match-class>
+                        <match-method><name filter-type="EQUALS" filter-value="cancel"/></match-method>
+                        <action type="cancellation" token="this"/>
+                    </job>
+                    <job>
+                        <match-class type="matches-class"><name filter-type="EQUALS" filter-value="java.util.concurrent.ThreadPoolExecutor"/></match-class>
+                        <match-method><name filter-type="EQUALS" filter-value="reject"/></match-method>
+                        <action type="cancellation" token="0"/>
+                    </job>
+                    <job>
+                        <match-class type="matches-class"><name filter-type="EQUALS" filter-value="java.util.concurrent.ThreadPoolExecutor"/></match-class>
+                        <match-method><name filter-type="EQUALS" filter-value="shutdownNow"/></match-method>
+                        <action type="shutdown" token="return"/>
+                    </job>
+                    <!-- Execution jobs -->
+                    <job>
+                        <match-class type="implements-interface"><name filter-type="EQUALS" filter-value="java.lang.Runnable"/></match-class>
+                        <match-method><name filter-type="EQUALS" filter-value="run"/></match-method>
+                        <action type="execution" token="this"/>
+                        <name-config operation="" type="4"/>
+                    </job>
+                    <job>
+                        <match-class type="matches-class"><name filter-type="EQUALS" filter-value="java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask"/></match-class>
+                        <match-method><name filter-type="EQUALS" filter-value="run"/></match-method>
+                        <action type="execution" token="this"/>
+                        <name-config operation="" type="4"/>
+                    </job>
+                    <job>
+                        <match-class type="matches-class"><name filter-type="EQUALS" filter-value="java.util.concurrent.FutureTask"/></match-class>
+                        <match-method><name filter-type="EQUALS" filter-value="run"/></match-method>
+                        <action type="execution" token="this"/>
+                        <name-config operation="" type="4"/>
+                    </job> 
+                    <!-- Suppression jobs -->
+                    <job>
+                        <match-class type="matches-class"><name filter-type="EQUALS" filter-value="java.util.Timer"/></match-class>
+                        <match-method><name filter-type="EQUALS" filter-value="&lt;init&gt;"/></match-method>
+                        <action type="suppression"/>
+                    </job> 
+                    <job>
+                        <match-class type="matches-class"><name filter-type="EQUALS" filter-value="java.util.concurrent.ThreadPoolExecutor"/></match-class>
+                        <match-method><name filter-type="EQUALS" filter-value="addWorker"/></match-method>
+                        <action type="suppression"/>
+                    </job> 
+                    <job>
+                        <match-class type="matches-class"><name filter-type="EQUALS" filter-value="java.util.concurrent.ForkJoinPool"/></match-class>
+                        <match-method><name filter-type="EQUALS" filter-value="createWorker"/></match-method>
+                        <action type="suppression"/>
+                    </job> 
+                    <job>
+                        <match-class type="matches-class"><name filter-type="EQUALS" filter-value="scala.concurrent.forkjoin.ForkJoinPool"/></match-class>
+                        <match-method><name filter-type="EQUALS" filter-value="tryAddWorker"/></match-method>
+                        <action type="suppression"/>
+                    </job> 
+                    <job>
+                        <match-class type="matches-class"><name filter-type="EQUALS" filter-value="akka.actor.ActorSystemImpl"/></match-class>
+                        <match-method><name filter-type="EQUALS" filter-value="tryAddWorker"/></match-method>
+                        <action type="suppression"/>
+                    </job> 
+                    <job>
+                        <match-class type="matches-class"><name filter-type="EQUALS" filter-value="io.netty.util.concurrent.SingleThreadEventExecutor"/></match-class>
+                        <match-method><name filter-type="EQUALS" filter-value="startThread"/></match-method>
+                        <action type="suppression"/>
+                    </job> 
+                    <job>
+                        <match-class type="matches-class"><name filter-type="EQUALS" filter-value="org.apache.http.impl.nio.client.CloseableHttpAsyncClientBase"/></match-class>
+                        <match-method><name filter-type="EQUALS" filter-value="start"/></match-method>
+                        <action type="suppression"/>
+                    </job> 
+                    <job>
+                        <match-class type="matches-class"><name filter-type="EQUALS" filter-value="org.apache.http.impl.nio.reactor.AbstractMultiworkerIOReactor"/></match-class>
+                        <match-method><name filter-type="EQUALS" filter-value="execute"/></match-method>
+                        <action type="suppression"/>
+                    </job> 
+                    <job>
+                        <match-class type="matches-class"><name filter-type="EQUALS" filter-value="org.jboss.netty.util.internal.DeadLockProofWorker"/></match-class>
+                        <match-method><name filter-type="EQUALS" filter-value="start"/></match-method>
+                        <action type="suppression"/>
+                    </job>
+                    <job>
+                        <match-class type="matches-class"><name filter-type="EQUALS" filter-value="com.ning.http.client.providers.netty.NettyAsyncHttpProvider"/></match-class>
+                        <match-method><name filter-type="EQUALS" filter-value="newNettyTimer"/></match-method>
+                        <action type="suppression"/>
+                    </job> 
+                    <job>
+                        <match-class type="matches-class"><name filter-type="EQUALS" filter-value="io.netty.util.concurrent.SingleThreadEventExecutor"/></match-class>
+                        <match-method><name filter-type="EQUALS" filter-value="doStartThread"/></match-method>
+                        <action type="suppression"/>
+                    </job> 
+                </async-config>
                 <fork-config>
+                  <!-- This is the configuration for the "constructor" strategy -->
                     <!--
                         <excludes filter-type="STARTSWITH | CONTAINS | ENDSWITH | EQUALS"
                                   filter-value="comma-separated list of excludes"/>
@@ -554,6 +705,9 @@
         <agent-service name="Agent17Service" enabled="true" minimum-java-version="1.7">
         </agent-service>
         <agent-service name="LogParserService" enabled="true">
+        </agent-service>
+        <agent-service name="ResourceMonitoringService" enabled="false">
+            <service-dependencies>BCIEngine</service-dependencies>
         </agent-service>
 
         <!-- Make sure this is the last service all the time in the config file -->
