@@ -49,7 +49,7 @@ describe JavaBuildpack::Container::StackTomcat do
   end
 
   it 'extract Tomcat from a GZipped TAR',
-     app_fixture:   'container_stack_tomcat',
+     app_fixture: 'container_stack_tomcat',
      cache_fixture: 'stub-tomcat.tar.gz' do
 
     component.compile
@@ -58,7 +58,7 @@ describe JavaBuildpack::Container::StackTomcat do
   end
 
   it 'link the wars to the webapp directory',
-     app_fixture:   'container_stack_tomcat',
+     app_fixture: 'container_stack_tomcat',
      cache_fixture: 'stub-tomcat.tar.gz' do
 
     component.compile
@@ -72,7 +72,7 @@ describe JavaBuildpack::Container::StackTomcat do
     let(:env) { 'root' }
 
     it 'link the wars to the ROOT directory',
-       app_fixture:   'container_stack_tomcat',
+       app_fixture: 'container_stack_tomcat',
        cache_fixture: 'stub-tomcat.tar.gz' do
 
       component.compile
@@ -87,7 +87,7 @@ describe JavaBuildpack::Container::StackTomcat do
     let(:env) { 'subdir' }
 
     it 'link the wars to the ROOT directory',
-       app_fixture:   'container_stack_tomcat',
+       app_fixture: 'container_stack_tomcat',
        cache_fixture: 'stub-tomcat.tar.gz' do
 
       component.compile
@@ -99,7 +99,7 @@ describe JavaBuildpack::Container::StackTomcat do
   end
 
   it 'link the applib directory',
-     app_fixture:   'container_stack_tomcat',
+     app_fixture: 'container_stack_tomcat',
      cache_fixture: 'stub-tomcat.tar.gz' do
 
     component.compile
@@ -110,7 +110,7 @@ describe JavaBuildpack::Container::StackTomcat do
   end
 
   it 'link the endorsed directory',
-     app_fixture:   'container_stack_tomcat',
+     app_fixture: 'container_stack_tomcat',
      cache_fixture: 'stub-tomcat.tar.gz' do
 
     component.compile
@@ -121,7 +121,7 @@ describe JavaBuildpack::Container::StackTomcat do
   end
 
   it 'link the conf directory entries',
-     app_fixture:   'container_stack_tomcat',
+     app_fixture: 'container_stack_tomcat',
      cache_fixture: 'stub-tomcat.tar.gz' do
 
     component.compile

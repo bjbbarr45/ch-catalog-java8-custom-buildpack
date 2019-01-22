@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Cloud Foundry Java Buildpack
-# Copyright 2013-2018 the original author or authors.
+# Copyright 2013-2019 the original author or authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -43,11 +43,15 @@ shared_context 'with droplet help' do
 
   let(:droplet) do
     JavaBuildpack::Component::Droplet.new(additional_libraries, component_id, environment_variables,
-                                          extension_directories, java_home, java_opts, app_dir, networking,
-                                          security_providers)
+                                          extension_directories, java_home, java_opts, networking, app_dir,
+                                          root_libraries, security_providers)
   end
 
   let(:extension_directories) { JavaBuildpack::Component::ExtensionDirectories.new app_dir }
+
+  let(:root_libraries) { JavaBuildpack::Component::RootLibraries.new app_dir }
+
+  let(:root_libs_directory) { droplet.root + '.root_libs' }
 
   let(:sandbox) { droplet.sandbox }
 
@@ -85,6 +89,9 @@ shared_context 'with droplet help' do
 
     extension_directories << sandbox + 'test-extension-directory-1'
     extension_directories << sandbox + 'test-extension-directory-2'
+
+    FileUtils.cp_r 'spec/fixtures/root_libs/.', root_libs_directory
+    root_libs_directory.children.each { |child| root_libraries << child }
 
     security_providers.concat %w[test-security-provider-1 test-security-provider-2]
   end

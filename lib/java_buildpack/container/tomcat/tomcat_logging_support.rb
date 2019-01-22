@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Cloud Foundry Java Buildpack
-# Copyright 2013-2018 the original author or authors.
+# Copyright 2013-2019 the original author or authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ module JavaBuildpack
       # (see JavaBuildpack::Component::BaseComponent#compile)
       def compile
         download_jar(jar_name, bin)
-        write_set_env
+        @droplet.root_libraries << (bin + jar_name)
       end
 
       # (see JavaBuildpack::Component::BaseComponent#release)
@@ -47,20 +47,6 @@ module JavaBuildpack
 
       def jar_name
         "tomcat_logging_support-#{@version}.jar"
-      end
-
-      def setenv
-        bin + 'setenv.sh'
-      end
-
-      def write_set_env
-        setenv.open('w') do |f|
-          f.write <<~SH
-            #!/bin/sh
-
-            CLASSPATH=$CLASSPATH:#{(bin + jar_name).relative_path_from(@droplet.root)}
-          SH
-        end
       end
 
     end

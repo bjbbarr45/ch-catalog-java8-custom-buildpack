@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Cloud Foundry Java Buildpack
-# Copyright 2013-2018 the original author or authors.
+# Copyright 2013-2019 the original author or authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -36,7 +36,8 @@ describe JavaBuildpack::Container::DistZipLike do
     component.compile
 
     expect((app_dir + 'bin/application').read)
-      .to match 'CLASSPATH=\$APP_HOME/.additional_libs/test-jar-1.jar:\$APP_HOME/.additional_libs/test-jar-2.jar:'
+      .to match 'CLASSPATH=\$APP_HOME/.additional_libs/test-jar-1.jar:\$APP_HOME/.additional_libs/test-jar-2.jar:' \
+                '\$APP_HOME/.root_libs/test-jar-3.jar:\$APP_HOME/.root_libs/test-jar-4.jar:'
   end
 
   it 'extends the app_classpath',
@@ -46,7 +47,8 @@ describe JavaBuildpack::Container::DistZipLike do
 
     expect((app_dir + 'application-root/bin/application').read)
       .to match 'declare -r app_classpath="\$app_home/../../.additional_libs/test-jar-1.jar:' \
-      '\$app_home/../../.additional_libs/test-jar-2.jar:'
+      '\$app_home/../../.additional_libs/test-jar-2.jar:\$app_home/../../.root_libs/test-jar-3.jar:' \
+      '\$app_home/../../.root_libs/test-jar-4.jar:'
   end
 
   it 'returns command',

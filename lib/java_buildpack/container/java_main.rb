@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Cloud Foundry Java Buildpack
-# Copyright 2013-2018 the original author or authors.
+# Copyright 2013-2019 the original author or authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -73,7 +73,6 @@ module JavaBuildpack
           @droplet.additional_libraries.insert 0, @application.root
         end
 
-        classpath = @spring_boot_utils.is?(@application) ? '-cp $PWD/.' : @droplet.additional_libraries.as_classpath
         release_text(classpath)
       end
 
@@ -100,6 +99,11 @@ module JavaBuildpack
 
       def arguments
         @configuration[ARGUMENTS_PROPERTY]
+      end
+
+      def classpath
+        cp = @spring_boot_utils.is?(@application) ? '-cp $PWD/.' : @droplet.additional_libraries.as_classpath
+        ([cp] + @droplet.root_libraries.qualified_paths).join(':')
       end
 
       def main_class

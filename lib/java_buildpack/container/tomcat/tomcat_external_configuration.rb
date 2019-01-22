@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Cloud Foundry Java Buildpack
-# Copyright 2013-2018 the original author or authors.
+# Copyright 2013-2019 the original author or authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -27,7 +27,11 @@ module JavaBuildpack
 
       # (see JavaBuildpack::Component::BaseComponent#compile)
       def compile
-        download_tar
+        JavaBuildpack::Util::Cache::InternetAvailability.instance.available(
+          true, 'The Tomcat External Configuration download location is always accessible'
+        ) do
+          download_tar
+        end
       end
 
       # (see JavaBuildpack::Component::BaseComponent#release)

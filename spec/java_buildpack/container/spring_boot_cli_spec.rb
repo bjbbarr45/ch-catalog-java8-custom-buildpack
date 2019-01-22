@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Cloud Foundry Java Buildpack
-# Copyright 2013-2018 the original author or authors.
+# Copyright 2013-2019 the original author or authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -83,7 +83,7 @@ describe JavaBuildpack::Container::SpringBootCLI do
   end
 
   it 'extracts Spring Boot CLI from a ZIP',
-     app_fixture:   'container_spring_boot_cli_valid_app',
+     app_fixture: 'container_spring_boot_cli_valid_app',
      cache_fixture: 'stub-spring-boot-cli.tar.gz' do
 
     component.compile
@@ -96,7 +96,8 @@ describe JavaBuildpack::Container::SpringBootCLI do
 
     expect(component.release).to eq("#{env_vars_str} #{java_home.as_env_var} " \
                                     'exec $PWD/.java-buildpack/spring_boot_cli/bin/spring run ' \
-                                    '-cp $PWD/.additional_libs/test-jar-1.jar:$PWD/.additional_libs/test-jar-2.jar ' \
+                                    '-cp $PWD/.additional_libs/test-jar-1.jar:$PWD/.additional_libs/test-jar-2.jar:' \
+                                    '$PWD/.root_libs/test-jar-3.jar:$PWD/.root_libs/test-jar-4.jar ' \
                                     'directory/pogo_4.groovy invalid.groovy pogo_1.groovy pogo_2.groovy pogo_3.groovy')
   end
 

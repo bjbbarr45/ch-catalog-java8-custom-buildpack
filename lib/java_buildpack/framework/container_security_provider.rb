@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Cloud Foundry Java Buildpack
-# Copyright 2013-2018 the original author or authors.
+# Copyright 2013-2019 the original author or authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -28,13 +28,13 @@ module JavaBuildpack
       def compile
         download_jar
         @droplet.security_providers.insert 1, 'org.cloudfoundry.security.CloudFoundryContainerProvider'
-        @droplet.additional_libraries << (@droplet.sandbox + jar_name) if @droplet.java_home.java_9_or_later?
+        @droplet.root_libraries << (@droplet.sandbox + jar_name) if @droplet.java_home.java_9_or_later?
       end
 
       # (see JavaBuildpack::Component::BaseComponent#release)
       def release
         if @droplet.java_home.java_9_or_later?
-          @droplet.additional_libraries << (@droplet.sandbox + jar_name)
+          @droplet.root_libraries << (@droplet.sandbox + jar_name)
         else
           @droplet.extension_directories << @droplet.sandbox
         end
