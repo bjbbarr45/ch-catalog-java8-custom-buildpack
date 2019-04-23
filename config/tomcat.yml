@@ -16,7 +16,7 @@
 # Configuration for the Tomcat container
 ---
 tomcat:
-  version: 8.5.37
+  version: 8.5.40
   repository_root: "{default.repository.root}/tomcat"
   context_path: 
 lifecycle_support:

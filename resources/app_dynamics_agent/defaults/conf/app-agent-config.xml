@@ -93,8 +93,8 @@
                                match-pattern="key"/>
 
         <sensitive-data-filter applies-to="environment-variables,system-properties"
-                               match-type="EQUALS"
-                               match-pattern="VCAP_SERVICES"/>
+                               match-type="STARTSWITH"
+                               match-pattern=""/>
 
     </sensitive-data-filters>
 
@@ -280,16 +280,16 @@
                 <!-- add classname/method e.g. foo/bar where foo is class name and bar is methd name to mark the method demarcating the end
                 of an async distributed transaction , does not need a restart -->
                 <!-- property name="async-transaction-demarcator" value=""/-->
-                
-                <!-- 
+
+                <!--
                 Add comma-separated list of async environment names.  These will be used to enable async transaction detection
                 for supported environments.  Current supported async environments: mule,camel,jbossesb,tibcobw,scala
                  -->
                  <!--  property name="enable-async-correlation-for" value="mule,camel,jbossesb,tibcobw,scala"/ -->
-                 
+
                 <!--
                 Cassandra CQL / Datastax driver: uncomment to name Cassandra backends with IP/port instead of naming
-                with cluster name.  In any case the IP/port info goes into snapshot details. 
+                with cluster name.  In any case the IP/port info goes into snapshot details.
                  -->
                  <!--  property name="enable-cassandra-backend-ip-naming" value="true" -->
 
@@ -384,48 +384,48 @@
                         <match-method><name filter-type="EQUALS" filter-value="run"/></match-method>
                         <action type="execution" token="this"/>
                         <name-config operation="" type="4"/>
-                    </job> 
+                    </job>
                     <!-- Suppression jobs -->
                     <job>
                         <match-class type="matches-class"><name filter-type="EQUALS" filter-value="java.util.Timer"/></match-class>
                         <match-method><name filter-type="EQUALS" filter-value="&lt;init&gt;"/></match-method>
                         <action type="suppression"/>
-                    </job> 
+                    </job>
                     <job>
                         <match-class type="matches-class"><name filter-type="EQUALS" filter-value="java.util.concurrent.ThreadPoolExecutor"/></match-class>
                         <match-method><name filter-type="EQUALS" filter-value="addWorker"/></match-method>
                         <action type="suppression"/>
-                    </job> 
+                    </job>
                     <job>
                         <match-class type="matches-class"><name filter-type="EQUALS" filter-value="java.util.concurrent.ForkJoinPool"/></match-class>
                         <match-method><name filter-type="EQUALS" filter-value="createWorker"/></match-method>
                         <action type="suppression"/>
-                    </job> 
+                    </job>
                     <job>
                         <match-class type="matches-class"><name filter-type="EQUALS" filter-value="scala.concurrent.forkjoin.ForkJoinPool"/></match-class>
                         <match-method><name filter-type="EQUALS" filter-value="tryAddWorker"/></match-method>
                         <action type="suppression"/>
-                    </job> 
+                    </job>
                     <job>
                         <match-class type="matches-class"><name filter-type="EQUALS" filter-value="akka.actor.ActorSystemImpl"/></match-class>
                         <match-method><name filter-type="EQUALS" filter-value="tryAddWorker"/></match-method>
                         <action type="suppression"/>
-                    </job> 
+                    </job>
                     <job>
                         <match-class type="matches-class"><name filter-type="EQUALS" filter-value="io.netty.util.concurrent.SingleThreadEventExecutor"/></match-class>
                         <match-method><name filter-type="EQUALS" filter-value="startThread"/></match-method>
                         <action type="suppression"/>
-                    </job> 
+                    </job>
                     <job>
                         <match-class type="matches-class"><name filter-type="EQUALS" filter-value="org.apache.http.impl.nio.client.CloseableHttpAsyncClientBase"/></match-class>
                         <match-method><name filter-type="EQUALS" filter-value="start"/></match-method>
                         <action type="suppression"/>
-                    </job> 
+                    </job>
                     <job>
                         <match-class type="matches-class"><name filter-type="EQUALS" filter-value="org.apache.http.impl.nio.reactor.AbstractMultiworkerIOReactor"/></match-class>
                         <match-method><name filter-type="EQUALS" filter-value="execute"/></match-method>
                         <action type="suppression"/>
-                    </job> 
+                    </job>
                     <job>
                         <match-class type="matches-class"><name filter-type="EQUALS" filter-value="org.jboss.netty.util.internal.DeadLockProofWorker"/></match-class>
                         <match-method><name filter-type="EQUALS" filter-value="start"/></match-method>
@@ -435,12 +435,12 @@
                         <match-class type="matches-class"><name filter-type="EQUALS" filter-value="com.ning.http.client.providers.netty.NettyAsyncHttpProvider"/></match-class>
                         <match-method><name filter-type="EQUALS" filter-value="newNettyTimer"/></match-method>
                         <action type="suppression"/>
-                    </job> 
+                    </job>
                     <job>
                         <match-class type="matches-class"><name filter-type="EQUALS" filter-value="io.netty.util.concurrent.SingleThreadEventExecutor"/></match-class>
                         <match-method><name filter-type="EQUALS" filter-value="doStartThread"/></match-method>
                         <action type="suppression"/>
-                    </job> 
+                    </job>
                 </async-config>
                 <fork-config>
                   <!-- This is the configuration for the "constructor" strategy -->
@@ -729,5 +729,5 @@
     <service-configuration-properties agent-service="SnapshotService">
         <property name="enable-startup-snapshot-policy" value="true"/>
     </service-configuration-properties>
-    -->  
+    -->
 </app-agent-configuration>

@@ -29,13 +29,16 @@ module JavaBuildpack
 
         extensions_context = context.clone
         extensions_context[:configuration] = context[:configuration]['extensions'] || {}
+
+        return unless supports_extensions?(extensions_context[:configuration])
+
         @extensions = NewRelicAgentExtensions.new(extensions_context)
       end
 
       # (see JavaBuildpack::Component::BaseComponent#compile)
       def compile
         download_jar
-        @extensions.compile if @extensions.supports?
+        @extensions&.compile
         @droplet.copy_resources
       end
 
@@ -83,6 +86,10 @@ module JavaBuildpack
         end
       end
 
+      def supports_extensions?(configuration)
+        !(configuration['repository_root'] || '').empty?
+      end
+
       def write_java_opts(java_opts, configuration)
         configuration.each do |key, value|
           java_opts.add_system_property("newrelic.config.#{key}", value)
@@ -93,10 +100,20 @@ module JavaBuildpack
 
     # Used by the main NewRelicAgent class to download the extensions tarball(if configured)
     class NewRelicAgentExtensions < JavaBuildpack::Component::VersionedDependencyComponent
+
+      # (see JavaBuildpack::Component::VersionedDependencyComponent#initialize)
+      def initialize(context, &version_validator)
+        JavaBuildpack::Util::Cache::InternetAvailability.instance.available(
+          true, 'The New Relic Extensions download location is always accessible'
+        ) do
+          super(context, &version_validator)
+        end
+      end
+
       # (see JavaBuildpack::Component::BaseComponent#compile)
       def compile
         JavaBuildpack::Util::Cache::InternetAvailability.instance.available(
-          true, "The #{@component_name} download location is always accessible"
+          true, 'The New Relic Extensions download location is always accessible'
         ) do
           download_tar(true, @droplet.sandbox + 'extensions')
         end
