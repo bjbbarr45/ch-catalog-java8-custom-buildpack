@@ -96,6 +96,7 @@ module JavaBuildpack
           else
             lsb_release
           end
+          "bionic"
         else
           raise 'Unable to determine platform'
         end
