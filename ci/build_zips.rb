@@ -14,7 +14,8 @@ exit $?.exitstatus unless $?.exitstatus == 0
 puts "Building version string for #{ARGV[0]}."
 hash = `git rev-parse --short HEAD`.strip
 
-version = "#{ARGV[1].nil? ? ARGV[0] : ARGV[1]}-#{hash}"
+# version = "#{ARGV[1].nil? ? ARGV[0] : ARGV[1]}-#{hash}"
+version = "#{ARGV[1].nil? ? ARGV[0] : ARGV[1]}"
 
 puts "Build Bundle zip for #{version}."
 system("bundle exec rake package VERSION=#{version} 2>&1")
@@ -23,6 +24,6 @@ exit $?.exitstatus unless $?.exitstatus == 0
 puts "Copy java-buildpack-#{version}.zip to release directory."
 system("mkdir -p release 2>&1")
 exit $?.exitstatus unless $?.exitstatus == 0
-system("cp build/java-buildpack-#{version}.zip release/java-buildpack-#{version}.zip.#{ARGV[0]} 2>&1")
+system("cp build/java-buildpack-#{version}.zip release/java-buildpack-#{version}-#{hash}.zip.#{ARGV[0]} 2>&1")
 exit $?.exitstatus unless $?.exitstatus == 0
 # rubocop:enable all
