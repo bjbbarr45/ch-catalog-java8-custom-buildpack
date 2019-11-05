@@ -92,8 +92,6 @@ module JavaBuildpack
         elsif !`which lsb_release 2> /dev/null`.empty?
           lsb_release = `lsb_release -cs`.strip
           if lsb_release == "xenial"
-            "trusty"
-          elsif lsb_release == "trusy"
             "bionic"
           else
             lsb_release
