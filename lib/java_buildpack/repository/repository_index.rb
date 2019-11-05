@@ -92,10 +92,11 @@ module JavaBuildpack
         elsif !`which lsb_release 2> /dev/null`.empty?
           lsb_release = `lsb_release -cs`.strip
           if lsb_release == "xenial"
-            "bionic"
+            "trusty"
           else
             lsb_release
           end
+          "bionic"
         else
           raise 'Unable to determine platform'
         end
