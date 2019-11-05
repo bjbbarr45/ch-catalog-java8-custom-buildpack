@@ -24,6 +24,6 @@ exit $?.exitstatus unless $?.exitstatus == 0
 puts "Copy java-buildpack-#{version}.zip to release directory."
 system("mkdir -p release 2>&1")
 exit $?.exitstatus unless $?.exitstatus == 0
-system("cp build/java-buildpack-#{version}.zip release/java-buildpack-#{version}-#{hash}.zip.#{ARGV[0]} 2>&1")
+system("cp build/java-buildpack-*.zip release/java-buildpack-#{version}-#{hash}.zip.#{ARGV[0]} 2>&1")
 exit $?.exitstatus unless $?.exitstatus == 0
 # rubocop:enable all
