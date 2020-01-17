@@ -19,6 +19,10 @@ tomcat:
   version: 8.5.50
   repository_root: "{default.repository.root}/tomcat"
   context_path: 
+  external_configuration_enabled: false
+external_configuration:
+  version: 1.+
+  repository_root: 
 lifecycle_support:
   version: 3.3.0_RELEASE
   repository_root: "{default.repository.root}/tomcat-lifecycle-support"
