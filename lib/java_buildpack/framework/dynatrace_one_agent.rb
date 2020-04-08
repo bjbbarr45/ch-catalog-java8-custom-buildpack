@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Cloud Foundry Java Buildpack
-# Copyright 2013-2019 the original author or authors.
+# Copyright 2013-2020 the original author or authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -32,7 +32,11 @@ module JavaBuildpack
       #
       # @param [Hash] context a collection of utilities used the component
       def initialize(context)
-        super(context)
+        @application    = context[:application]
+        @component_name = self.class.to_s.space_case
+        @configuration  = context[:configuration]
+        @droplet        = context[:droplet]
+
         @version, @uri = agent_download_url if supports?
         @logger        = JavaBuildpack::Logging::LoggerFactory.instance.get_logger DynatraceOneAgent
       end

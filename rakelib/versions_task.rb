@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Cloud Foundry Java Buildpack
-# Copyright 2013-2019 the original author or authors.
+# Copyright 2013-2020 the original author or authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -72,7 +72,7 @@ module Package
       'jprofiler_profiler' => 'JProfiler Profiler',
       'jre' => 'OpenJDK JRE',
       'jre-11' => 'OpenJDK JRE 11',
-      'jre-13' => 'OpenJDK JRE 13',
+      'jre-14' => 'OpenJDK JRE 14',
       'jrebel_agent' => 'JRebel Agent',
       'jvmkill_agent' => 'jvmkill Agent',
       'lifecycle_support' => 'Tomcat Lifecycle Support',
@@ -167,8 +167,8 @@ module Package
 
         if component_id == 'open_jdk_jre' && sub_component_id == 'jre'
           c1 = configuration.clone
-          c1['sub_component_id'] = 'jre-13'
-          c1['version'] = '13.+'
+          c1['sub_component_id'] = 'jre-14'
+          c1['version'] = '14.+'
 
           configurations << c1
         end
