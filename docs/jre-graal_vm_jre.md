@@ -1,5 +1,5 @@
-# SapMachine JRE
-The SapMachine JRE provides Java runtimes from the [SapMachine][] project.  Versions of Java from the `10` line are available.  Unless otherwise configured, the version of Java that will be used is specified in [`config/sap_machine_jre.yml`][].
+# GraalVM JRE
+The GraalVM JRE provides Java runtimes from [GraalVM][] project.  No versions of the JRE are available be default due to licensing restrictions.  Instead you will need to create a repository with the GraalVM JREs in it and configure the buildpack to use that repository.  Unless otherwise configured, the version of Java that will be used is specified in [`config/graal_vm_jre.yml`][].
 
 <table>
   <tr>
@@ -17,31 +17,41 @@ The SapMachine JRE provides Java runtimes from the [SapMachine][] project.  Vers
 </table>
 Tags are printed to standard output by the buildpack detect script
 
+**NOTE:**  Unlike the [OpenJDK JRE][], this JRE does not connect to a pre-populated repository.  Instead you will need to create your own repository by:
+
+1.  Downloading the GraalVM JRE binary (in TAR format) to an HTTP-accesible location
+1.  Uploading an `index.yml` file with a mapping from the version of the JRE to its location to the same HTTP-accessible location
+1.  Configuring the [`config/graal_vm_jre.yml`][] file to point to the root of the repository holding both the index and JRE binary
+1.  Configuring the [`config/components.yml`][] file to disable the OpenJDK JRE and enable the GraalVM JRE
+
+For details on the repository structure, see the [repository documentation][repositories].
+
 ## Configuration
 For general information on configuring the buildpack, including how to specify configuration values through environment variables, refer to [Configuration and Extension][].
 
-The JRE can be configured by modifying the [`config/sap_machine_jre.yml`][] file in the buildpack fork.  The JRE uses the [`Repository` utility support][repositories] and so it supports the [version syntax][]  defined there.
+The JRE can be configured by modifying the [`config/graal_vm_jre.yml`][] file in the buildpack fork.  The JRE uses the [`Repository` utility support][repositories] and so it supports the [version syntax][]  defined there.
 
-To use SapMachine JRE instead of OpenJDK without forking java-buildpack, set environment variable and restage:
+To use GraalVM JRE instead of OpenJDK without forking java-buildpack, set environment variable and restage:
 
 ```bash
-cf set-env <app_name> JBP_CONFIG_COMPONENTS '{jres: ["JavaBuildpack::Jre::SapMachineJRE"]}'
+cf set-env <app_name> JBP_CONFIG_COMPONENTS '{ jres: [ "JavaBuildpack::Jre::GraalVmJRE" ] }'
+cf set-env <app_name> JBP_CONFIG_GRAAL_VM_JRE '{ jre: { repository_root: "<INTERNAL_REPOSITORY_URI>" } }'
 cf restage <app_name>
 ```
 
 | Name | Description
 | ---- | -----------
-| `jre.repository_root` | The URL of the SapMachine repository index ([details][repositories]).
-| `jre.version` | The version of Java runtime to use.  Candidate versions can be found in the listings for [bionic][]. Note: version 1.8.0 and higher require the `memory_sizes` and `memory_heuristics` mappings to specify `metaspace` rather than `permgen`.
+| `jre.repository_root` | The URL of the GraalVM repository index ([details][repositories]).
+| `jre.version` | The version of Java runtime to use.  Candidate versions can be found in the the repository that you have created to house the JREs.
 | `jvmkill.repository_root` | The URL of the `jvmkill` repository index ([details][repositories]).
 | `jvmkill.version` | The version of `jvmkill` to use.  Candidate versions can be found in the listings for [bionic][jvmkill-bionic].
 | `memory_calculator` | Memory calculator defaults, described below under "Memory".
 
 ### Additional Resources
-The JRE can also be configured by overlaying a set of resources on the default distribution. To do this, add files to the `resources/sap_machine_jre` directory in the buildpack fork.
+The JRE can also be configured by overlaying a set of resources on the default distribution. To do this, add files to the `resources/graal_vm_jre` directory in the buildpack fork.
 
 #### Custom CA Certificates
-To add custom SSL certificates, add your `cacerts` file to `resources/sap_machine_jre/lib/security/cacerts`.  This file will be overlayed onto the SapMachine distribution.
+To add custom SSL certificates, add your `cacerts` file to `resources/graal_vm_jre/lib/security/cacerts`.  This file will be overlayed onto the GraalVM distribution.
 
 ### `jvmkill`
 The `jvmkill` agent runs when an application has experience a resource exhaustion event.  When this event occurs, the agent will print out a histogram of the first 100 largest types by total number of bytes.
@@ -133,7 +143,8 @@ reduce the calculated heap size by 10 Mb.
 #### Memory Calculation
 Memory calculation happens before every `start` of an application and is performed by an external program, the [Java Buildpack Memory Calculator]. There is no need to `restage` an application after scaling the memory as restarting will cause the memory settings to be recalculated.
 
-The container's total available memory is allocated into heap, metaspace and compressed class space, direct memory, and stack memory settings.
+The container's total available memory is allocated into heap, metaspace and compressed class space (or permanent generation for Java 7),
+direct memory, and stack memory settings.
 
 The memory calculation is described in more detail in the [Memory Calculator's README].
 
@@ -154,13 +165,14 @@ JVM Memory Configuration: -XX:MaxDirectMemorySize=10M -XX:MaxMetaspaceSize=99199
     -XX:ReservedCodeCacheSize=240M -XX:CompressedClassSpaceSize=18134K -Xss1M -Xmx368042K
 ```
 
-[`config/sap_machine_jre.yml`]: ../config/sap_machine_jre.yml
-[bionic]: https://java-buildpack.cloudfoundry.org/openjdk/bionic/x86_64/index.yml
+[`config/components.yml`]: ../config/components.yml
+[`config/graal_vm_jre.yml`]: ../config/graal_vm_jre.yml
 [Configuration and Extension]: ../README.md#configuration-and-extension
 [Java Buildpack Memory Calculator]: https://github.com/cloudfoundry/java-buildpack-memory-calculator
 [jvmkill-bionic]: https://java-buildpack.cloudfoundry.org/jvmkill/bionic/x86_64/index.yml
 [Memory Calculator's README]: https://github.com/cloudfoundry/java-buildpack-memory-calculator
+[OpenJDK JRE]: jre-open_jdk_jre.md
+[GraalVM]: https://www.graalvm.org/
 [repositories]: extending-repositories.md
-[SapMachine]: https://sapmachine.io
 [version syntax]: extending-repositories.md#version-syntax-and-ordering
 [Volume Service]: https://docs.cloudfoundry.org/devguide/services/using-vol-services.html
