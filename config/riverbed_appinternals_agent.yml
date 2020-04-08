@@ -1,5 +1,5 @@
 # Cloud Foundry Java Buildpack
-# Copyright 2013-2019 the original author or authors.
+# Copyright 2013-2020 the original author or authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,6 +15,6 @@
 
 # Configuration for the riverbed appinternals agent framework
 ---
-version: 10.17.1_BL510
+version: 10.21.5_BL509
 repository_root: https://pcf-instrumentation-download.steelcentral.net/
 rvbd_moniker: $(jq -r -n "$VCAP_APPLICATION | .application_name")
