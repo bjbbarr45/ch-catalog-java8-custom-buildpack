@@ -134,6 +134,61 @@ module JavaBuildpack
         end
       end
 
+      # Check if configuration file exists on the server before download
+      # @param [ResourceURI] uri URI of the remote configuration server
+      # @param [ConfigFileName] conf_file Name of the configuration file
+      # @return [Boolean] returns true if files exists on path specified by APPD_CONF_HTTP_URL, false otherwise
+      def check_if_resource_exists(resource_uri, conf_file)
+        # check if resource exists on remote server
+        begin
+          response = Net::HTTP.start(resource_uri.host, resource_uri.port) do |http|
+            http.request_head(resource_uri)
+          end
+        rescue StandardError => e
+          @logger.error { "Request failure: #{e.message}" }
+          return false
+        end
+
+        case response
+        when Net::HTTPSuccess
+          true
+        when Net::HTTPRedirection
+          location = response['location']
+          @logger.info { "redirected to #{location}" }
+          check_if_resource_exists(location, conf_file)
+        else
+          @logger.info { "Could not retrieve #{resource_uri}.  Code: #{response.code} Message: #{response.message}" }
+          false
+        end
+      end
+
+      # Check for configuration files on a remote server. If found, copy to conf dir under each ver* dir
+      # @return [Void]
+      def override_default_config_if_applicable
+        return unless @application.environment['APPD_CONF_HTTP_URL']
+
+        JavaBuildpack::Util::Cache::InternetAvailability.instance.available(
+          true, 'The AppDynamics remote configuration download location is always accessible'
+        ) do
+          agent_root = @application.environment['APPD_CONF_HTTP_URL'].chomp('/') + '/java/'
+          @logger.info { "Downloading override configuration files from #{agent_root}" }
+          CONFIG_FILES.each do |conf_file|
+            uri = URI(agent_root + conf_file)
+
+            # `download()` uses retries with exponential backoff which is expensive
+            # for situations like 404 File not Found. Also, `download()` doesn't expose
+            # an api to disable retries, which makes this check necessary to prevent
+            # long install times.
+            next unless check_if_resource_exists(uri, conf_file)
+
+            download(false, uri.to_s) do |file|
+              Dir.glob(@droplet.sandbox + 'ver*') do |target_directory|
+                FileUtils.cp_r file, target_directory + '/conf/' + conf_file
+              end
+            end
+          end
+        end
+      end
     end
 
   end
