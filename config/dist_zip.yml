@@ -13,9 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Configuration for the Takipi framework
+# Configuration for the DistZip container
 ---
-version: 4.49.1
-repository_root: https://get.takipi.com/cloudfoundry
-node_name_prefix: node
-application_name: 
+arguments:
