@@ -109,7 +109,13 @@ module Package
     end
 
     def component_ids
-      configuration('components').values.flatten.map { |component| component.split('::').last.snake_case }
+      conf = configuration('components').values.flatten.map { |component| component.split('::').last.snake_case }
+      offline_cache = ENV['ADD_TO_CACHE']
+      if !offline_cache.nil?
+        offline_cache = offline_cache.split(',')
+        (conf << offline_cache).flatten!.uniq!
+      end
+      conf
     end
 
     def configuration(id)
@@ -132,7 +138,7 @@ module Package
 
         if component_id == 'open_jdk_jre' && sub_component_id == 'jre'
           c1 = configuration.clone
-          c1['version'] = '14.+'
+          c1['version'] = '16.+'
 
           configurations << c1
         end
