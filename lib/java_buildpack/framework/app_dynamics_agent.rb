@@ -25,12 +25,17 @@ module JavaBuildpack
     # Encapsulates the functionality for enabling zero-touch AppDynamics support.
     class AppDynamicsAgent < JavaBuildpack::Component::VersionedDependencyComponent
 
+      def initialize(context)
+        super(context)
+        @logger = JavaBuildpack::Logging::LoggerFactory.instance.get_logger AppDynamicsAgent
+      end
+
       # (see JavaBuildpack::Component::BaseComponent#compile)
       def compile
         download_zip(false, @droplet.sandbox, 'AppDynamics Agent')
 
         # acessor for resources dir through @droplet?
-        resources_dir = Pathname.new(File.expand_path('../../../resources', __dir__)).freeze
+        resources_dir    = Pathname.new(File.expand_path('../../../resources', __dir__)).freeze
         default_conf_dir = resources_dir + @droplet.component_id + 'defaults'
 
         copy_appd_default_configuration(default_conf_dir)
@@ -42,7 +47,7 @@ module JavaBuildpack
       # (see JavaBuildpack::Component::BaseComponent#release)
       def release
         credentials = @application.services.find_service(FILTER, 'host-name')['credentials']
-        java_opts = @droplet.java_opts
+        java_opts   = @droplet.java_opts
         java_opts.add_javaagent(@droplet.sandbox + 'javaagent.jar')
 
         application_name java_opts, credentials
@@ -71,7 +76,7 @@ module JavaBuildpack
 
       FILTER = /app[-]?dynamics/.freeze
 
-      private_constant :FILTER
+      private_constant :CONFIG_FILES, :FILTER
 
       def application_name(java_opts, credentials)
         name = credentials['application-name'] || @configuration['default_application_name'] ||
@@ -217,6 +222,5 @@ module JavaBuildpack
         end
       end
     end
-
   end
 end
