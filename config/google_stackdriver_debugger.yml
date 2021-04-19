@@ -17,5 +17,5 @@
 ---
 version: 2.26.0
 repository_root: "{default.repository.root}/google-stackdriver-debugger/{platform}/{architecture}"
-application_name: 
-application_version: 
+application_name:
+application_version:

@@ -25,23 +25,29 @@ module JavaBuildpack
     # Encapsulates the functionality for enabling zero-touch AppDynamics support.
     class AppDynamicsAgent < JavaBuildpack::Component::VersionedDependencyComponent
 
+      def initialize(context)
+        super(context)
+        @logger = JavaBuildpack::Logging::LoggerFactory.instance.get_logger AppDynamicsAgent
+      end
+
       # (see JavaBuildpack::Component::BaseComponent#compile)
       def compile
         download_zip(false, @droplet.sandbox, 'AppDynamics Agent')
 
         # acessor for resources dir through @droplet?
-        resources_dir = Pathname.new(File.expand_path('../../../resources', __dir__)).freeze
+        resources_dir    = Pathname.new(File.expand_path('../../../resources', __dir__)).freeze
         default_conf_dir = resources_dir + @droplet.component_id + 'defaults'
 
         copy_appd_default_configuration(default_conf_dir)
-
+        override_default_config_remote
+        override_default_config_local
         @droplet.copy_resources
       end
 
       # (see JavaBuildpack::Component::BaseComponent#release)
       def release
         credentials = @application.services.find_service(FILTER, 'host-name')['credentials']
-        java_opts = @droplet.java_opts
+        java_opts   = @droplet.java_opts
         java_opts.add_javaagent(@droplet.sandbox + 'javaagent.jar')
 
         application_name java_opts, credentials
@@ -70,12 +76,12 @@ module JavaBuildpack
 
       FILTER = /app[-]?dynamics/.freeze
 
-      private_constant :FILTER
+      private_constant :CONFIG_FILES, :FILTER
 
       def application_name(java_opts, credentials)
         name = credentials['application-name'] || @configuration['default_application_name'] ||
           @application.details['application_name']
-        java_opts.add_system_property('appdynamics.agent.applicationName', name.to_s)
+        java_opts.add_system_property('appdynamics.agent.applicationName', "\\\"#{name}\\\"")
       end
 
       def account_access_key(java_opts, credentials)
@@ -141,8 +147,13 @@ module JavaBuildpack
       def check_if_resource_exists(resource_uri, conf_file)
         # check if resource exists on remote server
         begin
-          response = Net::HTTP.start(resource_uri.host, resource_uri.port) do |http|
-            http.request_head(resource_uri)
+          opts = { use_ssl: true } if resource_uri.scheme == 'https'
+          response = Net::HTTP.start(resource_uri.host, resource_uri.port, opts) do |http|
+            req = Net::HTTP::Head.new(resource_uri)
+            if resource_uri.user != '' || resource_uri.password != ''
+              req.basic_auth(resource_uri.user, resource_uri.password)
+            end
+            http.request(req)
           end
         rescue StandardError => e
           @logger.error { "Request failure: #{e.message}" }
@@ -164,7 +175,7 @@ module JavaBuildpack
 
       # Check for configuration files on a remote server. If found, copy to conf dir under each ver* dir
       # @return [Void]
-      def override_default_config_if_applicable
+      def override_default_config_remote
         return unless @application.environment['APPD_CONF_HTTP_URL']
 
         JavaBuildpack::Util::Cache::InternetAvailability.instance.available(
@@ -189,7 +200,27 @@ module JavaBuildpack
           end
         end
       end
-    end
 
+      # Check for configuration files locally. If found, copy to conf dir under each ver* dir
+      # @return [Void]
+      def override_default_config_local
+        return unless @application.environment['APPD_CONF_DIR']
+
+        app_conf_dir = @application.root + @application.environment['APPD_CONF_DIR']
+
+        raise "AppDynamics configuration source dir #{app_conf_dir} does not exist" unless Dir.exist?(app_conf_dir)
+
+        @logger.info { "Copy override configuration files from #{app_conf_dir}" }
+        CONFIG_FILES.each do |conf_file|
+          conf_file_path = app_conf_dir + conf_file
+
+          next unless File.file?(conf_file_path)
+
+          Dir.glob(@droplet.sandbox + 'ver*') do |target_directory|
+            FileUtils.cp_r conf_file_path, target_directory + '/conf/' + conf_file
+          end
+        end
+      end
+    end
   end
 end
