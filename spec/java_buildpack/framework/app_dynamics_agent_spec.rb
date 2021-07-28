@@ -88,9 +88,6 @@ describe JavaBuildpack::Framework::AppDynamicsAgent do
         it 'adds tier_name from credentials with space in name to JAVA_OPTS if specified' do
           component.release
 
-<<<<<<< HEAD
-          expect(java_opts).to include('-Dappdynamics.agent.applicationName=another-test-application-name')
-=======
           expect(java_opts).to include('-Dappdynamics.agent.tierName=another-test\ tier-name')
         end
       end
@@ -118,7 +115,6 @@ describe JavaBuildpack::Framework::AppDynamicsAgent do
           # should not be escaped, escaping happens at runtime because default value is a sub-command
           #   executed in the runtime container
           expect(java_opts).to include('-Dappdynamics.agent.applicationName=default application-name')
->>>>>>> v4.39
         end
       end
 
