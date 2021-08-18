@@ -89,7 +89,7 @@ module JavaBuildpack
         name = credentials['application-name'] || @configuration['default_application_name'] ||
         @application.details['application_name']
         java_opts.add_system_property('appdynamics.agent.applicationName', "\\\"#{name}\\\"")
-        
+
         # name = Shellwords.escape(@application.details['application_name'])
         # name = @configuration['default_application_name'] if @configuration['default_application_name']
         # name = Shellwords.escape(credentials['application-name']) if credentials['application-name']
