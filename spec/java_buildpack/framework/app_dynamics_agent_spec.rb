@@ -84,14 +84,14 @@ describe JavaBuildpack::Framework::AppDynamicsAgent do
 
       context do
         let(:credentials) { super().merge 'application-name' => 'another-test-application-name' }
-      #  let(:credentials) { super().merge 'tier-name' => 'another-test tier-name' }
+       # let(:credentials) { super().merge 'tier-name' => 'another-test tier-name' }
 
-        it 'adds application_name from credentials to JAVA_OPTS if specified' do      
-      #  it 'adds tier_name from credentials with space in name to JAVA_OPTS if specified' do
+        it 'adds application_name from credentials to JAVA_OPTS if specified' do
+       # it 'adds tier_name from credentials with space in name to JAVA_OPTS if specified' do
           component.release
 
           expect(java_opts).to include('-Dappdynamics.agent.applicationName=\"another-test-application-name\"')
-        #  expect(java_opts).to include('-Dappdynamics.agent.tierName=another-test\ tier-name')
+         # expect(java_opts).to include('-Dappdynamics.agent.tierName=another-test\ tier-name')
         end
       end
 
@@ -119,7 +119,7 @@ describe JavaBuildpack::Framework::AppDynamicsAgent do
     #      #   executed in the runtime container
     #      expect(java_opts).to include('-Dappdynamics.agent.applicationName=default application-name')
     #    end
-    #  end
+     # end
 
       context do
         let(:credentials) { super().merge 'node-name' => 'another-test-node-name' }
