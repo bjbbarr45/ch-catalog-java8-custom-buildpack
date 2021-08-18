@@ -119,7 +119,8 @@ module JavaBuildpack
 
         java_opts.add_system_property('appdynamics.agent.nodeName', name.to_s)
         # java_opts.add_system_property('LAME_EXPR_FIX', "'$(/bin/true) PAAS-3163'")
-        # We expect this is no longer needed as of 20210818. This can be removed with a future update and all community code can be merged in.
+        # We expect this is no longer needed as of 20210818.
+        # This can be removed with a future update and all community code can be merged in.
       end
 
       def port(java_opts, credentials)
