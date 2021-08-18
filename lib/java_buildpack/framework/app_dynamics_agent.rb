@@ -86,30 +86,36 @@ module JavaBuildpack
       private_constant :FILTER
 
       def application_name(java_opts, credentials)
-        name = Shellwords.escape(@application.details['application_name'])
-        name = @configuration['default_application_name'] if @configuration['default_application_name']
-        name = Shellwords.escape(credentials['application-name']) if credentials['application-name']
+        name = credentials['application-name'] || @configuration['default_application_name'] ||
+        @application.details['application_name']
+        java_opts.add_system_property('appdynamics.agent.applicationName', "\\\"#{name}\\\"")
+        
+        # name = Shellwords.escape(@application.details['application_name'])
+        # name = @configuration['default_application_name'] if @configuration['default_application_name']
+        # name = Shellwords.escape(credentials['application-name']) if credentials['application-name']
 
-        java_opts.add_system_property('appdynamics.agent.applicationName', name.to_s)
+        # java_opts.add_system_property('appdynamics.agent.applicationName', name.to_s)
       end
 
       def account_access_key(java_opts, credentials)
         account_access_key = credentials['account-access-key'] || credentials.dig('account-access-secret', 'secret')
-        account_access_key = Shellwords.escape(account_access_key)
+        # account_access_key = Shellwords.escape(account_access_key)
 
         java_opts.add_system_property 'appdynamics.agent.accountAccessKey', account_access_key if account_access_key
       end
 
       def account_name(java_opts, credentials)
         account_name = credentials['account-name']
-        java_opts.add_system_property 'appdynamics.agent.accountName', Shellwords.escape(account_name) if account_name
+        java_opts.add_system_property 'appdynamics.agent.accountName', account_name if account_name
+        # java_opts.add_system_property 'appdynamics.agent.accountName', Shellwords.escape(account_name) if account_name
       end
 
       def host_name(java_opts, credentials)
         host_name = credentials['host-name']
         raise "'host-name' credential must be set" unless host_name
 
-        java_opts.add_system_property 'appdynamics.controller.hostName', Shellwords.escape(host_name)
+        java_opts.add_system_property 'appdynamics.controller.hostName', host_name
+        # java_opts.add_system_property 'appdynamics.controller.hostName', Shellwords.escape(host_name)
       end
 
       def node_name(java_opts, credentials)
@@ -134,16 +140,19 @@ module JavaBuildpack
       end
 
       def tier_name(java_opts, credentials)
-        name = Shellwords.escape(@application.details['application_name'])
-        name = @configuration['default_tier_name'] if @configuration['default_tier_name']
-        name = Shellwords.escape(credentials['tier-name']) if credentials['tier-name']
+        name = credentials['tier-name'] || @configuration['default_tier_name'] ||
+          @application.details['application_name']
+        # name = Shellwords.escape(@application.details['application_name'])
+        # name = @configuration['default_tier_name'] if @configuration['default_tier_name']
+        # name = Shellwords.escape(credentials['tier-name']) if credentials['tier-name']
 
         java_opts.add_system_property('appdynamics.agent.tierName', name.to_s)
       end
 
       def unique_host_name(java_opts)
-        name = @configuration['default_unique_host_name']
-        name = Shellwords.escape(@application.details['application_name']) if @application.details['application_name']
+        name = @configuration['default_unique_host_name'] || @application.details['application_name']
+        # name = @configuration['default_unique_host_name']
+        # name = Shellwords.escape(@application.details['application_name']) if @application.details['application_name']
 
         java_opts.add_system_property('appdynamics.agent.uniqueHostId', name.to_s)
       end
