@@ -103,7 +103,7 @@ describe JavaBuildpack::Framework::AppDynamicsAgent do
 
           # expect(java_opts).to include('-Dappdynamics.agent.applicationName=another-test\ application-name')
         # end
-       # end
+      # end
 
       # context do
         #let(:configuration) do
