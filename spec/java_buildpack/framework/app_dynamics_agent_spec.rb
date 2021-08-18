@@ -106,7 +106,7 @@ describe JavaBuildpack::Framework::AppDynamicsAgent do
       # end
 
       # context do
-        #let(:configuration) do
+        # let(:configuration) do
           # { 'default_tier_name' => nil,
             # 'default_node_name' => nil,
             # 'default_application_name' => 'default application-name' }
