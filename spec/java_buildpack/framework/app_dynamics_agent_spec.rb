@@ -86,7 +86,6 @@ describe JavaBuildpack::Framework::AppDynamicsAgent do
         let(:credentials) { super().merge 'application-name' => 'another-test-application-name' }
 
         it 'adds application_name from credentials to JAVA_OPTS if specified' do
-
           component.release
 
           expect(java_opts).to include('-Dappdynamics.agent.applicationName=\"another-test-application-name\"')
@@ -239,7 +238,5 @@ describe JavaBuildpack::Framework::AppDynamicsAgent do
         end
       end
     end
-
   end
-
 end
