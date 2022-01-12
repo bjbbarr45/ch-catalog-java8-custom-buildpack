@@ -67,6 +67,41 @@ describe JavaBuildpack::Framework::DatadogJavaagent do
 
     context 'when datadog buildpack is present' do
       before do
+        FileUtils.mkdir_p File.join(context[:droplet].root, '.datadog')
+      end
+
+      after do
+        FileUtils.rmdir File.join(context[:droplet].root, '.datadog')
+      end
+
+      it 'compile downloads datadog-javaagent JAR', cache_fixture: 'stub-datadog-javaagent.jar' do
+        component.compile
+        expect(sandbox + "datadog_javaagent-#{version}.jar").to exist
+      end
+
+      it 'makes a jar with fake class files', cache_fixture: 'stub-datadog-javaagent.jar' do
+        component.compile
+        expect(sandbox + "datadog_javaagent-#{version}.jar").to exist
+        expect(sandbox + 'datadog_fakeclasses.jar').to exist
+        expect(sandbox + 'datadog_fakeclasses').not_to exist
+
+        cnt = `unzip -l #{sandbox}/datadog_fakeclasses.jar | grep '\\(\\.class\\)$' | wc -l`.to_i
+        expect(cnt).to equal(34)
+      end
+
+      it 'release updates JAVA_OPTS' do
+        component.release
+
+        expect(java_opts).to include(
+          "-javaagent:$PWD/.java-buildpack/datadog_javaagent/datadog_javaagent-#{version}.jar"
+        )
+        expect(java_opts).to include('-Ddd.service=\"test-application-name\"')
+        expect(java_opts).to include('-Ddd.version=test-application-version')
+      end
+    end
+
+    context 'when datadog buildpack 4.22.0 (or older) is present' do
+      before do
         FileUtils.mkdir_p File.join(context[:droplet].root, 'datadog')
       end
 
@@ -77,6 +112,16 @@ describe JavaBuildpack::Framework::DatadogJavaagent do
       it 'compile downloads datadog-javaagent JAR', cache_fixture: 'stub-datadog-javaagent.jar' do
         component.compile
         expect(sandbox + "datadog_javaagent-#{version}.jar").to exist
+      end
+
+      it 'makes a jar with fake class files', cache_fixture: 'stub-datadog-javaagent.jar' do
+        component.compile
+        expect(sandbox + "datadog_javaagent-#{version}.jar").to exist
+        expect(sandbox + 'datadog_fakeclasses.jar').to exist
+        expect(sandbox + 'datadog_fakeclasses').not_to exist
+
+        cnt = `unzip -l #{sandbox}/datadog_fakeclasses.jar | grep '\\(\\.class\\)$' | wc -l`.to_i
+        expect(cnt).to equal(34)
       end
 
       it 'release updates JAVA_OPTS' do
@@ -114,11 +159,11 @@ describe JavaBuildpack::Framework::DatadogJavaagent do
     end
 
     before do
-      FileUtils.mkdir_p File.join(context[:droplet].root, 'datadog')
+      FileUtils.mkdir_p File.join(context[:droplet].root, '.datadog')
     end
 
     after do
-      FileUtils.rmdir File.join(context[:droplet].root, 'datadog')
+      FileUtils.rmdir File.join(context[:droplet].root, '.datadog')
     end
 
     it 'release updates JAVA_OPTS with env variable version' do

@@ -112,7 +112,11 @@ module JavaBuildpack
 
       def agent_download_url
         download_uri = "#{api_base_url(credentials)}/v1/deployment/installer/agent/unix/paas/latest?include=java" \
-                       "&bitness=64&Api-Token=#{credentials[APITOKEN]}"
+                       '&bitness=64' \
+                       "&Api-Token=#{credentials[APITOKEN]}"
+
+        download_uri += "&networkZone=#{networkzone}" if networkzone?
+
         ['latest', download_uri]
       end
 
@@ -174,6 +178,10 @@ module JavaBuildpack
         end
       end
 
+      def networkzone
+        credentials[NETWORKZONE]
+      end
+
       def networkzone?
         credentials.key?(NETWORKZONE)
       end
@@ -195,8 +203,6 @@ module JavaBuildpack
         FileUtils.mv(root + 'agent', @droplet.sandbox)
         FileUtils.mv(root + 'manifest.json', @droplet.sandbox)
       end
-
     end
-
   end
 end

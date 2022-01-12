@@ -85,10 +85,73 @@ describe JavaBuildpack::Framework::AppDynamicsAgent do
       context do
         let(:credentials) { super().merge 'application-name' => 'another-test-application-name' }
 
-        it 'adds application_name from credentials to JAVA_OPTS if specified' do
+          expect(java_opts).to include('-Dappdynamics.agent.tierName=another-test\ tier-name')
+        end
+      end
+
+      context do
+        let(:credentials) { super().merge 'tier-name' => '--> ${SOME_VAR} <--' }
+
+        it 'adds tier_name from credentials with shell variable in it to JAVA_OPTS if specified' do
           component.release
 
-          expect(java_opts).to include('-Dappdynamics.agent.applicationName=another-test-application-name')
+          expect(java_opts).to include('-Dappdynamics.agent.tierName=\"--> ${SOME_VAR} <--\"')
+        end
+      end
+
+      context do
+        let(:credentials) { super().merge 'tier-name' => '$(echo \'Hello World!\') and stuff' }
+
+        it 'adds tier_name from credentials with subshell in it to JAVA_OPTS if specified' do
+          component.release
+
+          expect(java_opts).to include('-Dappdynamics.agent.tierName=\"$(echo \'Hello World!\') and stuff\"')
+        end
+      end
+
+      context do
+        let(:credentials) { super().merge 'application-name' => 'another-test application-name' }
+
+        it 'adds application_name from credentials with space in name to JAVA_OPTS if specified' do
+          component.release
+
+          expect(java_opts).to include('-Dappdynamics.agent.applicationName=another-test\ application-name')
+        end
+      end
+
+      context do
+        let(:credentials) { super().merge 'application-name' => '$(echo \'Hello World!\') and stuff' }
+
+        it 'adds application_name from credentials with subshell in value to JAVA_OPTS if specified' do
+          component.release
+
+          expect(java_opts).to include('-Dappdynamics.agent.applicationName=\"$(echo \'Hello World!\') and stuff\"')
+        end
+      end
+
+      context do
+        let(:credentials) { super().merge 'application-name' => 'Name ${MY_APP_NAME}' }
+
+        it 'adds application_name from credentials with env variable in value to JAVA_OPTS if specified' do
+          component.release
+
+          expect(java_opts).to include('-Dappdynamics.agent.applicationName=\"Name ${MY_APP_NAME}\"')
+        end
+      end
+
+      context do
+        let(:configuration) do
+          { 'default_tier_name' => nil,
+            'default_node_name' => nil,
+            'default_application_name' => 'default application-name' }
+        end
+
+        it 'adds application_name from default config to JAVA_OPTS if specified' do
+          component.release
+
+          # should not be escaped, escaping happens at runtime because default value is a sub-command
+          #   executed in the runtime container
+          expect(java_opts).to include('-Dappdynamics.agent.applicationName=default application-name')
         end
       end
 

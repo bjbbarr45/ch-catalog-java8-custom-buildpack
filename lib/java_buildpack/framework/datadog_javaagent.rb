@@ -27,20 +27,22 @@ module JavaBuildpack
 
       def initialize(context)
         super(context)
-        @datadog_buildpack = File.exist? File.join(@droplet.root, 'datadog')
         @logger = JavaBuildpack::Logging::LoggerFactory.instance.get_logger DatadogJavaagent
       end
 
       # (see JavaBuildpack::Component::BaseComponent#compile)
       def compile
-        @logger.error 'Datadog Buildpack is required, but not found' unless @datadog_buildpack
+        @logger.error 'Datadog Buildpack is required, but not found' unless datadog_buildpack?
 
-        download_jar if @datadog_buildpack
+        return unless datadog_buildpack?
+
+        download_jar
+        fix_class_count
       end
 
       # (see JavaBuildpack::Component::BaseComponent#release)
       def release
-        return unless @datadog_buildpack
+        return unless datadog_buildpack?
 
         java_opts = @droplet.java_opts
         java_opts.add_javaagent(@droplet.sandbox + jar_name)
@@ -62,6 +64,36 @@ module JavaBuildpack
         api_key_defined = @application.environment.key?('DD_API_KEY') && !@application.environment['DD_API_KEY'].empty?
         apm_disabled = @application.environment['DD_APM_ENABLED'] == 'false'
         (api_key_defined && !apm_disabled)
+      end
+
+      # determins if the datadog buildpack is present
+      def datadog_buildpack?
+        File.exist?(File.join(@droplet.root, '.datadog')) || File.exist?(File.join(@droplet.root, 'datadog'))
+      end
+
+      # fixes issue where some classes are not counted by adding shadow class files
+      def fix_class_count
+        cnt = classdata_count(@droplet.sandbox + jar_name)
+        zipdir = "#{@droplet.sandbox}/datadog_fakeclasses"
+        zipfile = "#{@droplet.sandbox}/datadog_fakeclasses.jar"
+
+        File.delete(zipfile) if File.exist? zipfile
+        FileUtils.rm_rf(zipdir)
+        FileUtils.mkdir_p(zipdir)
+
+        1.upto(cnt) do |i|
+          File.open("#{zipdir}/#{i}.class", 'w') do |f|
+            f.write(i.to_s)
+          end
+        end
+
+        `cd #{zipdir} && zip -r #{zipfile} .`
+        FileUtils.rm_rf(zipdir)
+      end
+
+      # count hidden class files in the agent JAR
+      def classdata_count(archive)
+        `unzip -l #{archive} | grep '\\(\\.classdata\\)$' | wc -l`.to_i
       end
     end
   end

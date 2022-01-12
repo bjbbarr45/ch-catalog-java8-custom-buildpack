@@ -1,5 +1,6 @@
 .bundle/
-.idea/.rakeTasks
+.idea/
+.idea/**
 .idea/tasks.xml
 .idea/workspace.xml
 .yardoc
