@@ -81,7 +81,7 @@ module JavaBuildpack
       def application_name(java_opts, credentials)
         name = credentials['application-name'] || @configuration['default_application_name'] ||
           @application.details['application_name']
-        java_opts.add_system_property('appdynamics.agent.applicationName', name)
+        java_opts.add_system_property('appdynamics.agent.applicationName', name.to_s)
       end
 
       def account_access_key(java_opts, credentials)
@@ -103,7 +103,7 @@ module JavaBuildpack
 
       def node_name(java_opts, credentials)
         name = credentials['node-name'] || @configuration['default_node_name']
-        java_opts.add_system_property('appdynamics.agent.nodeName', name)
+        java_opts.add_system_property('appdynamics.agent.nodeName', name.to_s)
       end
 
       def port(java_opts, credentials)
@@ -119,12 +119,12 @@ module JavaBuildpack
       def tier_name(java_opts, credentials)
         name = credentials['tier-name'] || @configuration['default_tier_name'] ||
           @application.details['application_name']
-        java_opts.add_system_property('appdynamics.agent.tierName', name)
+        java_opts.add_system_property('appdynamics.agent.tierName', name.to_s)
       end
 
       def unique_host_name(java_opts)
         name = @configuration['default_unique_host_name'] || @application.details['application_name']
-        java_opts.add_system_property('appdynamics.agent.uniqueHostId', name)
+        java_opts.add_system_property('appdynamics.agent.uniqueHostId', name.to_s)
       end
 
       # Copy default configuration present in resources folder of app_dynamics_agent ver* directories present in sandbox
